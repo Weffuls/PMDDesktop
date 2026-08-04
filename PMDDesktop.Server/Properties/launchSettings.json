@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "Start Server": {
+      "commandName": "Project",
+      "commandLineArgs": "start"
+    },
+    "Build Assets": {
+      "commandName": "Project",
+      "commandLineArgs": "assets build",
+      "hotReloadEnabled": true
+    }
+  }
+}
