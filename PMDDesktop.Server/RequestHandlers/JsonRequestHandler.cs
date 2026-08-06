@@ -25,7 +25,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 
 			context.Response.StatusCode = 400;
 			context.Response.ContentType = "text/plain";
-			await context.Response.BodyWriter.WriteAsync(Encoding.UTF8.GetBytes(e.ToString()));
+			await context.Response.BodyWriter.WriteAsync(Encoding.UTF8.GetBytes("Error while deserializing JSON: " + e.Message));
 
 			return;
 
@@ -39,12 +39,22 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 			await context.Response.WriteAsJsonAsync(CreateResponse(deserialized, game), AppInfo.NETWORK_JSON_OPTIONS);
 
 		}
+		catch (UserRequestException e) // Intended for user-facing errors, like bad inputs, 
+		{
+
+			context.Response.StatusCode = 400;
+			context.Response.ContentType = "text/plain";
+			await context.Response.BodyWriter.WriteAsync(Encoding.UTF8.GetBytes(e.Message));
+
+			return;
+
+		}
 		catch (Exception e)
 		{
 
 			context.Response.StatusCode = 500;
 			context.Response.ContentType = "text/plain";
-			await context.Response.BodyWriter.WriteAsync(Encoding.UTF8.GetBytes(e.ToString()));
+			await context.Response.BodyWriter.WriteAsync(Encoding.UTF8.GetBytes("Internal error while processing request: " + e.Message));
 
 			return;
 
