@@ -1,5 +1,6 @@
 ﻿using PMDDesktop.Requests;
 using PMDDesktop.Server.Game;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 
@@ -7,6 +8,10 @@ namespace PMDDesktop.Server.RequestHandlers;
 
 public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TReq : ServerRequest<TRes> where TRes : ServerResponse
 {
+	public Type GetRequestType()
+	{
+		return typeof(TReq);
+	}
 
 	public async Task HandleRequest(HttpContext context, GameServer game)
 	{

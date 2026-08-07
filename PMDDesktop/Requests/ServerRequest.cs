@@ -1,4 +1,5 @@
 ﻿using PMDDesktop.Exceptions;
+using PMDDesktop.Utils;
 using System.Reflection;
 
 namespace PMDDesktop.Requests;
@@ -11,9 +12,7 @@ public abstract class ServerRequest<T> where T : ServerResponse
 
 		ATTRIBUTES = [];
 
-		IEnumerable<Type> requestTypes = AppDomain.CurrentDomain.GetAssemblies()
-			.SelectMany(assembly => assembly.GetTypes())
-			.Where(type => type.IsClass && !type.IsAbstract && true == type.BaseType?.IsGenericType && typeof(ServerRequest<>).IsAssignableFrom(type.BaseType?.GetGenericTypeDefinition()));
+		IEnumerable<Type> requestTypes = TypeUtils.GetInstanceableClassesAssignableTo(typeof(ServerRequest<>));
 
 		Dictionary<string, Type> endpointCollisionChecks = [];
 

@@ -1,4 +1,5 @@
 ﻿using PMDDesktop.Exceptions;
+using PMDDesktop.Utils;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
@@ -128,11 +129,7 @@ public class SaveDataManager : ISaveDataIndexable
 	{
 
 		// This should find all classes implementing "SaveData."
-		IEnumerable<Type> saveTypes = AppDomain.CurrentDomain.GetAssemblies()
-			.SelectMany(assembly => assembly.GetTypes())
-			.Where(type => typeof(SaveData).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract);
-
-		Dictionary<string, Type> savePaths = [];
+		IEnumerable<Type> saveTypes = TypeUtils.GetInstanceableClassesAssignableTo(typeof(SaveData));
 
 		foreach (Type type in saveTypes)
 		{
