@@ -8,6 +8,8 @@ namespace PMDDesktop.Server.RequestHandlers;
 internal interface IRequestHandler
 {
 
+	private delegate IEndpointConventionBuilder EndpointMapper(string pattern, RequestDelegate requestDelegate);
+
 	static void AddApiPoints(GameServer server)
 	{
 
@@ -25,7 +27,11 @@ internal interface IRequestHandler
 			if (!ServerRequest<ServerResponse>.ATTRIBUTES.TryGetValue(requestType, out ServerRequestAttribute? attribute))
 				throw new MissingAttributeException(requestType, typeof(ServerRequestAttribute));
 
-			server.WebApp.MapPost(attribute.Path, (context) =>
+			EndpointMapper mapper = ServerRequest<ServerResponse>.IsAllQueryProperties(requestType)
+				? server.WebApp.MapGet
+				: server.WebApp.MapPost;
+
+			mapper(attribute.Path, (context) =>
 			{
 
 				return handler.HandleRequest(context, server);
