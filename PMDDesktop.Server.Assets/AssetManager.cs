@@ -1,4 +1,5 @@
 ﻿using PMDDesktop.Exceptions;
+using PMDDesktop.Utils;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -48,9 +49,7 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 			throw new InvalidOperationException("assetFileTypes already has data in it and SetAssetFileTypes() was called again!");
 
 		// This should find all classes implementing "Asset."
-		IEnumerable<Type> saveTypes = AppDomain.CurrentDomain.GetAssemblies()
-			.SelectMany(assembly => assembly.GetTypes())
-			.Where(type => typeof(Asset).IsAssignableFrom(type) && type.IsClass && !type.IsAbstract);
+		IEnumerable<Type> saveTypes = TypeUtils.GetInstanceableClassesAssignableTo(typeof(Asset));
 
 		foreach (Type type in saveTypes)
 		{

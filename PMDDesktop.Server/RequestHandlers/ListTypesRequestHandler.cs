@@ -12,7 +12,20 @@ public class ListTypesRequestHandler : JsonRequestHandler<ListTypesRequest, List
 
 		return new()
 		{
-			TypeIDs = [.. game.State.Assets.OfType<PokemonType>().Select((type) => (string)type.Location)]
+			Types = [.. game.State.Assets.OfType<PokemonType>().Select(TypeAssetToTypeEntry)]
+		};
+
+	}
+
+	private static ListTypesResponse.TypeEntry TypeAssetToTypeEntry(PokemonType type)
+	{
+
+		return new()
+		{
+			ID = type.Location,
+			Immunities = [.. type.Immunities.Select((reference) => reference.Location.ToString())],
+			Weaknesses = [.. type.Weaknesses.Select((reference) => reference.Location.ToString())],
+			Resistances = [.. type.Resistances.Select((reference) => reference.Location.ToString())]
 		};
 
 	}
