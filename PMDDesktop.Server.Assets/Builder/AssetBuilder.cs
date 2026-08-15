@@ -8,6 +8,7 @@ public static class AssetBuilder
 
 	public static readonly BuildStep[] BUILD_STEPS =
 	[
+		new("types", BuildTypes.StartBuildStep),
 		new("species", BuildSpecies.StartBuildStep),
 		new("visuals", BuildVisuals.StartBuildStep)
 	];
