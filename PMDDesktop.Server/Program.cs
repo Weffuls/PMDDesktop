@@ -84,7 +84,7 @@ internal static class Program
 			Recursive = true
 		};
 
-		// [program] assets build --wipe-assets
+		// [program] assets build --delete-assets
 		Option<bool> buildDeleteAssetsOption = new("--delete-assets")
 		{
 			Description = "Deletes ./assets before running. (CAREFUL!)",
