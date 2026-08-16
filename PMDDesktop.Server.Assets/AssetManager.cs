@@ -71,6 +71,14 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 	internal void Add(Asset asset)
 	{
 
+		if (asset.Manager != null)
+		{
+			if (asset.Manager == this)
+				throw new InvalidOperationException($"{asset} is already assigned to {asset.Manager}, the same manager it's trying to be added to.");
+			else
+				throw new InvalidOperationException($"{asset} already has Manager {asset.Manager} assigned to it.");
+		}
+
 		if (allAssets.TryGetValue(asset.Location, out Asset? blockingAsset))
 		{
 
@@ -82,6 +90,8 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 		}
 
 		allAssets.Add(asset.Location, asset);
+
+		asset.Manager = this;
 
 		Console.WriteLine($"Added SaveData ({asset.GetType().Name}): {asset}");
 

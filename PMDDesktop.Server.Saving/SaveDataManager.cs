@@ -308,6 +308,9 @@ public class SaveDataManager : ISaveDataIndexable
 
 		string path = GetFilePath(data);
 
+		if (!WritingEnabled)
+			return;
+
 		// There's a chance we haven't had the chance to flush/save yet, so the file may not exist.
 		if (File.Exists(path))
 			File.Delete(path);
@@ -321,6 +324,14 @@ public class SaveDataManager : ISaveDataIndexable
 	public void Add(SaveData data)
 	{
 
+		if (data.Manager != null)
+		{
+			if (data.Manager == this)
+				throw new InvalidOperationException($"{data} is already assigned to {data.Manager}, the same manager it's trying to be added to.");
+			else
+				throw new InvalidOperationException($"{data} already has Manager {data.Manager} assigned to it.");
+		}
+
 		if (saveDatas.TryGetValue(data.GUID, out SaveData? blockingData))
 		{
 
@@ -333,6 +344,7 @@ public class SaveDataManager : ISaveDataIndexable
 
 		data.Dirty = true;
 		saveDatas.Add(data.GUID, data);
+		data.Manager = this;
 
 		Console.WriteLine($"Added SaveData ({data.GetType().Name}): {data}");
 
@@ -353,6 +365,7 @@ public class SaveDataManager : ISaveDataIndexable
 			{
 				saveDatas.Remove(data.GUID);
 				deleteQueue.Enqueue(data);
+				data.Manager = null;
 				return;
 			}
 			else
