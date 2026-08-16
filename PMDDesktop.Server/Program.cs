@@ -84,15 +84,27 @@ internal static class Program
 			Recursive = true
 		};
 
+		// [program] assets build --wipe-assets
+		Option<bool> buildDeleteAssetsOption = new("--delete-assets")
+		{
+			Description = "Deletes ./assets before running. (CAREFUL!)",
+			Arity = ArgumentArity.ZeroOrOne,
+			Recursive = true
+		};
+
 		// [program] assets build
 		Command buildCommand = new("build", "Build assets by downloading their source GitHub and formatting them for use.")
 		{
-			buildRedownloadOption
+			buildRedownloadOption,
+			buildDeleteAssetsOption
 		};
 		buildCommand.SetAction(async (result) =>
 		{
 
 			AssetSourceDownloader.AlwaysRedownload = result.GetValue(buildRedownloadOption);
+
+			if (result.GetValue(buildDeleteAssetsOption))
+				AssetBuilder.DeleteAssetsFolder();
 
 			return await AssetBuilder.RunAllSteps();
 

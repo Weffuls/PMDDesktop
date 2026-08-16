@@ -25,6 +25,13 @@ public static class AssetBuilder
 
 	}
 
+	public static void DeleteAssetsFolder()
+	{
+
+		Directory.Delete(AssetLocation.GetAssetsDirectory(), true);
+
+	}
+
 	/// <summary>
 	/// Writes a progress bar, replacing the current console line. The progress is displayed using a blue background.
 	/// </summary>
