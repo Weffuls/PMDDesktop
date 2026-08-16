@@ -1,12 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace PMDDesktop.Server.Game.Data;
+namespace PMDDesktop.GameData;
 
 /// <summary>
 /// This class holds information about a character's thoughts on another character.
 /// It does not neccessarily accurately reflect that character, just how the owning character perceives that character.
 /// </summary>
-internal class Relationship()
+public class Relationship()
 {
 
 	[JsonInclude]
