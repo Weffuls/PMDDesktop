@@ -1,25 +1,9 @@
-﻿using PMDDesktop.GameData;
-
-namespace PMDDesktop.Utils;
+﻿namespace PMDDesktop.Utils;
 
 public static class BattleStatsUtils
 {
 
 	public static readonly float STANDARD_STAT_MODIFIER_BASE = 2.0f;
-
-	public static BattleStats ToBattleStats(this IBattleStats source)
-	{
-
-		return new(source);
-
-	}
-
-	public static ImmutableBattleStats ToImmutableBattleStats(this IBattleStats source)
-	{
-
-		return new(source);
-
-	}
 
 	public static uint ApplyStatModifier(uint originStat, int boostLevel)
 	{

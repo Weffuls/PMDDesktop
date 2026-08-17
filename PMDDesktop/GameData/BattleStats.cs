@@ -1,65 +1,67 @@
 ﻿namespace PMDDesktop.GameData;
 
-public class BattleStats : IBattleStats
+public struct BattleStats(int hp, int physicalAttack, int physicalDefense, int specialAttack, int specialDefense, int speed)
 {
 
-	public BattleStats()
+	public static readonly BattleStats Zero = new();
+	public static readonly BattleStats One = new(1, 1, 1, 1, 1, 1);
+	public static readonly BattleStats MinValue = new(int.MinValue, int.MinValue, int.MinValue, int.MinValue, int.MinValue, int.MinValue);
+	public static readonly BattleStats MaxValue = new(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue);
+
+	public int Hp { get; set; } = hp;
+	public int PhysicalAttack { get; set; } = physicalAttack;
+	public int PhysicalDefense { get; set; } = physicalDefense;
+	public int SpecialAttack { get; set; } = specialAttack;
+	public int SpecialDefense { get; set; } = specialDefense;
+	public int Speed { get; set; } = speed;
+
+	public static BattleStats Clamp(BattleStats input, BattleStats min, BattleStats max) => new()
 	{
+		Hp = Math.Clamp(input.Hp, min.Hp, max.Hp),
+		PhysicalAttack = Math.Clamp(input.PhysicalAttack, min.PhysicalAttack, max.PhysicalAttack),
+		PhysicalDefense = Math.Clamp(input.PhysicalDefense, min.PhysicalDefense, max.PhysicalDefense),
+		SpecialAttack = Math.Clamp(input.SpecialAttack, min.SpecialAttack, max.SpecialAttack),
+		SpecialDefense = Math.Clamp(input.SpecialDefense, min.SpecialDefense, max.SpecialDefense),
+		Speed = Math.Clamp(input.Speed, min.Speed, max.Speed)
+	};
 
-	}
-
-	public BattleStats(IBattleStats source)
+	public static BattleStats operator +(BattleStats left, BattleStats right) => new()
 	{
-
-		Hp = source.Hp;
-		PhysicalAttack = source.PhysicalAttack;
-		PhysicalDefense = source.PhysicalDefense;
-		SpecialAttack = source.SpecialAttack;
-		SpecialDefense = source.SpecialDefense;
-		Speed = source.Speed;
-
-	}
-
-	public BattleStats(uint hp, uint physicalAttack, uint physicalDefense, uint speed, uint specialAttack, uint specialDefense)
+		Hp = left.Hp + right.Hp,
+		PhysicalAttack = left.PhysicalAttack + right.PhysicalAttack,
+		PhysicalDefense = left.PhysicalDefense + right.PhysicalDefense,
+		SpecialAttack = left.SpecialAttack + right.SpecialAttack,
+		SpecialDefense = left.SpecialDefense + right.SpecialDefense,
+		Speed = left.Speed + right.Speed,
+	};
+	public static BattleStats operator -(BattleStats left, BattleStats right) => new()
 	{
-
-		Hp = hp;
-		PhysicalAttack = physicalAttack;
-		PhysicalDefense = physicalDefense;
-		SpecialAttack = specialAttack;
-		SpecialDefense = specialDefense;
-		Speed = speed;
-
-	}
-
-	public uint Hp { get; set; }
-	public uint PhysicalAttack { get; set; }
-	public uint PhysicalDefense { get; set; }
-	public uint SpecialAttack { get; set; }
-	public uint SpecialDefense { get; set; }
-	public uint Speed { get; set; }
-
-	public static BattleStats operator +(BattleStats left, IBattleStats right) => IBattleStats.Add(left, right);
-	public static BattleStats operator +(IBattleStats left, BattleStats right) => IBattleStats.Add(left, right);
-	public void operator +=(IBattleStats right)
+		Hp = left.Hp - right.Hp,
+		PhysicalAttack = left.PhysicalAttack - right.PhysicalAttack,
+		PhysicalDefense = left.PhysicalDefense - right.PhysicalDefense,
+		SpecialAttack = left.SpecialAttack - right.SpecialAttack,
+		SpecialDefense = left.SpecialDefense - right.SpecialDefense,
+		Speed = left.Speed - right.Speed,
+	};
+	public static BattleStats operator -(BattleStats input) => new()
 	{
-		Hp += right.Hp;
-		PhysicalAttack += right.PhysicalAttack;
-		PhysicalDefense += right.PhysicalDefense;
-		SpecialAttack += right.SpecialAttack;
-		SpecialDefense += right.SpecialDefense;
-		Speed += right.Speed;
-	}
-	public static BattleStats operator -(BattleStats left, IBattleStats right) => IBattleStats.Subtract(left, right);
-	public static BattleStats operator -(IBattleStats left, BattleStats right) => IBattleStats.Subtract(left, right);
-	public void operator -=(IBattleStats right)
+		Hp = -input.Hp,
+		PhysicalAttack = -input.PhysicalAttack,
+		PhysicalDefense = -input.PhysicalDefense,
+		SpecialAttack = -input.SpecialAttack,
+		SpecialDefense = -input.SpecialDefense,
+		Speed = -input.Speed,
+	};
+
+	public readonly int GetBaseStatTotal()
 	{
-		Hp -= right.Hp;
-		PhysicalAttack -= right.PhysicalAttack;
-		PhysicalDefense -= right.PhysicalDefense;
-		SpecialAttack -= right.SpecialAttack;
-		SpecialDefense -= right.SpecialDefense;
-		Speed -= right.Speed;
+		return
+			Hp +
+			PhysicalAttack +
+			PhysicalDefense +
+			SpecialAttack +
+			SpecialDefense +
+			Speed;
 	}
 
 }
