@@ -10,4 +10,34 @@ public interface IBattleStats
 	uint SpecialDefense { get; }
 	uint Speed { get; }
 
+	static BattleStats Add(IBattleStats left, IBattleStats right)
+	{
+
+		return new BattleStats()
+		{
+			Hp = left.Hp + right.Hp,
+			PhysicalAttack = left.PhysicalAttack + right.PhysicalAttack,
+			PhysicalDefense = left.PhysicalDefense + right.PhysicalDefense,
+			SpecialAttack = left.SpecialAttack + right.SpecialAttack,
+			SpecialDefense = left.SpecialDefense + right.SpecialDefense,
+			Speed = left.Speed + right.Speed
+		};
+
+	}
+
+	static BattleStats Subtract(IBattleStats left, IBattleStats right)
+	{
+
+		return new BattleStats()
+		{
+			Hp = left.Hp - right.Hp,
+			PhysicalAttack = left.PhysicalAttack - right.PhysicalAttack,
+			PhysicalDefense = left.PhysicalDefense - right.PhysicalDefense,
+			SpecialAttack = left.SpecialAttack - right.SpecialAttack,
+			SpecialDefense = left.SpecialDefense - right.SpecialDefense,
+			Speed = left.Speed - right.Speed
+		};
+
+	}
+
 }

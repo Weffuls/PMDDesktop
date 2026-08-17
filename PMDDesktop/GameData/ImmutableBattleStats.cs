@@ -34,4 +34,9 @@ public class ImmutableBattleStats : IBattleStats
 	public uint SpecialDefense { get; init; }
 	public uint Speed { get; init; }
 
+	public static BattleStats operator +(ImmutableBattleStats left, IBattleStats right) => IBattleStats.Add(left, right);
+	public static BattleStats operator +(IBattleStats left, ImmutableBattleStats right) => IBattleStats.Add(left, right);
+	public static BattleStats operator -(ImmutableBattleStats left, IBattleStats right) => IBattleStats.Subtract(left, right);
+	public static BattleStats operator -(IBattleStats left, ImmutableBattleStats right) => IBattleStats.Subtract(left, right);
+
 }

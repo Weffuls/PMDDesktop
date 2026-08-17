@@ -39,4 +39,27 @@ public class BattleStats : IBattleStats
 	public uint SpecialDefense { get; set; }
 	public uint Speed { get; set; }
 
+	public static BattleStats operator +(BattleStats left, IBattleStats right) => IBattleStats.Add(left, right);
+	public static BattleStats operator +(IBattleStats left, BattleStats right) => IBattleStats.Add(left, right);
+	public void operator +=(IBattleStats right)
+	{
+		Hp += right.Hp;
+		PhysicalAttack += right.PhysicalAttack;
+		PhysicalDefense += right.PhysicalDefense;
+		SpecialAttack += right.SpecialAttack;
+		SpecialDefense += right.SpecialDefense;
+		Speed += right.Speed;
+	}
+	public static BattleStats operator -(BattleStats left, IBattleStats right) => IBattleStats.Subtract(left, right);
+	public static BattleStats operator -(IBattleStats left, BattleStats right) => IBattleStats.Subtract(left, right);
+	public void operator -=(IBattleStats right)
+	{
+		Hp -= right.Hp;
+		PhysicalAttack -= right.PhysicalAttack;
+		PhysicalDefense -= right.PhysicalDefense;
+		SpecialAttack -= right.SpecialAttack;
+		SpecialDefense -= right.SpecialDefense;
+		Speed -= right.Speed;
+	}
+
 }
