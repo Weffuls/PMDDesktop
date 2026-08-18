@@ -33,10 +33,13 @@ public static class AssetBuilder
 	internal static void WriteProgress(string taskName, string details, OneWayRange progress)
 	{
 
-		Console.SetCursorPosition(0, Console.CursorTop);
-
 		int width = Console.WindowWidth;
 		int spaceRemaining = width - 5;
+
+		if (spaceRemaining <= 0)
+			return;
+
+		Console.Write('\r');
 
 		// Details are more important, so they're trimmed first.
 		int detailLength = Math.Min(spaceRemaining, details.Length);
