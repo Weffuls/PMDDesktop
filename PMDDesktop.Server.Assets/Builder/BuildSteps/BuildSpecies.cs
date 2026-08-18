@@ -8,14 +8,7 @@ namespace PMDDesktop.Server.Assets.Builder.BuildSteps;
 internal static class BuildSpecies
 {
 
-	private class SpeciesRecord
-	{
-
-		public string identifier = string.Empty;
-
-	}
-
-	public static async Task StartBuildStep()
+	public static async Task StartBuildStep(AssetManager assets)
 	{
 
 		await BuildTopLevelSpecies();
@@ -34,17 +27,17 @@ internal static class BuildSpecies
 
 			using Stream stream = await entry.OpenAsync();
 
-			JsonDocument json = JsonDocument.Parse(stream);
+			JsonDocument json = await JsonDocument.ParseAsync(stream);
 
 			int speciesNumber = json.RootElement.GetProperty("id").GetInt32();
 			string speciesName = json.RootElement.GetProperty("name").GetString()
-				?? throw new Exception();
+				?? throw new Exception($"No name found on {json}");
 
 			AssetLocation location = new("species", $"{speciesNumber:0000}-{speciesName}");
 
 			Species species = new(location);
 
-			await AssetManager.WriteAsset(species);
+			throw new NotImplementedException();
 
 		}
 

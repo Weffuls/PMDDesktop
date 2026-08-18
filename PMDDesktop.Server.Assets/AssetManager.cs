@@ -97,7 +97,15 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 
 	}
 
-	internal static async Task WriteAsset(Asset asset)
+	public async Task WriteAllAssets()
+	{
+
+		foreach (Asset asset in allAssets.Values)
+			await WriteAsset(asset);
+
+	}
+
+	private static async Task WriteAsset(Asset asset)
 	{
 
 		string dirPath = asset.Location.GetDirectory();

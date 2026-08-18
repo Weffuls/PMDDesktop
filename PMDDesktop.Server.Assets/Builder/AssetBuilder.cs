@@ -13,13 +13,18 @@ public static class AssetBuilder
 		new("visuals", BuildVisuals.StartBuildStep)
 	];
 
-	public static async Task<int> RunAllSteps()
+	public static async Task<int> RunAllSteps(bool writeAssets = true)
 	{
+
+		AssetManager assets = [];
 
 		foreach (BuildStep step in BUILD_STEPS)
 		{
-			await step.onExecute();
+			await step.onExecute(assets);
 		}
+
+		if (!writeAssets)
+			await assets.WriteAllAssets();
 
 		return 0;
 

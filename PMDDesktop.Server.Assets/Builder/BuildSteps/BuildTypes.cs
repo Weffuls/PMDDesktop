@@ -9,7 +9,7 @@ namespace PMDDesktop.Server.Assets.Builder.BuildSteps;
 internal class BuildTypes
 {
 
-	public static async Task StartBuildStep()
+	public static async Task StartBuildStep(AssetManager assets)
 	{
 
 		await BuildTypeAssets();
