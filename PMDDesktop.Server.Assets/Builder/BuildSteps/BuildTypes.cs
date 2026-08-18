@@ -12,13 +12,13 @@ internal class BuildTypes
 	public static async Task StartBuildStep(AssetManager assets)
 	{
 
-		await BuildTypeAssets();
+		await BuildTypeAssets(assets);
 
 		return;
 
 	}
 
-	private static async Task BuildTypeAssets()
+	private static async Task BuildTypeAssets(AssetManager assets)
 	{
 
 		using PokeApiZip zip = await ZipManager.GetPokeApiZip();
@@ -42,7 +42,7 @@ internal class BuildTypes
 			type.Weaknesses = CreateTypeReferences(damageRelations.GetProperty("double_damage_from"));
 			type.Immunities = CreateTypeReferences(damageRelations.GetProperty("no_damage_from"));
 
-			await AssetManager.WriteAsset(type);
+			assets.Add(type);
 
 		}
 
