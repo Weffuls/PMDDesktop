@@ -5,7 +5,7 @@ public static class BattleStatsUtils
 
 	public static readonly float STANDARD_STAT_MODIFIER_BASE = 2.0f;
 
-	public static uint ApplyStatModifier(uint originStat, int boostLevel)
+	public static int ApplyStatModifier(int originStat, int boostLevel)
 	{
 
 		float top = STANDARD_STAT_MODIFIER_BASE;
@@ -18,9 +18,9 @@ public static class BattleStatsUtils
 
 		float multiplier = (float)top / bottom;
 
-		uint calculated = (uint)multiplier * originStat;
+		int calculated = (int)multiplier * originStat;
 
-		return calculated == 0 ? 1 : calculated;
+		return calculated <= 0 ? 1 : calculated;
 
 	}
 
