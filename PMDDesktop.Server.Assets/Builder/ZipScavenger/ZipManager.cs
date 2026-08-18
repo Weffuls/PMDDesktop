@@ -6,8 +6,23 @@ internal static class ZipManager
 	public static async Task<PokeApiZip> GetPokeApiZip()
 	{
 
-		string path = await AssetSourceDownloader.DownloadAFile(new("https://github.com/PokeAPI/api-data/archive/refs/heads/master.zip"), "pokeapi.zip");
+		Uri uri = new("https://github.com/PokeAPI/api-data/archive/refs/heads/master.zip");
+		string fileName = "pokeapi.zip";
 
+		string path = await AssetSourceDownloader.DownloadAFile(uri, fileName);
+
+		try
+		{
+			return new(path);
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine(e);
+		}
+
+		Console.WriteLine("Failed to read zip, downloading one more time; assuming the file is corrupted.");
+		File.Delete(path);
+		await AssetSourceDownloader.DownloadAFile(uri, fileName);
 		return new(path);
 
 	}
@@ -15,8 +30,23 @@ internal static class ZipManager
 	public static async Task<SpriteCollabZip> GetSpriteCollabZip()
 	{
 
-		string path = await AssetSourceDownloader.DownloadAFile(new("https://github.com/PMDCollab/SpriteCollab/archive/refs/heads/master.zip"), "spriteCollab.zip");
+		Uri uri = new("https://github.com/PMDCollab/SpriteCollab/archive/refs/heads/master.zip");
+		string fileName = "spriteCollab.zip";
 
+		string path = await AssetSourceDownloader.DownloadAFile(uri, fileName);
+
+		try
+		{
+			return new(path);
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine(e);
+		}
+
+		Console.WriteLine("Failed to read zip, downloading one more time; assuming the file is corrupted.");
+		File.Delete(path);
+		await AssetSourceDownloader.DownloadAFile(uri, fileName);
 		return new(path);
 
 	}
