@@ -26,16 +26,16 @@ public static class AssetSourceDownloader
 	/// <param name="saveName">The file name you'd like to write to.</param>
 	/// <returns>The path of the downloaded file.</returns>
 	/// <remarks>This will throw if the http response isn't a successful response.</remarks>
-	public static async Task<string> DownloadAFile(Uri httpUrl, string saveName)
+	public static async Task<string> DownloadAFile(Uri httpUrl, string saveName, bool forceRedownload = false)
 	{
 
 		Directory.CreateDirectory(saveFolderPath);
 		string savePath = Path.Combine(saveFolderPath, saveName);
 
-		if (!downloadedHashes.Add(savePath))
+		if (!downloadedHashes.Add(savePath) && !forceRedownload)
 			return savePath;
 
-		if (!AlwaysRedownload && File.Exists(savePath))
+		if (!AlwaysRedownload && File.Exists(savePath) && !forceRedownload)
 		{
 			Console.WriteLine($"Skipping download from {httpUrl} because {saveName} already exists.");
 			return savePath;

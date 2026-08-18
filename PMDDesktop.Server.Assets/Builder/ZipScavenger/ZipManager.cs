@@ -21,8 +21,7 @@ internal static class ZipManager
 		}
 
 		Console.WriteLine("Failed to read zip, downloading one more time; assuming the file is corrupted.");
-		File.Delete(path);
-		await AssetSourceDownloader.DownloadAFile(uri, fileName);
+		await AssetSourceDownloader.DownloadAFile(uri, fileName, true);
 		return new(path);
 
 	}
@@ -45,8 +44,7 @@ internal static class ZipManager
 		}
 
 		Console.WriteLine("Failed to read zip, downloading one more time; assuming the file is corrupted.");
-		File.Delete(path);
-		await AssetSourceDownloader.DownloadAFile(uri, fileName);
+		await AssetSourceDownloader.DownloadAFile(uri, fileName, true);
 		return new(path);
 
 	}
