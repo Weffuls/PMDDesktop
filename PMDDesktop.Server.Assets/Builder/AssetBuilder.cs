@@ -23,7 +23,7 @@ public static class AssetBuilder
 			await step.onExecute(assets);
 		}
 
-		if (!writeAssets)
+		if (writeAssets)
 			await assets.WriteAllAssets();
 
 		return 0;
