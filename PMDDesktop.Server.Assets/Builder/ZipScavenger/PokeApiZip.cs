@@ -5,6 +5,15 @@ namespace PMDDesktop.Server.Assets.Builder.ZipScavenger;
 internal class PokeApiZip(string path) : Zip(path)
 {
 
+	public ZipArchiveEntry GetEntryFromApiUrl(string apiUrl)
+	{
+
+		string path = Path.Join("api-data-master/data", apiUrl, "index.json");
+
+		return GetEntry(path);
+
+	}
+
 	private IEnumerable<ZipArchiveEntry> EnumerateIntoDirectory(string pathToDirectory, string pathFromSubdirectoryToFile)
 	{
 

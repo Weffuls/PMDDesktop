@@ -8,6 +8,21 @@ internal abstract class Zip(string path) : IDisposable, IAsyncDisposable
 
 	private ZipArchive _archive = ZipFile.OpenRead(path);
 
+	public ZipArchiveEntry GetEntry(string entryPath)
+	{
+
+		foreach (ZipArchiveEntry entry in _archive.Entries)
+		{
+
+			if (entry.FullName == entryPath)
+				return entry;
+
+		}
+
+		throw new FileNotFoundException($"Unable to find Entry at {entryPath}");
+
+	}
+
 	protected IEnumerable<ZipArchiveEntry> EnumerateEntries(Regex regex)
 	{
 

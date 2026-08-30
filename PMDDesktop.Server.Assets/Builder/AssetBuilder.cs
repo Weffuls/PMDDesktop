@@ -9,8 +9,7 @@ public static class AssetBuilder
 	public static readonly BuildStep[] BUILD_STEPS =
 	[
 		new("types", BuildTypes.StartBuildStep),
-		new("species", BuildSpecies.StartBuildStep),
-		new("visuals", BuildVisuals.StartBuildStep)
+		new("species", BuildSpecies.StartBuildStep)
 	];
 
 	public static async Task<int> RunAllSteps(bool writeAssets = true)

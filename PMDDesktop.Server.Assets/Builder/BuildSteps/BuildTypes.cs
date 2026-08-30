@@ -28,7 +28,7 @@ internal class BuildTypes
 
 			using Stream stream = await entry.OpenAsync();
 
-			JsonDocument json = JsonDocument.Parse(stream);
+			using JsonDocument json = JsonDocument.Parse(stream);
 			JsonElement root = json.RootElement;
 
 			string typeName = json.RootElement.GetProperty("name").GetString()
