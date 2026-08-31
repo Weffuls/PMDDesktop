@@ -11,5 +11,6 @@ internal class MetaVariant(SpeciesVariant variant)
 
 	public SpeciesVariant variant = variant;
 	public static implicit operator SpeciesVariant(MetaVariant meta) => meta.variant;
+	public GenderAlignment genderAlignment = GenderAlignment.None;
 
 }

@@ -13,6 +13,8 @@ internal class MetaForm()
 	public required string originalFormName;
 	public required SpeciesForm form;
 
+	public GenderAlignment genderAlignment = GenderAlignment.None;
+
 	public bool IsStandaloneForm()
 	{
 
