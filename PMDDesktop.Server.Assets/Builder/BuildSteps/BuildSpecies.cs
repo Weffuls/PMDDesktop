@@ -64,9 +64,7 @@ internal static class BuildSpecies
 			// At this point, we should only see Pokémon that fully qualify as being their own variation.
 			// If we do not, adjust the code before this point.
 
-			MetaVariant createdForm = await BuildFullVariant(species, form, forms, zip);
-
-			variants.Add(createdForm);
+			variants.AddRange(await BuildGenderedVariants(species, form, forms, zip));
 
 		}
 
@@ -94,37 +92,52 @@ internal static class BuildSpecies
 
 	}
 
-	private static async Task<MetaVariant> BuildFullVariant(Species species, MetaForm baseForm, IEnumerable<MetaForm> potentialForms, PokeApiZip zip)
+	/// <summary>
+	/// Builds one MetaVariant if no gender difference is required for this variant or it is already implied to have one.
+	/// Otherwise, builds as many as needed for gender differences (2).
+	/// </summary>
+	/// <param name="species">The species this variant belongs to.</param>
+	/// <param name="baseForm">The MetaForm to build a variant based on, may already be gendered.</param>
+	/// <param name="potentialForms">All forms that this variant can have, may include the baseForm.</param>
+	/// <param name="zip">Any PokeApiZip to read from when needed.</param>
+	/// <returns>An enumerable of MetaVariants.</returns>
+	private static async Task<IEnumerable<MetaVariant>> BuildGenderedVariants(Species species, MetaForm baseForm, IEnumerable<MetaForm> potentialForms, PokeApiZip zip)
+	{
+
+		if (baseForm.genderAlignment != GenderAlignment.None)
+			return [await BuildFullVariant(species, baseForm, potentialForms, baseForm.genderAlignment, zip)];
+
+		if (BuildSpeciesUtils.WouldNoneAlignmentNeedGenderDifferences(baseForm, potentialForms))
+		{
+
+			GenderAlignment[] genders = [GenderAlignment.Female, GenderAlignment.Male];
+			List<MetaVariant> variants = [];
+
+			foreach (GenderAlignment gender in genders)
+			{
+				variants.Add(await BuildFullVariant(species, baseForm, potentialForms, gender, zip));
+			}
+
+			return variants;
+
+		}
+
+		return [await BuildFullVariant(species, baseForm, potentialForms, GenderAlignment.None, zip)];
+
+	}
+
+	private static async Task<MetaVariant> BuildFullVariant(Species species, MetaForm baseForm, IEnumerable<MetaForm> potentialForms, GenderAlignment genderAlignment, PokeApiZip zip)
 	{
 
 		List<MetaForm> otherPotentialForms = [.. potentialForms.Where(form => baseForm != potentialForms)];
 
-		List<MetaForm> extraForms = await LinkForms(baseForm, otherPotentialForms);
+		List<MetaForm> extraForms = [.. BuildSpeciesUtils.EnumerateLinkableForms(baseForm, otherPotentialForms, genderAlignment)];
 
 		SpeciesVariant variant = await BuildOneVariantAsset(species, baseForm, extraForms, zip);
 
 		return new(variant);
 
 	}
-
-	private static async Task<List<MetaForm>> LinkForms(MetaForm baseForm, IEnumerable<MetaForm> potentialForms)
-	{
-
-		List<MetaForm> foundForms = [];
-
-		foreach (MetaForm potentialForm in potentialForms)
-		{
-
-			// TODO: Make this work
-
-			throw new NotImplementedException();
-
-		}
-
-		return foundForms;
-
-	}
-
 
 	/// <summary>
 	/// Builds strictly ONE species asset. Does not build any variants or forms.
