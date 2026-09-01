@@ -14,7 +14,7 @@ internal class SpriteCollabZip(string path) : Zip(path)
 		if (trackerCache is JsonElement cache)
 			return cache;
 
-		ZipArchiveEntry entry = GetEntry("tracker.json");
+		ZipArchiveEntry entry = GetEntry("SpriteCollab-master/tracker.json");
 
 		Stream stream = await entry.OpenAsync();
 		JsonDocument document = await JsonDocument.ParseAsync(stream);
