@@ -12,15 +12,7 @@ internal abstract class Zip(string path) : IDisposable, IAsyncDisposable
 	public ZipArchiveEntry GetEntry(string entryPath)
 	{
 
-		_entryLookup ??= _archive.Entries.ToLookup((entry) => entry.FullName);
-
-		IEnumerable<ZipArchiveEntry> found = _entryLookup[entryPath];
-		int count = found.Count();
-
-		if (found.Count() != 1)
-			throw new FileNotFoundException($"Found {count} entries at {entryPath}; only 1 is supported.");
-
-		return found.First();
+		return _archive.GetEntry(entryPath) ?? throw new KeyNotFoundException($"Could not find an entry for '{entryPath}'");
 
 	}
 
