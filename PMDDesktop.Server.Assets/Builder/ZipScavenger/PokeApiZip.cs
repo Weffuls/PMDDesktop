@@ -2,8 +2,18 @@
 
 namespace PMDDesktop.Server.Assets.Builder.ZipScavenger;
 
-internal class PokeApiZip(string path) : Zip(path)
+internal class PokeApiZip : Zip
 {
+
+	public PokeApiZip(string path) : base(path)
+	{
+
+	}
+
+	public PokeApiZip(ZipArchive archive) : base(archive)
+	{
+
+	}
 
 	public ZipArchiveEntry GetEntryFromApiUrl(string apiUrl)
 	{
