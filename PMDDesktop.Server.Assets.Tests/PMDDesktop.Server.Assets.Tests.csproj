@@ -18,7 +18,7 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <Target Name="CreateAndBundleTestZip" BeforeTargets="Build">
+  <Target Name="CreateAndBundleTestZip" BeforeTargets="BeforeBuild">
 
     <ZipDirectory SourceDirectory="Builder/mockZipContents" DestinationFile="Builder/mockZip.zip" Overwrite="true" />
     
