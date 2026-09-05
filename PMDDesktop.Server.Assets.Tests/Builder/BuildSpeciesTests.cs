@@ -76,6 +76,34 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 
 	}
 
+	[Fact]
+	public void AllFormsHavePortraits()
+	{
+
+		IEnumerable<SpeciesPortraits> normalPortraits = fixture.assets.OfType<SpeciesPortraits>().Where(visual => !visual.Shiny);
+		IEnumerable<SpeciesPortraits> shinyPortraits = fixture.assets.OfType<SpeciesPortraits>().Where(visual => visual.Shiny);
+
+		IEnumerable<SpeciesForm> forms = fixture.assets.OfType<SpeciesForm>();
+
+		Assert.All(forms, form => Assert.Contains(normalPortraits, portrait => portrait.forForms.Any(forForm => forForm.Location == form.Location)));
+		Assert.All(forms, form => Assert.Contains(shinyPortraits, portrait => portrait.forForms.Any(forForm => forForm.Location == form.Location)));
+
+	}
+
+	[Fact]
+	public void AllFormsHaveSprites()
+	{
+
+		IEnumerable<SpeciesSprites> normalSprites = fixture.assets.OfType<SpeciesSprites>().Where(visual => !visual.Shiny);
+		IEnumerable<SpeciesSprites> shinySprites = fixture.assets.OfType<SpeciesSprites>().Where(visual => visual.Shiny);
+
+		IEnumerable<SpeciesForm> forms = fixture.assets.OfType<SpeciesForm>();
+
+		Assert.All(forms, form => Assert.Contains(normalSprites, portrait => portrait.forForms.Any(forForm => forForm.Location == form.Location)));
+		Assert.All(forms, form => Assert.Contains(shinySprites, portrait => portrait.forForms.Any(forForm => forForm.Location == form.Location)));
+
+	}
+
 	private bool DoesVariantReferenceForm(SpeciesVariant variant, SpeciesForm form)
 	{
 
