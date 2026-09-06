@@ -3,8 +3,18 @@ using System.Text.Json;
 
 namespace PMDDesktop.Server.Assets.Builder.ZipScavenger;
 
-internal class SpriteCollabZip(string path) : Zip(path)
+internal class SpriteCollabZip : Zip
 {
+
+	public SpriteCollabZip(string path) : base(path)
+	{
+
+	}
+
+	public SpriteCollabZip(ZipArchive archive) : base(archive)
+	{
+
+	}
 
 	private JsonElement? trackerCache;
 

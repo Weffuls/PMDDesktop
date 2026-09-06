@@ -10,4 +10,8 @@
 	<ProjectReference Include="..\PMDDesktop\PMDDesktop.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+	<InternalsVisibleTo Include="PMDDesktop.Server.Assets.Tests"/>
+  </ItemGroup>
+
 </Project>

@@ -71,6 +71,9 @@ public struct AssetLocation
 	[JsonInclude]
 	private string String { get; set => field = CheckLocationString(value); }
 
+	[JsonIgnore]
+	public readonly string Tail { get => GetComponents().Last(); }
+
 	public static string GetAssetsDirectory()
 	{
 

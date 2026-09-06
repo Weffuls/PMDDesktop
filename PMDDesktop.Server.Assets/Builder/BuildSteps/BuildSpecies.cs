@@ -11,26 +11,35 @@ internal static class BuildSpecies
 	public static async Task StartBuildStep(AssetManager assets)
 	{
 
-		await BuildTopLevelSpecies(assets);
+		using PokeApiZip apiZip = await ZipManager.GetPokeApiZip();
+		using SpriteCollabZip spriteZip = await ZipManager.GetSpriteCollabZip();
+
+		await BuildTopLevelSpecies(assets, apiZip, spriteZip);
 
 		return;
 
 	}
 
-	private static async Task BuildTopLevelSpecies(AssetManager assets)
+	public static async Task BuildWithCustomZips(AssetManager assets, PokeApiZip apiZip, SpriteCollabZip spriteZip)
 	{
 
-		using PokeApiZip zip = await ZipManager.GetPokeApiZip();
-		using SpriteCollabZip spriteZip = await ZipManager.GetSpriteCollabZip();
+		await BuildTopLevelSpecies(assets, apiZip, spriteZip);
 
-		foreach (ZipArchiveEntry entry in zip.EnumerateSpecies())
+		return;
+
+	}
+
+	private static async Task BuildTopLevelSpecies(AssetManager assets, PokeApiZip apiZip, SpriteCollabZip spriteZip)
+	{
+
+		foreach (ZipArchiveEntry entry in apiZip.EnumerateSpecies())
 		{
 
 			using Stream stream = await entry.OpenAsync();
 
 			using JsonDocument json = await JsonDocument.ParseAsync(stream);
 
-			await BuildFullSpeciesAndVariantsAndForms(assets, json.RootElement, zip);
+			await BuildFullSpeciesAndVariantsAndForms(assets, json.RootElement, apiZip);
 
 		}
 
