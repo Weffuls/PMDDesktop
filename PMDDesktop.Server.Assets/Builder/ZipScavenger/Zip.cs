@@ -17,7 +17,6 @@ internal abstract class Zip : IDisposable, IAsyncDisposable
 	}
 
 	private ZipArchive _archive;
-	private ILookup<string, ZipArchiveEntry>? _entryLookup;
 
 	public ZipArchiveEntry GetEntry(string entryPath)
 	{
