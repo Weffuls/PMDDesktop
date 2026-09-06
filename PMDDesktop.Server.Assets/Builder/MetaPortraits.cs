@@ -1,5 +1,5 @@
 ﻿namespace PMDDesktop.Server.Assets.Builder;
 
-internal class MetaPortrait : MetaVisual
+internal class MetaPortraits : MetaVisual
 {
 }
