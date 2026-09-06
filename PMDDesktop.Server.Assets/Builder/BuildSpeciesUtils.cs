@@ -96,6 +96,44 @@ internal static class BuildSpeciesUtils
 
 	}
 
+	public static GenderAlignment IsGenderName(string str)
+	{
+
+		return str.ToLowerInvariant() switch
+		{
+			"female" => GenderAlignment.Female,
+			"male" => GenderAlignment.Male,
+			_ => GenderAlignment.None
+		};
+
+	}
+
+	public static GenderAlignment HasGenderName(IEnumerable<string> strings)
+	{
+
+
+		GenderAlignment seen = GenderAlignment.None;
+
+		foreach (string str in strings)
+		{
+
+			GenderAlignment result = IsGenderName(str);
+
+			if (result == GenderAlignment.None)
+				continue;
+
+			if (seen == GenderAlignment.None)
+				seen = result;
+
+			if (result != seen)
+				throw new Exception($"Two different gender strings were found in the enumerable: '{seen}' found first, '{result}' found later.");
+
+		}
+
+		return seen;
+
+	}
+
 	public static IEnumerable<MetaForm> EnumerateLinkableForms(MetaForm baseForm, IEnumerable<MetaForm> potentialForms, GenderAlignment genderAlignment)
 	{
 
