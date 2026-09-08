@@ -99,7 +99,7 @@ internal static class BuildSpeciesUtils
 	public static GenderAlignment IsGenderName(string str)
 	{
 
-		return str.ToLowerInvariant() switch
+		return INameMatchable.NormalizeStringForMatching(str) switch
 		{
 			"female" => GenderAlignment.Female,
 			"male" => GenderAlignment.Male,

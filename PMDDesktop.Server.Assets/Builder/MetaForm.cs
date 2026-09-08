@@ -7,13 +7,15 @@ namespace PMDDesktop.Server.Assets.Builder;
 /// Holds a form and metadata about it, such as the requirements to change into this form.
 /// </summary>
 /// <param name="form">The form we're talking about.</param>
-internal class MetaForm()
+internal class MetaForm() : INameMatchable
 {
 	public required JsonElement formRoot;
 	public required string originalFormName;
 	public required SpeciesForm form;
 
 	public GenderAlignment genderAlignment = GenderAlignment.None;
+
+	public IEnumerable<string> GetMatchableParts() => originalFormName.Split('-');
 
 	public bool IsStandaloneForm()
 	{

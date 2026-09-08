@@ -1,10 +1,14 @@
-﻿using System.Text.Json;
+﻿using PMDDesktop.Server.Assets.Data;
+using System.Text.Json;
 
 namespace PMDDesktop.Server.Assets.Builder;
 
-internal abstract class MetaVisual
+internal abstract class MetaVisual : INameMatchable
 {
 
+	public static readonly string[] EXCLUDED_FROM_MATCHING = ["shiny", "altcolor", "alternate"];
+
+	public required string speciesName;
 	public required JsonElement groupElement;
 	public required IEnumerable<string> groupNames;
 
@@ -13,5 +17,14 @@ internal abstract class MetaVisual
 	/// </summary>
 	public GenderAlignment genderAlignment = GenderAlignment.None;
 	public required bool isShiny;
+
+	public IEnumerable<string> GetMatchableParts() => groupNames.Where(name =>
+	{
+
+		string normalized = INameMatchable.NormalizeStringForMatching(name);
+
+		return !EXCLUDED_FROM_MATCHING.Contains(normalized);
+
+	});
 
 }
