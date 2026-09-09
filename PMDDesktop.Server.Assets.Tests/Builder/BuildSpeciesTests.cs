@@ -118,8 +118,8 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 
 		IEnumerable<SpeciesForm> forms = fixture.assets.OfType<SpeciesForm>();
 
-		Assert.All(forms, form => Assert.Contains(normalPortraits, portrait => portrait.forForms.Any(forForm => forForm.Location == form.Location)));
-		Assert.All(forms, form => Assert.Contains(shinyPortraits, portrait => portrait.forForms.Any(forForm => forForm.Location == form.Location)));
+		Assert.All(forms, form => Assert.Contains(normalPortraits, portrait => portrait.ForForms.Any(forForm => forForm.Location == form.Location)));
+		Assert.All(forms, form => Assert.Contains(shinyPortraits, portrait => portrait.ForForms.Any(forForm => forForm.Location == form.Location)));
 
 	}
 
@@ -132,8 +132,10 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 
 		IEnumerable<SpeciesForm> forms = fixture.assets.OfType<SpeciesForm>();
 
-		Assert.All(forms, form => Assert.Contains(normalSprites, portrait => portrait.forForms.Any(forForm => forForm.Location == form.Location)));
-		Assert.All(forms, form => Assert.Contains(shinySprites, portrait => portrait.forForms.Any(forForm => forForm.Location == form.Location)));
+		Assert.All(forms, form => Assert.Contains(normalSprites, portrait => portrait.ForForms.Any(forForm => forForm.Location == form.Location)));
+		Assert.All(forms, form => Assert.Contains(shinySprites, portrait => portrait.ForForms.Any(forForm => forForm.Location == form.Location)));
+
+	}
 
 	}
 
@@ -353,7 +355,7 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 		foreach (SpeciesForm form in forms)
 		{
 
-			IEnumerable<SpeciesVisual> visualsPointingTo = fixture.assets.OfType<SpeciesVisual>().Where(visual => visual.forForms.Any(forForm => forForm.Location == form.Location));
+			IEnumerable<SpeciesVisual> visualsPointingTo = fixture.assets.OfType<SpeciesVisual>().Where(visual => visual.ForForms.Any(forForm => forForm.Location == form.Location));
 			IEnumerable<SpeciesPortraits> portraits = visualsPointingTo.OfType<SpeciesPortraits>();
 			IEnumerable<SpeciesSprites> sprites = visualsPointingTo.OfType<SpeciesSprites>();
 

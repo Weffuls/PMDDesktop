@@ -47,7 +47,7 @@ internal abstract class MetaVisual : MetaAsset, INameMatchable
 
 		visual.Location = Location;
 		visual.Shiny = isShiny;
-		visual.forForms = ImmutableArray.Create([.. ForForms.Select(form => new AssetReference<SpeciesForm>(form.Location))]);
+		visual.ForForms = ImmutableArray.Create([.. ForForms.Select(form => new AssetReference<SpeciesForm>(form.Location))]);
 
 	}
 
