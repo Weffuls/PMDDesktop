@@ -10,6 +10,17 @@ namespace PMDDesktop.Server.Assets.Builder;
 internal class MetaForm : MetaAsset, INameMatchable
 {
 
+	public MetaForm(MetaForm toClone)
+	{
+
+		OriginalName = toClone.OriginalName;
+		Name = toClone.Name;
+		Species = toClone.Species;
+		FormRoot = toClone.FormRoot;
+		genderAlignment = toClone.genderAlignment;
+
+	}
+
 	public MetaForm(MetaSpecies species, JsonElement pokemonFormRoot)
 	{
 

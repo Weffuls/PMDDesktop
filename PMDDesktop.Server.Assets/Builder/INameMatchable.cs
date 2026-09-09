@@ -3,7 +3,7 @@
 internal interface INameMatchable
 {
 
-	internal static int CalculateNameSpecificity(INameMatchable left, INameMatchable right)
+	internal static int CalculateNameMatches(INameMatchable left, INameMatchable right)
 	{
 
 		string[] leftStrings = [.. left.GetMatchableParts()];

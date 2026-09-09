@@ -10,11 +10,9 @@ internal class MetaSpecies : MetaAsset
 	internal MetaSpecies(JsonElement pokemonSpeciesRoot, PokeApiZip apiZip, SpriteCollabZip spriteZip)
 	{
 
-		int speciesNumber = pokemonSpeciesRoot.GetProperty("id").GetInt32();
-		string speciesName = pokemonSpeciesRoot.GetProperty("name").GetString()
+		SpeciesIndex = pokemonSpeciesRoot.GetProperty("id").GetInt32();
+		SoloName = pokemonSpeciesRoot.GetProperty("name").GetString()
 			?? throw new InvalidDataException($"No name found on {pokemonSpeciesRoot}");
-
-		DataName = $"{speciesNumber:0000}-{speciesName}";
 
 		ApiZip = apiZip;
 		SpriteZip = spriteZip;
@@ -25,7 +23,10 @@ internal class MetaSpecies : MetaAsset
 
 	internal PokeApiZip ApiZip { get; init; }
 	internal SpriteCollabZip SpriteZip { get; init; }
-	internal string DataName { get; init; }
+	internal string DataName => $"{FormattedIndex}-{SoloName}";
+	internal string SoloName { get; init; }
+	internal int SpeciesIndex { get; init; }
+	internal string FormattedIndex => $"{SpeciesIndex:0000}";
 
 	internal override AssetLocation Location => new("species", DataName);
 

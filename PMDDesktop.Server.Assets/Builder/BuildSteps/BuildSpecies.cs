@@ -49,14 +49,69 @@ internal static class BuildSpecies
 
 		MetaSpecies species = new(pokemonSpeciesRoot, apiZip, spriteZip);
 
+		species.metaAssets.AddRange(await SpriteCollabUtils.GetAllVisuals(species));
+
 		// Create variants & forms and add them to the groups list.
 		foreach (JsonElement formRoot in await PokeApiUtils.GetSpeciesForms(pokemonSpeciesRoot, apiZip))
 		{
 
 			MetaForm createdForm = new(species, formRoot);
 
+			bool needsGenderSplit = false;
+			if (createdForm.genderAlignment == GenderAlignment.None)
+			{
+
+				IEnumerable<MetaVisual> visuals = await GetClosestVisualMatches(createdForm, species);
+
+				bool seenMale = false;
+				bool seenFemale = false;
+
+				foreach (MetaVisual visual in visuals)
+				{
+
+					if (visual.genderAlignment == GenderAlignment.Male)
+						seenMale = true;
+
+					if (visual.genderAlignment == GenderAlignment.Female)
+						seenFemale = true;
+
+				}
+
+				if (seenMale && seenFemale)
+					needsGenderSplit = true;
+
+			}
+
+			if (needsGenderSplit)
+			{
+
+				// Create female split.
+				MetaForm femaleForm = new(createdForm)
+				{
+					genderAlignment = GenderAlignment.Female,
+					Name = createdForm.Name + "-female"
+				};
+				species.metaAssets.Add(femaleForm);
+
+				// Adjust to create male split.
+				createdForm.genderAlignment = GenderAlignment.Male;
+				createdForm.Name += "-male";
+
+			}
+
 			species.metaAssets.Add(createdForm);
 
+		}
+
+		// Assign visuals to forms.
+		foreach (MetaForm form in species.metaAssets.OfType<MetaForm>())
+		{
+			foreach (MetaVisual visual in await GetClosestVisualMatches(form, species))
+			{
+
+				visual.ForForms.Add(form);
+
+			}
 		}
 
 		// Create variants from forms.
@@ -117,6 +172,50 @@ internal static class BuildSpecies
 		}
 
 		return [new(species, baseForm, GenderAlignment.None)];
+
+	}
+
+	private static async Task<IEnumerable<MetaVisual>> GetClosestVisualMatches(MetaForm form, MetaSpecies species)
+	{
+
+		int highestMatchResult = 0; // Matches
+		int lowestSpecificityTiebreaker = 0; // Tie-breaker, so lower counts with the same match count are prioritized.
+		List<MetaVisual> foundVisuals = [];
+
+		foreach (MetaVisual visual in species.metaAssets.OfType<MetaVisual>())
+		{
+
+			if (!BuildSpeciesUtils.IsConnectableGender(form.genderAlignment, visual.genderAlignment))
+				continue;
+
+			int specificity = visual.GetMatchableParts().Count();
+			int matchResults = INameMatchable.CalculateNameMatches(form, visual);
+
+			if (matchResults >= highestMatchResult)
+			{
+				if (matchResults > highestMatchResult)
+					foundVisuals.Clear();
+
+				foundVisuals.Add(visual);
+				highestMatchResult = matchResults;
+				lowestSpecificityTiebreaker = specificity;
+				continue;
+			}
+
+			if (matchResults == highestMatchResult && specificity <= lowestSpecificityTiebreaker)
+			{
+				if (specificity < lowestSpecificityTiebreaker)
+					foundVisuals.Clear();
+
+				foundVisuals.Add(visual);
+				highestMatchResult = matchResults;
+				lowestSpecificityTiebreaker = specificity;
+				continue;
+			}
+
+		}
+
+		return foundVisuals;
 
 	}
 

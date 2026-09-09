@@ -13,7 +13,7 @@ public abstract class SpeciesVisual : Asset
 	/// <summary>
 	/// A list of forms this visual should appear in menus to be selectable for.
 	/// </summary>
-	public required ImmutableArray<AssetReference<SpeciesForm>> forForms;
+	public ImmutableArray<AssetReference<SpeciesForm>> forForms;
 
 	internal SpeciesVisual(AssetLocation location) : base(location)
 	{
