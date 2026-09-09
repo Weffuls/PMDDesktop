@@ -9,13 +9,13 @@ internal static class BuildSpeciesUtils
 		if (baseForm == target)
 			return false;
 
-		if (PokeApiUtils.IsPokemonFormStandalone(target.formRoot))
+		if (PokeApiUtils.IsPokemonFormStandalone(target.FormRoot))
 			return false;
 
 		if (!IsConnectableGender(genderAlignment, target.genderAlignment))
 			return false;
 
-		if (!PokeApiUtils.IsPokemonFormWithMatchingBaseForm(target.formRoot, [baseForm.originalFormName], true))
+		if (!PokeApiUtils.IsPokemonFormWithMatchingBaseForm(target.FormRoot, [baseForm.OriginalName], true))
 			return false;
 
 		return true;

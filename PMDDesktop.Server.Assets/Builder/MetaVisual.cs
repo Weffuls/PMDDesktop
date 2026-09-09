@@ -1,14 +1,22 @@
-﻿using PMDDesktop.Server.Assets.Data;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace PMDDesktop.Server.Assets.Builder;
 
-internal abstract class MetaVisual : INameMatchable
+internal abstract class MetaVisual : MetaAsset, INameMatchable
 {
+
+	protected AssetLocation GetVisualAssetLocation(string typeFolder)
+	{
+
+		string groupFolderName = string.Join('-', groupNames);
+
+		return new("visuals", Species.DataName, groupFolderName, typeFolder);
+
+	}
 
 	public static readonly string[] EXCLUDED_FROM_MATCHING = ["shiny", "altcolor", "alternate"];
 
-	public required string speciesName;
+	public required MetaSpecies Species { get; init; }
 	public required JsonElement groupElement;
 	public required IEnumerable<string> groupNames;
 
@@ -26,5 +34,10 @@ internal abstract class MetaVisual : INameMatchable
 		return !EXCLUDED_FROM_MATCHING.Contains(normalized);
 
 	});
+
+	internal override async Task<Asset> CreateAsset()
+	{
+		throw new NotImplementedException();
+	}
 
 }

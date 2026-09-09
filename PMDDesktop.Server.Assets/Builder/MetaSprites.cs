@@ -2,4 +2,5 @@
 
 internal class MetaSprites : MetaVisual
 {
+	internal override AssetLocation Location => GetVisualAssetLocation("sprites");
 }
