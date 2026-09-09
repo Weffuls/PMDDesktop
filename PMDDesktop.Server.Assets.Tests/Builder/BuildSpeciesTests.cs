@@ -371,7 +371,7 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 			// Should contain a shiny sprite.
 			Assert.Contains(sprites, visual => visual.Shiny);
 
-			seenVisuals.AddRange(seenVisuals);
+			seenVisuals.AddRange(visualsPointingTo);
 
 		}
 
