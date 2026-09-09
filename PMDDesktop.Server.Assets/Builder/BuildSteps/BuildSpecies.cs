@@ -164,7 +164,9 @@ internal static class BuildSpecies
 
 			foreach (GenderAlignment gender in genders)
 			{
-				variants.Add(new(species, baseForm, gender));
+				MetaVariant variant = new(species, baseForm, gender);
+				variant.Name += "-" + BuildSpeciesUtils.GetGenderFilenameDistinction(gender);
+				variants.Add(variant);
 			}
 
 			return variants;
@@ -178,8 +180,8 @@ internal static class BuildSpecies
 	private static async Task<IEnumerable<MetaVisual>> GetClosestVisualMatches(MetaForm form, MetaSpecies species)
 	{
 
-		int highestMatchResult = 0; // Matches
-		int lowestSpecificityTiebreaker = 0; // Tie-breaker, so lower counts with the same match count are prioritized.
+		int highestMatchResult = int.MinValue; // Matches
+		int lowestSpecificityTiebreaker = int.MaxValue; // Tie-breaker, so lower counts with the same match count are prioritized.
 		List<MetaVisual> foundVisuals = [];
 
 		foreach (MetaVisual visual in species.metaAssets.OfType<MetaVisual>())

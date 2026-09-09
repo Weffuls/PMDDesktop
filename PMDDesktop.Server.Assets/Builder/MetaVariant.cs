@@ -12,22 +12,21 @@ internal class MetaVariant : MetaAsset
 	internal MetaVariant(MetaSpecies species, MetaForm baseForm, GenderAlignment genderAlignment)
 	{
 
-		string variantName = baseForm.FormRoot.GetProperty("name").GetString()
-			?? throw new InvalidDataException($"{baseForm.FormRoot} had no name property");
-
 		IEnumerable<MetaForm> potentialForms = species.metaAssets.OfType<MetaForm>().Where(form => baseForm != form);
 
 		ExtraForms = [.. BuildSpeciesUtils.EnumerateLinkableForms(baseForm, potentialForms, genderAlignment)];
 
-		Name = variantName;
-		OriginalName = variantName;
+		Name = baseForm.Name;
+		OriginalName = baseForm.OriginalName;
 
 		Species = species;
 		BaseForm = baseForm;
 
+		GenderAlignment = genderAlignment;
+
 	}
 
-	internal GenderAlignment genderAlignment = GenderAlignment.None;
+	internal GenderAlignment GenderAlignment { get; set; } = GenderAlignment.None;
 	internal MetaSpecies Species { get; set; }
 	internal MetaForm BaseForm { get; set; }
 	internal List<MetaForm> ExtraForms { get; set; }
