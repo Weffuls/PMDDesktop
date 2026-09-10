@@ -305,10 +305,15 @@ public class SaveDataManager : ISaveDataIndexable, IEnumerable<SaveData>
 	private async Task SaveDataToFile(SaveData data)
 	{
 
-		string dirPath = GetDirectoryPath(data);
+		if (WritingEnabled)
+		{
 
-		if (!Directory.Exists(dirPath))
-			Directory.CreateDirectory(dirPath);
+			string dirPath = GetDirectoryPath(data);
+
+			if (!Directory.Exists(dirPath))
+				Directory.CreateDirectory(dirPath);
+			
+		}
 
 		await using Stream stream = WritingEnabled
 			? File.Create(GetFilePath(data))
@@ -327,6 +332,9 @@ public class SaveDataManager : ISaveDataIndexable, IEnumerable<SaveData>
 	/// <returns>Resolves Task once file is deleted.</returns>
 	private async Task EraseSaveDataFile(SaveData data)
 	{
+
+		if (!WritingEnabled)
+			return;
 
 		string path = GetFilePath(data);
 
