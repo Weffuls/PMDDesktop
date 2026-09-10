@@ -1,5 +1,6 @@
 ﻿using PMDDesktop.Exceptions;
 using PMDDesktop.Utils;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
@@ -9,7 +10,7 @@ namespace PMDDesktop.Server.Saving;
 /// <summary>
 /// Holds methods and fields related to SaveData management. It lives in its own static class to declutter the primary SaveData class.
 /// </summary>
-public class SaveDataManager : ISaveDataIndexable
+public class SaveDataManager : ISaveDataIndexable, IEnumerable<SaveData>
 {
 
 	/// <summary>
@@ -389,17 +390,21 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Allows you to enumerate through tracked SaveData of a type.
+	/// Returns an IEnumerator<SaveData> that iterates through all SaveDatas in the SaveDataManager.
 	/// </summary>
-	/// <typeparam name="T">The type you'd like to enumerate though.</typeparam>
-	/// <returns>An enumerable of only the matching type of active save data.</returns>
-	public IEnumerable<T> EnumerateData<T>()
+	/// <returns>An IEnumerator<SaveData> that iterates through all SavaData objects in the SaveDataManager.</returns>
+	public IEnumerator<SaveData> GetEnumerator()
 	{
+		return saveDatas.Values.GetEnumerator();
+	}
 
-		foreach (SaveData data in saveDatas.Values)
-			if (data is T typedData)
-				yield return typedData;
-
+	/// <summary>
+	/// Returns an IEnumerator that iterates through all SaveDatas in the SaveDataManager.
+	/// </summary>
+	/// <returns>An IEnumerator that iterates through all SavaData objects in the SaveDataManager.</returns>
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return saveDatas.Values.GetEnumerator();
 	}
 
 }
