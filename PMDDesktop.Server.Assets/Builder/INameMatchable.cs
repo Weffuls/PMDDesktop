@@ -13,21 +13,21 @@ internal interface INameMatchable
 
 	}
 
-	private static int CompareNames(string[] longer, string[] shorter)
+	private static int CompareNames(string[] left, string[] right)
 	{
 
 		int matches = 0;
 
-		for (int leftStartIndex = 0; leftStartIndex < longer.Length; ++leftStartIndex)
-			for (int leftEndIndex = leftStartIndex + 1; leftEndIndex <= longer.Length; ++leftEndIndex)
-				for (int rightStartIndex = 0; rightStartIndex < shorter.Length; ++rightStartIndex)
-					for (int rightEndIndex = rightStartIndex + 1; rightEndIndex <= shorter.Length; ++rightEndIndex)
+		for (int leftStartIndex = 0; leftStartIndex < left.Length; ++leftStartIndex)
+			for (int leftEndIndex = leftStartIndex + 1; leftEndIndex <= left.Length; ++leftEndIndex)
+				for (int rightStartIndex = 0; rightStartIndex < right.Length; ++rightStartIndex)
+					for (int rightEndIndex = rightStartIndex + 1; rightEndIndex <= right.Length; ++rightEndIndex)
 					{
 
-						string shortString = NormalizeStringForMatching(string.Join("", longer[leftStartIndex..leftEndIndex]));
-						string longString = NormalizeStringForMatching(string.Join("", longer[leftStartIndex..leftEndIndex]));
+						string leftSection = NormalizeStringForMatching(string.Join("", left[leftStartIndex..leftEndIndex]));
+						string rightSection = NormalizeStringForMatching(string.Join("", right[rightStartIndex..rightEndIndex]));
 
-						if (shortString == longString)
+						if (leftSection == rightSection)
 							++matches;
 
 					}
