@@ -20,7 +20,7 @@ internal abstract class MetaVisual : MetaAsset, INameMatchable
 
 	}
 
-	public static readonly string[] EXCLUDED_FROM_MATCHING = ["shiny", "altcolor", "alternate", "male", "female", ""];
+	public static readonly string[] EXCLUDED_FROM_MATCHING = ["shiny", "altcolor", "alternate", "male", "female"];
 
 	public required MetaSpecies Species { get; init; }
 	public required JsonElement groupElement;

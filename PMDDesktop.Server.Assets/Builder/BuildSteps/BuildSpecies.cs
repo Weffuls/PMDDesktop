@@ -193,27 +193,22 @@ internal static class BuildSpecies
 			int specificity = visual.GetMatchableParts().Count();
 			int matchResults = INameMatchable.CalculateNameMatches(form, visual);
 
-			if (matchResults >= highestMatchResult)
-			{
-				if (matchResults > highestMatchResult)
-					foundVisuals.Clear();
-
-				foundVisuals.Add(visual);
-				highestMatchResult = matchResults;
-				lowestSpecificityTiebreaker = specificity;
+			// If this is not the best match, leave.
+			if (matchResults < highestMatchResult)
 				continue;
-			}
 
-			if (matchResults == highestMatchResult && specificity <= lowestSpecificityTiebreaker)
-			{
-				if (specificity < lowestSpecificityTiebreaker)
-					foundVisuals.Clear();
-
-				foundVisuals.Add(visual);
-				highestMatchResult = matchResults;
-				lowestSpecificityTiebreaker = specificity;
+			// If this is tied for the best match, but more specific, leave.
+			if (matchResults == highestMatchResult && specificity > lowestSpecificityTiebreaker)
 				continue;
-			}
+
+			// If this is the new best match (not a tie), wipe the list.
+			if (matchResults > highestMatchResult)
+				foundVisuals.Clear();
+
+			foundVisuals.Add(visual);
+			highestMatchResult = matchResults;
+			lowestSpecificityTiebreaker = specificity;
+			continue;
 
 		}
 

@@ -137,8 +137,6 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 
 	}
 
-	}
-
 	[Fact]
 	public void AllVariantsListUniqueForms()
 	{
