@@ -13,8 +13,8 @@ public class SaveDataManager : ISaveDataIndexable
 {
 
 	/// <summary>
-	/// Creates a SaveDataManager.
-	/// Typically, this object is a singleton that'll be passed around.
+	/// <para>Creates a SaveDataManager.</para>
+	/// <para>Typically, this object is a singleton that'll be passed around; however there are no checks on having multiple.</para>
 	/// </summary>
 	public SaveDataManager()
 	{
@@ -22,8 +22,12 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Does this SaveDataManager actually write to files?
+	/// <para>Does this SaveDataManager actually write to files?</para>
+	/// <para>If this is false, file writes to the <b>filesystem/disk</b> will be skipped.</para>
 	/// </summary>
+	/// <remarks>
+	/// This is property as "false" is very useful in unit testing. Should probably be "true" during runtime.
+	/// </remarks>
 	public bool WritingEnabled { get; private set; }
 
 	/// <summary>
@@ -79,6 +83,13 @@ public class SaveDataManager : ISaveDataIndexable
 
 	}
 
+	/// <summary>
+	/// Try to get a save data by type and GUID. Will return false and data will be null if not found.
+	/// </summary>
+	/// <typeparam name="T">The type of the save data to get.</typeparam>
+	/// <param name="GUID">The GUID of the object you're looking for.</param>
+	/// <param name="data">The found save data, if any was found. Will be null if the return was false.</param>
+	/// <returns>True if the data is found.</returns>
 	public bool TryGetSave<T>(Guid GUID, [NotNullWhen(true)] out T? data) where T : SaveData
 	{
 
@@ -109,10 +120,11 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Internal function for getting SaveData by UID.
+	/// <para>Internal function for getting a SaveData object by GUID.</para>
+	/// <para>Either returns the SaveData if it was found, or null if it was not.</para>
 	/// </summary>
-	/// <param name="GUID">The UID of </param>
-	/// <returns></returns>
+	/// <param name="GUID">The GUID of the SaveData to attempt to get.</param>
+	/// <returns>The target SaveData object, or null.</returns>
 	internal SaveData? GetByGUID(Guid GUID)
 	{
 
@@ -123,8 +135,14 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// This function scans the save folder and attempts to load all the SaveData in that folder and create objects for them. It should be called once during initialization, and never again.
+	/// <para>This function scans the save folder and attempts to load all the SaveData in that folder and create objects for them.</para>
+	/// <para>It should be called once during initialization of a WritingEnabled SaveManager, and never again.</para>
+	/// <para>It should not be called in situations like Unit Testing, it is intended for loading/saving server state.</para>
 	/// </summary>
+	/// <remarks>
+	/// <para>This function may throw in many different ways. Try your best to clearly communicate the thrown error to the user.</para>
+	/// <para>Continuing to use the SaveManager after this function throws may result in data corruption or loss.</para>
+	/// </remarks>
 	private async Task LoadAllSaveData()
 	{
 
@@ -170,14 +188,15 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Asynchronously saves all unsaved SaveData objects, one-by-one. May take time.
-	/// Will also delete any SaveData queued for deletion.
-	/// Try not to call while SaveData is being updated; saving won't fail but it might make continuity issues.
-	/// A good place to call this is when the GameActions queue is empty.
-	/// This can only be called once at a time.
+	/// <para>Asynchronously saves all unsaved SaveData objects, one-by-one. May take time.</para>
+	/// <para>Will also delete any SaveData queued for deletion.</para>
+	/// <para>Try not to call while SaveData is being updated; saving won't fail but it might make continuity issues.</para>
 	/// </summary>
 	/// <returns></returns>
-	/// <exception cref="InvalidOperationException">Throws if SaveData isn't initalized or if this function is already running.</exception>
+	/// <remarks>
+	/// This can only be called once at a time. Another attempt at concurrent saving/flushing will throw the new one.
+	/// </remarks>
+	/// <exception cref="InvalidOperationException">Throws if this function is SaveManager is already flushing/saving.</exception>
 	public async Task SaveAllChanges()
 	{
 
@@ -221,7 +240,7 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Returns the folder that this type would be saved to.
+	/// <para>Returns the folder path that this type would be saved to.</para>
 	/// </summary>
 	/// <param name="type">The type you're looking for the folder path of.</param>
 	/// <returns>The folder path of the type.</returns>
@@ -251,7 +270,7 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Returns the folder that this type would be saved to.
+	/// Returns the folder path that this type would be saved to.
 	/// </summary>
 	/// <param name="data">The data you're looking for the folder path of.</param>
 	/// <returns>The folder path of the type.</returns>
@@ -263,10 +282,10 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Returns the exact path (ends with .JSON) that a data is expecting to be written to.
+	/// Returns the exact path (ends with <b>.json</b>) that a SaveData object is expecting to be serialized and written to.
 	/// </summary>
 	/// <param name="data">The data you're looking for the file path for.</param>
-	/// <returns>The file path of the data.</returns>
+	/// <returns>The file path that the SaveData's data should be saved to.</returns>
 	private string GetFilePath(SaveData data)
 	{
 
@@ -279,7 +298,9 @@ public class SaveDataManager : ISaveDataIndexable
 	/// </summary>
 	/// <param name="data">The data to save</param>
 	/// <returns></returns>
-	/// <remarks>If LoadFromFilesAndEnableWriting() was not called, it will instead write to a null.</remarks>
+	/// <remarks>
+	/// <para>If WritingEnabled is false, it will instead write to a null, but it will still serialize the data.</para>
+	/// </remarks>
 	private async Task SaveDataToFile(SaveData data)
 	{
 
@@ -302,7 +323,7 @@ public class SaveDataManager : ISaveDataIndexable
 	/// Deletes the file that a data would've saved to. Should be called when flushing changes.
 	/// </summary>
 	/// <param name="data">The data to delete.</param>
-	/// <returns></returns>
+	/// <returns>Resolves Task once file is deleted.</returns>
 	private async Task EraseSaveDataFile(SaveData data)
 	{
 
@@ -314,10 +335,11 @@ public class SaveDataManager : ISaveDataIndexable
 
 	}
 
-	/// <summary>
-	/// Begin tracking this object and saving it.
+	/// <para>Begin tracking this object and saving it.</para>
+	/// <para>
 	/// </summary>
 	/// <param name="data">The SaveData to begin tracking and saving.</param>
+	/// <exception cref="InvalidOperationException">Throws if the GUID is already being used in the SaveManager or if the SaveData already exists in the SaveManager.</exception>
 	public void Add(SaveData data)
 	{
 
@@ -339,10 +361,12 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Disable this SaveData and queue the delition of the file it is saving to.
-	/// The object will NOT be disposed of instantly.
-	/// The file SaveData will be removed from the list immediately; but the file won't be deleted until the next "flush" happens.
+	/// <para>Unlink this SaveData and queue the deletion of the file it is saving to.</para>
 	/// </summary>
+	/// <remarks>
+	/// <para>The SaveData object will still exist until the .NET garbage collector collects it.</para>
+	/// <para>The file SaveData will be removed from the list immediately; but the file won't be deleted until the next "flush" happens.</para>
+	/// </remarks>
 	public void Remove(SaveData data)
 	{
 

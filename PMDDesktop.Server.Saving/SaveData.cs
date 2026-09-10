@@ -3,47 +3,44 @@
 namespace PMDDesktop.Server.Saving;
 
 /// <summary>
-/// SaveData is an abstract class that implements features to help with creating persistant data.
-///
-/// Each SaveData has a GUID that identifies it.
-///
-/// Pass the SaveData into the SaveDataManager's Add() function to start saving it, or Delete() to stop saving it.
+/// <para>SaveData is an abstract class that implements features to help with creating persistant data.</para>
+/// <para>Each SaveData has a GUID that identifies it.</para>
+/// <para>Pass the SaveData into the SaveDataManager's Add() function to start saving it, or Delete() to stop saving it.</para>
 /// </summary>
 public abstract class SaveData
 {
 
 	/// <summary>
-	/// Was this SaveData edited and has unsaved changes?
-	/// Control this property with MarkDirty() and Save().
-	/// Marking a SaveData dirty may allow it to be "autosaved" by other functions, for example on program quit.
+	/// <para>Was this SaveData edited and has unsaved changes?</para>
+	/// <para>Control this property with <b>MarkDirty()</b>.</para>
+	/// <para>Marking a SaveData dirty allows it to be saved by the SaveManager, for example on program quit.</para>
 	/// </summary>
 	[JsonIgnore]
 	public bool Dirty { get; internal set; } = false;
 
 	/// <summary>
-	/// The unique identifier for this object.
-	/// This UID will be used to name the save file that is written to.
-	/// Checks are performed to ensure this UID is unique.
-	/// Creating an object with a matching UID will throw.
+	/// <para>The unique identifier for this object.</para>
+	/// <para>This GUID will be used to name the save file that is written to.</para>
+	/// <para>Checks are performed to ensure this GUID is unique.</para>
 	/// </summary>
 	[JsonIgnore]
 	public Guid GUID { get; internal set; }
 
 	/// <summary>
-	/// The application version that this SaveData was originally created in.
-	/// Used for future-proofing, incase data structure upgrades ever need to be done.
+	/// <para>The application version that this SaveData was originally created in.</para>
+	/// <para>Used for future-proofing, incase data structure upgrades ever need to be done.</para>
 	/// </summary>
 	public Version CreationVersion { get; init; }
 
 	/// <summary>
-	/// The date and time that this SaveData was originally created in.
-	/// This is not reliable for upgrading data between versions, as servers could be running an older version, but it is a cool statistic, and may be useful for debugging.
+	/// <para>The date and time that this SaveData was originally created in.</para>
+	/// <para>This is not reliable for upgrading data between versions, as servers could be running an older version, but it is a cool statistic, and may be useful for debugging.</para>
 	/// </summary>
 	public DateTime CreationDate { get; init; }
 
 	/// <summary>
-	/// Creates a new Save Data instance. The GUID will be a randomly generated GUID.
-	/// Immediately marked Dirty, add it to the SaveDataManager to start saving this data.
+	/// <para>Creates a new Save Data instance. The GUID will be a randomly generated GUID.</para>
+	/// <para>It will initally be marked Dirty; add it to the SaveDataManager to start saving this data.</para>
 	/// </summary>
 	protected SaveData()
 	{
@@ -58,7 +55,7 @@ public abstract class SaveData
 	}
 
 	/// <summary>
-	/// Marks the object as dirty (unsaved) saying it needs to be saved.
+	/// Marks the object as dirty (unsaved), saying it needs to be saved.
 	/// </summary>
 	/// <remarks>As a design practice, this should always be called by the function that's making the changes to the object, and never by the object itself.</remarks>
 	public void MarkDirty()
