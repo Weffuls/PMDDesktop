@@ -16,7 +16,7 @@ internal abstract class MetaVisual : MetaAsset, INameMatchable
 
 		string groupFolderName = string.Join('-', names);
 
-		return new("visuals", Species.DataName, groupFolderName, typeFolder);
+		return new(Species.Location, typeFolder, groupFolderName);
 
 	}
 
