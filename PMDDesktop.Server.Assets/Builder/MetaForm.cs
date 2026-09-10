@@ -32,6 +32,8 @@ internal class MetaForm : MetaAsset, INameMatchable
 		FormRoot = pokemonFormRoot;
 		Species = species;
 
+		genderAlignment = BuildSpeciesUtils.HasGenderName(OriginalName.Split("-"));
+
 	}
 
 	internal JsonElement FormRoot { get; init; }
@@ -39,7 +41,7 @@ internal class MetaForm : MetaAsset, INameMatchable
 	internal string Name { get; set; }
 	internal MetaSpecies Species { get; init; }
 
-	internal GenderAlignment genderAlignment = GenderAlignment.None;
+	internal GenderAlignment genderAlignment;
 
 	public IEnumerable<string> GetMatchableParts() => OriginalName.Split('-');
 
