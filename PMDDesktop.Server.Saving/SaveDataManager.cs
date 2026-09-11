@@ -344,8 +344,8 @@ public class SaveDataManager : ISaveDataIndexable, IEnumerable<SaveData>
 
 	}
 
+	/// <summary>
 	/// <para>Begin tracking this object and saving it.</para>
-	/// <para>
 	/// </summary>
 	/// <param name="data">The SaveData to begin tracking and saving.</param>
 	/// <exception cref="InvalidOperationException">Throws if the GUID is already being used in the SaveManager or if the SaveData already exists in the SaveManager.</exception>
