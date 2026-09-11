@@ -1,8 +1,7 @@
 ﻿using PMDDesktop.Server.Assets.Builder.ZipScavenger;
-using PMDDesktop.Server.Assets.Data;
 using System.Text.Json;
 
-namespace PMDDesktop.Server.Assets.Builder;
+namespace PMDDesktop.Server.Assets.Builder.Species;
 
 internal class MetaSpecies : MetaAsset
 {
@@ -35,7 +34,7 @@ internal class MetaSpecies : MetaAsset
 	internal override async Task<Asset> CreateAsset()
 	{
 
-		return new Species(Location);
+		return new Data.Species(Location);
 
 	}
 

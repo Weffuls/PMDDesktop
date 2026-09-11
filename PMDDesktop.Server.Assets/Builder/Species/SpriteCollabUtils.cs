@@ -1,7 +1,7 @@
 ﻿using PMDDesktop.Server.Assets.Builder.ZipScavenger;
 using System.Text.Json;
 
-namespace PMDDesktop.Server.Assets.Builder;
+namespace PMDDesktop.Server.Assets.Builder.Species;
 
 /// <summary>
 /// This file contains extremely specialized helper functions for BuildSpecies relating to the PMDCollab's SpriteCollab.

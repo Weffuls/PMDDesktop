@@ -1,4 +1,4 @@
-﻿namespace PMDDesktop.Server.Assets.Builder;
+﻿namespace PMDDesktop.Server.Assets.Builder.Species;
 
 internal abstract class MetaAsset
 {

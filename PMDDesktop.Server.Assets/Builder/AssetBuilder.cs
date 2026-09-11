@@ -1,4 +1,5 @@
-﻿using PMDDesktop.Server.Assets.Builder.BuildSteps;
+﻿using PMDDesktop.Server.Assets.Builder.Species;
+using PMDDesktop.Server.Assets.Builder.Types;
 using PMDDesktop.Structs;
 
 namespace PMDDesktop.Server.Assets.Builder;

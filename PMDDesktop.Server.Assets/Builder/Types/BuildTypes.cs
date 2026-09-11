@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.IO.Compression;
 using System.Text.Json;
 
-namespace PMDDesktop.Server.Assets.Builder.BuildSteps;
+namespace PMDDesktop.Server.Assets.Builder.Types;
 
 internal class BuildTypes
 {

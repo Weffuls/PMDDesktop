@@ -1,4 +1,4 @@
-﻿namespace PMDDesktop.Server.Assets.Builder;
+﻿namespace PMDDesktop.Server.Assets.Builder.Species;
 
 /// <summary>
 /// <para>Enum for male, female, and no gender difference needed.</para>

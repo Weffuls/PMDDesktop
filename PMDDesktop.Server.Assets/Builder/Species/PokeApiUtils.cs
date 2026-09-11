@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 using System.IO.Compression;
 using System.Text.Json;
 
-namespace PMDDesktop.Server.Assets.Builder;
+namespace PMDDesktop.Server.Assets.Builder.Species;
 
 /// <summary>
 /// This file contains extremely specialized helper functions for BuildSpecies relating to PokeAPI's api-data.

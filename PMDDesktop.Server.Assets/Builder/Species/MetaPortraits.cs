@@ -1,6 +1,6 @@
 ﻿using PMDDesktop.Server.Assets.Data;
 
-namespace PMDDesktop.Server.Assets.Builder;
+namespace PMDDesktop.Server.Assets.Builder.Species;
 
 internal class MetaPortraits : MetaVisual
 {

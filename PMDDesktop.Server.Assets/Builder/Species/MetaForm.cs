@@ -1,7 +1,7 @@
 ﻿using PMDDesktop.Server.Assets.Data;
 using System.Text.Json;
 
-namespace PMDDesktop.Server.Assets.Builder;
+namespace PMDDesktop.Server.Assets.Builder.Species;
 
 /// <summary>
 /// Holds a form and metadata about it, such as the requirements to change into this form.

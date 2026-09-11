@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace PMDDesktop.Server.Assets.Builder;
+namespace PMDDesktop.Server.Assets.Builder.Species;
 
 internal static class BuildSpeciesUtils
 {

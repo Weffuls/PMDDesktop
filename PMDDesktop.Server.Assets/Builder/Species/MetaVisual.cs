@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 
-namespace PMDDesktop.Server.Assets.Builder;
+namespace PMDDesktop.Server.Assets.Builder.Species;
 
 internal abstract class MetaVisual : MetaAsset, INameMatchable
 {
