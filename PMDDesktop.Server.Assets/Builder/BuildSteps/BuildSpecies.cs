@@ -114,6 +114,32 @@ internal static class BuildSpecies
 			}
 		}
 
+		// Try to merge forms.
+		// Yes this loop is slow.
+		while (true)
+		{
+
+			bool foundOne = false;
+
+			foreach (MetaForm merger in species.metaAssets.OfType<MetaForm>())
+			{
+
+				foreach (MetaForm target in species.metaAssets.OfType<MetaForm>())
+					if (merger.CouldFormsBeMerged(target))
+					{
+
+						merger.MergeForm(target);
+
+						foundOne = true;
+						break;
+
+					}
+
+				if (foundOne) break;
+			}
+			if (!foundOne) break;
+		}
+
 		// Create variants from forms.
 		foreach (MetaForm form in species.metaAssets.OfType<MetaForm>().ToArray()) // ToArray() is used to keep the enumerator valid while editing species.metaAssets
 		{

@@ -13,10 +13,10 @@ internal class MetaForm : MetaAsset, INameMatchable
 	public MetaForm(MetaForm toClone)
 	{
 
-		OriginalName = toClone.OriginalName;
+		OriginalNames = [.. toClone.OriginalNames];
 		Name = toClone.Name;
 		Species = toClone.Species;
-		FormRoot = toClone.FormRoot;
+		FormRoots = [.. toClone.FormRoots];
 		genderAlignment = toClone.genderAlignment;
 
 	}
@@ -24,44 +24,121 @@ internal class MetaForm : MetaAsset, INameMatchable
 	public MetaForm(MetaSpecies species, JsonElement pokemonFormRoot)
 	{
 
-		OriginalName = pokemonFormRoot.GetProperty("name").GetString()
+		string originalName = pokemonFormRoot.GetProperty("name").GetString()
 			?? throw new InvalidDataException($"{pokemonFormRoot} had no name property");
 
-		Name = OriginalName;
+		OriginalNames = [originalName];
+		Name = originalName;
 
-		FormRoot = pokemonFormRoot;
+		FormRoots = [pokemonFormRoot];
 		Species = species;
 
-		genderAlignment = BuildSpeciesUtils.HasGenderName(OriginalName.Split("-"));
+		genderAlignment = BuildSpeciesUtils.HasGenderName(originalName.Split("-"));
 
 	}
 
-	internal JsonElement FormRoot { get; init; }
-	internal string OriginalName { get; init; }
+	internal List<JsonElement> FormRoots { get; init; }
+	internal List<string> OriginalNames { get; init; }
 	internal string Name { get; set; }
 	internal MetaSpecies Species { get; init; }
 
 	internal GenderAlignment genderAlignment;
 
-	public IEnumerable<string> GetMatchableParts() => OriginalName.Split('-');
+	public IEnumerable<string> GetMatchableParts() => Name.Split('-');
 
 	public bool IsStandaloneForm()
 	{
 
-		return PokeApiUtils.IsPokemonFormStandalone(FormRoot);
+		foreach (JsonElement formRoot in FormRoots)
+			if (PokeApiUtils.IsPokemonFormStandalone(formRoot))
+				return true;
+
+		return false;
 
 	}
+
+	public bool CouldFormsBeMerged(MetaForm with)
+	{
+
+		// Merging with ourself destroys ourself.
+
+		if (with == this)
+			return false;
+
+		// Check if visuals match before merging.
+
+		IEnumerable<MetaVisual> myVisuals = GetVisualsPointingAt();
+		IEnumerable<MetaVisual> withVisuals = with.GetVisualsPointingAt();
+		if (!myVisuals.SequenceEqual(withVisuals))
+			return false;
+
+		// If more conditions are ever needed before merging, they should be added here.
+
+		return true;
+
+	}
+
+	public void MergeForm(MetaForm target)
+	{
+
+		Species.metaAssets.Remove(target);
+
+		// Drop references to the removed target form.
+		foreach (MetaVisual visual in target.GetVisualsPointingAt().ToArray())
+			visual.DropUnlinkedForms();
+
+		Name = GetCommonName(target);
+
+		// Add items from lists.
+		FormRoots.AddRange(target.FormRoots);
+		OriginalNames.AddRange(target.OriginalNames);
+
+		// This helps us link Megas that converge with gender differences.
+		if (genderAlignment != target.genderAlignment)
+			genderAlignment = GenderAlignment.None;
+
+	}
+
+	private string GetCommonName(MetaForm with)
+	{
+
+		string? newName = null;
+
+		List<string> withParts = [.. with.Name.Split("-")];
+
+		foreach (string myPart in Name.Split("-"))
+		{
+
+			if (withParts.Remove(myPart))
+			{
+				if (string.IsNullOrWhiteSpace(newName))
+					newName = myPart;
+				else
+					newName += "-" + myPart;
+			}
+
+		}
+
+		if (newName == null)
+			throw new InvalidOperationException($"Greatest common name between '{Name}' and '{with.Name}' was null.");
+
+		return newName;
+
+	}
+
+	public IEnumerable<MetaVisual> GetVisualsPointingAt() => Species.metaAssets.OfType<MetaVisual>().Where(visual => visual.ForForms.Contains(this));
 
 	internal override AssetLocation Location => new(Species.Location, "forms", Name);
 
 	internal override async Task<Asset> CreateAsset()
 	{
 
-		JsonElement pokemonRoot = await PokeApiUtils.GetPokemonFromForm(FormRoot, Species.ApiZip);
+		// TODO: Verify if this is the best way to get the "main" form root.
+		JsonElement pokemonRoot = await PokeApiUtils.GetPokemonFromForm(FormRoots[0], Species.ApiZip);
 
 		return new SpeciesForm(Location)
 		{
-			Types = PokeApiUtils.CreateFormTypeReferences(FormRoot),
+			Types = PokeApiUtils.CreateFormTypeReferences(pokemonRoot),
 			Stats = PokeApiUtils.CreatePokemonBattleStats(pokemonRoot)
 		};
 

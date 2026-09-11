@@ -42,6 +42,13 @@ internal abstract class MetaVisual : MetaAsset, INameMatchable
 
 	});
 
+	public void DropUnlinkedForms()
+	{
+
+		ForForms.RemoveAll(form => !Species.metaAssets.Contains(form));
+
+	}
+
 	protected async Task CreateVisualAssetCommon(SpeciesVisual visual)
 	{
 

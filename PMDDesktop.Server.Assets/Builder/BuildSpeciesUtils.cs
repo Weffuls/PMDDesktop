@@ -1,4 +1,6 @@
-﻿namespace PMDDesktop.Server.Assets.Builder;
+﻿using System.Text.Json;
+
+namespace PMDDesktop.Server.Assets.Builder;
 
 internal static class BuildSpeciesUtils
 {
@@ -9,16 +11,27 @@ internal static class BuildSpeciesUtils
 		if (baseForm == target)
 			return false;
 
-		if (PokeApiUtils.IsPokemonFormStandalone(target.FormRoot))
+		if (target.IsStandaloneForm())
 			return false;
 
 		if (!IsConnectableGender(genderAlignment, target.genderAlignment))
 			return false;
 
-		if (!PokeApiUtils.IsPokemonFormWithMatchingBaseForm(target.FormRoot, [baseForm.OriginalName], true))
+		if (!AnyPokemonFormWithMatchingBaseForm(target.FormRoots, baseForm.OriginalNames, true))
 			return false;
 
 		return true;
+
+	}
+
+	private static bool AnyPokemonFormWithMatchingBaseForm(IEnumerable<JsonElement> formRoots, IEnumerable<string> names, bool returnIfNull)
+	{
+
+		foreach (JsonElement root in formRoots)
+			if (PokeApiUtils.IsPokemonFormWithMatchingBaseForm(root, names, returnIfNull))
+				return true;
+
+		return false;
 
 	}
 
