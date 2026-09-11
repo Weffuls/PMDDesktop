@@ -226,7 +226,10 @@ public class SaveDataManager : ISaveDataIndexable, IEnumerable<SaveData>
 			{
 
 				if (data.Dirty)
+				{
+					data.OnBeforeSave();
 					await SaveDataToFile(data);
+				}
 
 			}
 
@@ -384,7 +387,15 @@ public class SaveDataManager : ISaveDataIndexable, IEnumerable<SaveData>
 
 			if (matchingData == data)
 			{
+				// Remove the data.
 				saveDatas.Remove(data.GUID);
+
+				// Alert save datas of removal.
+				foreach (SaveData alerting in saveDatas.Values)
+					alerting.OnAnySaveDataRemoved(data);
+				data.OnAnySaveDataRemoved(data);
+
+				// Queue deletion.
 				deleteQueue.Enqueue(data);
 				return;
 			}
