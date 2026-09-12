@@ -21,14 +21,14 @@ internal static class SpriteCollabUtils
 
 		JsonElement tracker = await zip.GetTrackerJSON();
 
-		return tracker.GetProperty(index);
+		return tracker.GetProperty(species.FormattedIndex);
 
 	}
 
 	public static async Task<IEnumerable<MetaVisual>> GetAllVisuals(MetaSpecies species)
 	{
 
-		JsonElement top = await GetSpeciesTop(species.FormattedIndex, species.SpriteZip);
+		JsonElement top = await GetSpeciesTop(species, species.SpriteZip);
 
 		List<MetaVisual> visuals = [.. await RecurseSubgroups(species, top, [])];
 
