@@ -144,13 +144,6 @@ internal static class PokeApiUtils
 
 	}
 
-	internal static bool IsPokemonFormWithoutReferencedBaseForms(JsonElement pokemonFormRoot)
-	{
-
-		return IsPokemonFormWithMatchingBaseForm(pokemonFormRoot, [], true);
-
-	}
-
 	internal static bool IsPokemonFormWithMatchingBaseForm(JsonElement pokemonFormRoot, IEnumerable<string> baseFormNames, bool returnIfNull)
 	{
 
@@ -247,13 +240,6 @@ internal static class PokeApiUtils
 		}
 
 		return stats;
-
-	}
-
-	internal static bool IsPartInNameString(string nameString, string part)
-	{
-
-		return nameString.Split('-').Contains(part);
 
 	}
 
