@@ -90,6 +90,83 @@ internal class MetaForm : MetaAsset, INameMatchable
 	}
 
 	/// <summary>
+	/// <para>Do the visuals found by <see cref="GetClosestVisualMatches()"/> suggest that this <see cref="MetaForm"/> would need to be split into both a <see cref="GenderAlignment.Female"/> <see cref="MetaForm"/> and a <see cref="GenderAlignment.Male"/> <see cref="MetaForm"/> to properly represent gender differences?</para>
+	/// <para>In other words, does this form see both <see cref="GenderAlignment.Male"/> and <see cref="GenderAlignment.Female"/> visuals?</para>
+	/// </summary>
+	/// <returns>True if this <see cref="MetaForm"/> should be split, false otherwise.</returns>
+	internal async Task<bool> NeedsGenderSplit()
+	{
+
+		if (genderAlignment != GenderAlignment.None)
+			return false;
+
+		IEnumerable<MetaVisual> visuals = await GetClosestVisualMatches();
+
+		bool seenMale = false;
+		bool seenFemale = false;
+
+		foreach (MetaVisual visual in visuals)
+		{
+
+			if (visual.genderAlignment == GenderAlignment.Male)
+				seenMale = true;
+
+			if (visual.genderAlignment == GenderAlignment.Female)
+				seenFemale = true;
+
+		}
+
+		return seenMale && seenFemale;
+
+	}
+
+	/// <summary>
+	/// <para>Highly opinionated function to attempt to match <see cref="MetaVisual"/>s with the this <see cref="MetaForm"/></para>
+	/// </summary>
+	/// <returns>An enumerable of <see cref="MetaVisual"/>s that likely match this <see cref="MetaForm"/>.</returns>
+	/// <remarks>
+	/// <para>Improvements to the matching algorithm are welcome.</para>
+	/// </remarks>
+	internal async Task<IEnumerable<MetaVisual>> GetClosestVisualMatches()
+	{
+
+		int highestMatchResult = int.MinValue; // Matches
+		int lowestSpecificityTiebreaker = int.MaxValue; // Tie-breaker, so lower counts with the same match count are prioritized.
+		List<MetaVisual> foundVisuals = [];
+
+		foreach (MetaVisual visual in Species.metaAssets.OfType<MetaVisual>())
+		{
+
+			if (!BuildSpeciesUtils.IsConnectableGender(genderAlignment, visual.genderAlignment))
+				continue;
+
+			int specificity = visual.GetMatchableParts().Count();
+			int matchResults = INameMatchable.CalculateNameMatches(this, visual);
+
+			// If this is not the best match, leave.
+			if (matchResults < highestMatchResult)
+				continue;
+
+			// If this is tied for the best match, but more specific, leave.
+			if (matchResults == highestMatchResult && specificity > lowestSpecificityTiebreaker)
+				continue;
+
+			// If this is the new best match (not a tie), wipe the list.
+			if (matchResults > highestMatchResult)
+				foundVisuals.Clear();
+
+			foundVisuals.Add(visual);
+			highestMatchResult = matchResults;
+			lowestSpecificityTiebreaker = specificity;
+			continue;
+
+		}
+
+		return foundVisuals;
+
+	}
+
+	/// <summary>
 	/// Opinionated: Could <paramref name="mergeTarget"/> merge into this <see cref="MetaForm"/>?
 	/// </summary>
 	/// <param name="mergeTarget">The <see cref="MetaForm"/> that will be checking its ability to merge into this <see cref="MetaForm"/>.</param>

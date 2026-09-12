@@ -103,30 +103,8 @@ internal static class BuildSpecies
 
 			MetaForm createdForm = new(species, formRoot);
 
-			bool needsGenderSplit = false;
-			if (createdForm.genderAlignment == GenderAlignment.None)
-			{
-
-				IEnumerable<MetaVisual> visuals = await GetClosestVisualMatches(createdForm, species);
-
-				bool seenMale = false;
-				bool seenFemale = false;
-
-				foreach (MetaVisual visual in visuals)
-				{
-
-					if (visual.genderAlignment == GenderAlignment.Male)
-						seenMale = true;
-
-					if (visual.genderAlignment == GenderAlignment.Female)
-						seenFemale = true;
-
-				}
-
-				if (seenMale && seenFemale)
-					needsGenderSplit = true;
-
-			}
+			// Do we need to split this form into two forms to represent gender differences?
+			bool needsGenderSplit = await createdForm.NeedsGenderSplit();
 
 			if (needsGenderSplit)
 			{
@@ -152,7 +130,7 @@ internal static class BuildSpecies
 		// Assign visuals to forms.
 		foreach (MetaForm form in species.metaAssets.OfType<MetaForm>())
 		{
-			foreach (MetaVisual visual in await GetClosestVisualMatches(form, species))
+			foreach (MetaVisual visual in await form.GetClosestVisualMatches())
 			{
 
 				visual.ForForms.Add(form);
@@ -244,54 +222,6 @@ internal static class BuildSpecies
 		}
 
 		return [new(species, baseForm, GenderAlignment.None)];
-
-	}
-
-	/// <summary>
-	/// <para>Highly opinionated function to attempt to match <see cref="MetaVisual"/>s with the provided <see cref="MetaForm"/></para>
-	/// </summary>
-	/// <param name="form">The form to match <see cref="MetaVisual"/>s to.</param>
-	/// <param name="species">The <see cref="MetaSpecies"/> to retrieve <see cref="MetaVisual"/>s from.</param>
-	/// <returns>An enumerable of <see cref="MetaVisual"/>s from <paramref name="species"/> that likely match <paramref name="form"/>.</returns>
-	/// <remarks>
-	/// <para>Improvements to the matching algorithm are welcome.</para>
-	/// </remarks>
-	private static async Task<IEnumerable<MetaVisual>> GetClosestVisualMatches(MetaForm form, MetaSpecies species)
-	{
-
-		int highestMatchResult = int.MinValue; // Matches
-		int lowestSpecificityTiebreaker = int.MaxValue; // Tie-breaker, so lower counts with the same match count are prioritized.
-		List<MetaVisual> foundVisuals = [];
-
-		foreach (MetaVisual visual in species.metaAssets.OfType<MetaVisual>())
-		{
-
-			if (!BuildSpeciesUtils.IsConnectableGender(form.genderAlignment, visual.genderAlignment))
-				continue;
-
-			int specificity = visual.GetMatchableParts().Count();
-			int matchResults = INameMatchable.CalculateNameMatches(form, visual);
-
-			// If this is not the best match, leave.
-			if (matchResults < highestMatchResult)
-				continue;
-
-			// If this is tied for the best match, but more specific, leave.
-			if (matchResults == highestMatchResult && specificity > lowestSpecificityTiebreaker)
-				continue;
-
-			// If this is the new best match (not a tie), wipe the list.
-			if (matchResults > highestMatchResult)
-				foundVisuals.Clear();
-
-			foundVisuals.Add(visual);
-			highestMatchResult = matchResults;
-			lowestSpecificityTiebreaker = specificity;
-			continue;
-
-		}
-
-		return foundVisuals;
 
 	}
 
