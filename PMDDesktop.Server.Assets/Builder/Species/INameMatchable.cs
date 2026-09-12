@@ -49,8 +49,8 @@ internal interface INameMatchable
 	internal static bool IsSameNameExact(INameMatchable left, INameMatchable right)
 	{
 
-		string[] leftNames = [.. left.GetMatchableParts().Select(NormalizeStringForMatching)];
-		string[] rightNames = [.. right.GetMatchableParts().Select(NormalizeStringForMatching)];
+		string[] leftNames = [.. left.GetMatchableParts()];
+		string[] rightNames = [.. right.GetMatchableParts()];
 
 		if (leftNames.Length != rightNames.Length)
 			return false;
@@ -74,8 +74,8 @@ internal interface INameMatchable
 					for (int rightEndIndex = rightStartIndex + 1; rightEndIndex <= right.Length; ++rightEndIndex)
 					{
 
-						string leftSection = NormalizeStringForMatching(string.Join("", left[leftStartIndex..leftEndIndex]));
-						string rightSection = NormalizeStringForMatching(string.Join("", right[rightStartIndex..rightEndIndex]));
+						string leftSection = string.Join("", left[leftStartIndex..leftEndIndex]);
+						string rightSection = string.Join("", right[rightStartIndex..rightEndIndex]);
 
 						if (SinglePartsMatch(leftSection, rightSection))
 							++matches;
@@ -88,6 +88,10 @@ internal interface INameMatchable
 
 	static bool SinglePartsMatch(string left, string right)
 	{
+
+		// Safety normalization.
+		left = NormalizeStringForMatching(left);
+		right = NormalizeStringForMatching(right);
 
 		// Quick and easy!!
 		if (left == right)
