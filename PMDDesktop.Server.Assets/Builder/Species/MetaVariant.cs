@@ -17,7 +17,6 @@ internal class MetaVariant : MetaAsset
 		ExtraForms = [.. BuildSpeciesUtils.EnumerateLinkableForms(baseForm, potentialForms, genderAlignment)];
 
 		Name = baseForm.Name;
-		OriginalNames = baseForm.OriginalNames;
 
 		Species = species;
 		BaseForm = baseForm;
@@ -31,7 +30,6 @@ internal class MetaVariant : MetaAsset
 	internal MetaForm BaseForm { get; set; }
 	internal List<MetaForm> ExtraForms { get; set; }
 	internal string Name { get; set; }
-	internal List<string> OriginalNames { get; init; }
 
 	internal override AssetLocation Location => new(Species.Location, "variants", Name);
 
