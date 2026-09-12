@@ -8,16 +8,16 @@ using System.Text.Json;
 namespace PMDDesktop.Server.Assets.Builder.Species;
 
 /// <summary>
-/// This file contains extremely specialized helper functions for BuildSpecies relating to PokeAPI's api-data.
-/// They are delegated here to help BuildSpecies be easy to follow the flow of.
+/// <para>This file contains extremely specialized helper functions for <see cref="BuildSpecies"/> relating to <see href="https://github.com/PokeAPI/api-data">PokeAPI's api-data</see>.</para>
+/// <para>They are delegated here to help <see cref="BuildSpecies"/> be easy to follow the flow of.</para>
 /// </summary>
 internal static class PokeApiUtils
 {
 
 	/// <summary>
-	/// Takes in an Api Url and returns a JsonElement using the zip that said Url would usually be pointing to.
+	/// <para>Takes in an <paramref name="apiUrl"/> and returns a <see cref="JsonElement"/> using the <see cref="PokeApiZip"/> that said <paramref name="apiUrl"/> would usually be pointing to.</para>
 	/// </summary>
-	/// <param name="apiUrl">URL found inside an API file.</param>
+	/// <param name="apiUrl">URL found inside an API file. This is the string literal found in the json data of the API.</param>
 	/// <param name="zip">Zip file to use to open the API URL</param>
 	/// <returns></returns>
 	internal static async Task<JsonElement> ResolveApiUrl(string apiUrl, PokeApiZip zip)
@@ -31,22 +31,22 @@ internal static class PokeApiUtils
 	}
 
 	/// <summary>
-	/// Enumerates all "pokemon" in a "pokemon-species" object.
+	/// <para>Enumerates all "pokemon" in a "pokemon-species" object.</para>
 	/// </summary>
-	/// <param name="element"></param>
-	/// <returns>All "pokemon" in that "pokemon-species" object</returns>
-	/// <exception cref="InvalidDataException"></exception>
-	internal static async Task<IOrderedEnumerable<JsonElement>> GetSpeciesPokemonVarieties(JsonElement element, PokeApiZip zip)
+	/// <param name="pokemonSpeciesRoot">The root of a "pokemon-species" json from the API.</param>
+	/// <param name="zip">The <see cref="PokeApiZip"/> to use to retrieve "pokemon" <see cref="JsonElement"/>s.</param>
+	/// <returns>Enumerable with all "pokemon" roots in that "pokemon-species" object as <see cref="JsonElement"/>s.</returns>
+	internal static async Task<IOrderedEnumerable<JsonElement>> GetSpeciesPokemonVarieties(JsonElement pokemonSpeciesRoot, PokeApiZip zip)
 	{
 
 		List<JsonElement> list = [];
-		JsonElement array = element.GetProperty("varieties");
+		JsonElement array = pokemonSpeciesRoot.GetProperty("varieties");
 
 		foreach (JsonElement variety in array.EnumerateArray())
 		{
 
 			string apiUrl = variety.GetProperty("pokemon").GetProperty("url").GetString()
-				?? throw new InvalidDataException($"Unable to find Pokemon URL in {variety} in {element}");
+				?? throw new InvalidDataException($"Unable to find Pokemon URL in {variety} in {pokemonSpeciesRoot}");
 
 			list.Add(await ResolveApiUrl(apiUrl, zip));
 
@@ -57,17 +57,17 @@ internal static class PokeApiUtils
 	}
 
 	/// <summary>
-	/// Enumerates all "pokemon-forms" in a "pokemon-species" object.
+	/// <para>Enumerates all "pokemon-forms" in a "pokemon-species" object.</para>
 	/// </summary>
-	/// <param name="speciesRoot"></param>
-	/// <returns>All "pokemon" in that "pokemon-species" object</returns>
-	/// <exception cref="InvalidDataException"></exception>
-	internal static async Task<IOrderedEnumerable<JsonElement>> GetSpeciesForms(JsonElement speciesRoot, PokeApiZip zip)
+	/// <param name="pokemonSpeciesRoot">The root of a "pokemon-species" json from the API.</param>
+	/// <param name="zip">The <see cref="PokeApiZip"/> to use to retrieve "pokemon-forms" and "pokemon" <see cref="JsonElement"/>s.</param>
+	/// <returns>Enumerable with all "pokemon-forms" roots in that "pokemon-species" object as <see cref="JsonElement"/>s.</returns>
+	internal static async Task<IOrderedEnumerable<JsonElement>> GetSpeciesForms(JsonElement pokemonSpeciesRoot, PokeApiZip zip)
 	{
 
 		List<JsonElement> formRoots = [];
 
-		foreach (JsonElement pokemonRoot in await GetSpeciesPokemonVarieties(speciesRoot, zip))
+		foreach (JsonElement pokemonRoot in await GetSpeciesPokemonVarieties(pokemonSpeciesRoot, zip))
 			foreach (JsonElement formRoot in await GetPokemonForms(pokemonRoot, zip))
 				if (!formRoots.Any((form) => formRoot.GetProperty("id").GetInt32() == form.GetProperty("id").GetInt32())) // Guard against duplicates, shouldn't happen though.
 					formRoots.Add(formRoot);
@@ -77,22 +77,22 @@ internal static class PokeApiUtils
 	}
 
 	/// <summary>
-	/// Enumerates all "pokemon-forms" in a "pokemon" object.
+	/// <para>Enumerates all "pokemon-forms" in a "pokemon" object.</para>
 	/// </summary>
-	/// <param name="element">The root element in a "pokemon" object.</param>
-	/// <returns></returns>
-	/// <exception cref="InvalidDataException"></exception>
-	internal static async Task<IOrderedEnumerable<JsonElement>> GetPokemonForms(JsonElement element, PokeApiZip zip)
+	/// <param name="pokemonRoot">The root of a "pokemon" json from the API.</param>
+	/// <param name="zip">The <see cref="PokeApiZip"/> to use to retrieve "pokemon-forms" <see cref="JsonElement"/>s.</param>
+	/// <returns>Enumerable with all "pokemon-forms" roots in that "pokemon" object as <see cref="JsonElement"/>s.</returns>
+	internal static async Task<IOrderedEnumerable<JsonElement>> GetPokemonForms(JsonElement pokemonRoot, PokeApiZip zip)
 	{
 
 		List<JsonElement> list = [];
-		JsonElement array = element.GetProperty("forms");
+		JsonElement array = pokemonRoot.GetProperty("forms");
 
 		foreach (JsonElement form in array.EnumerateArray())
 		{
 
 			string apiUrl = form.GetProperty("url").GetString()
-				?? throw new InvalidDataException($"Unable to find Pokemon URL in {form} in {element}");
+				?? throw new InvalidDataException($"Unable to find Pokemon URL in {form} in {pokemonRoot}");
 
 			list.Add(await ResolveApiUrl(apiUrl, zip));
 
@@ -102,6 +102,12 @@ internal static class PokeApiUtils
 
 	}
 
+	/// <summary>
+	/// <para>Find the "pokemon" that's the 'parent' of the provided "pokemon-form"</para>
+	/// </summary>
+	/// <param name="pokemonFormRoot">The root of a "pokemon-form" json from the API.</param>
+	/// <param name="zip">The <see cref="PokeApiZip"/> to use to retrieve the "pokemon" <see cref="JsonElement"/>.</param>
+	/// <returns>The root of the "pokemon" json object that's the 'parent' of the provided <paramref name="pokemonFormRoot"/> as a <see cref="JsonElement"/>.</returns>
 	internal static async Task<JsonElement> GetPokemonFromForm(JsonElement pokemonFormRoot, PokeApiZip zip)
 	{
 
@@ -112,6 +118,12 @@ internal static class PokeApiUtils
 
 	}
 
+	/// <summary>
+	/// <para>Find the "pokemon-species" that's the 'parent' of the provided "pokemon"</para>
+	/// </summary>
+	/// <param name="pokemonRoot">The root of a "pokemon" json from the API.</param>
+	/// <param name="zip">The <see cref="PokeApiZip"/> to use to retrieve the "pokemon-species" <see cref="JsonElement"/>.</param>
+	/// <returns>The root of the "pokemon-species" json object that's the 'parent' of the provided <paramref name="pokemonRoot"/> as a <see cref="JsonElement"/>.</returns>
 	internal static async Task<JsonElement> GetSpeciesFromPokemon(JsonElement pokemonRoot, PokeApiZip zip)
 	{
 
@@ -122,6 +134,12 @@ internal static class PokeApiUtils
 
 	}
 
+	/// <summary>
+	/// <para>Find the "pokemon-species" that's the 'parent' of the provided "pokemon-form"</para>
+	/// </summary>
+	/// <param name="pokemonFormRoot">The root of a "pokemon-form" json from the API.</param>
+	/// <param name="zip">The <see cref="PokeApiZip"/> to use to retrieve the "pokemon-species" and "pokemon" <see cref="JsonElement"/>s.</param>
+	/// <returns>The root of the "pokemon-species" json object that's the 'parent' of the provided <paramref name="pokemonFormRoot"/> as a <see cref="JsonElement"/>.</returns>
 	internal static async Task<JsonElement> GetSpeciesFromForm(JsonElement pokemonFormRoot, PokeApiZip zip)
 	{
 
@@ -130,11 +148,11 @@ internal static class PokeApiUtils
 	}
 
 	/// <summary>
-	/// <para>Does this "pokemon-form" api object make sense to be the root of a variant?</para>
+	/// <para>Opinionated function to determine if this "pokemon-form" api object makes sense to be the root of a variant.</para>
 	/// <para>e.g. is it not a mega, or a form that's conditional?</para>
 	/// </summary>
-	/// <param name="pokemonRoot"></param>
-	/// <returns></returns>
+	/// <param name="pokemonFormRoot">The root of the "pokemon-form" to be evaluated.</param>
+	/// <returns>true if the "pokemon-form" makes sense as a standalone form, false otherwise.</returns>
 	internal static bool IsPokemonFormStandalone(JsonElement pokemonFormRoot)
 	{
 
@@ -144,7 +162,15 @@ internal static class PokeApiUtils
 
 	}
 
-	internal static bool IsPokemonFormWithMatchingBaseForm(JsonElement pokemonFormRoot, IEnumerable<string> baseFormNames, bool returnIfNull)
+	/// <summary>
+	/// Check if the provided <paramref name="pokemonFormRoot"/> references any <paramref name="baseFormNames"/> as a "base_form".
+	/// </summary>
+	/// <param name="pokemonFormRoot">A <see cref="JsonElement"/> of the root of a "pokemon-form".</param>
+	/// <param name="baseFormNames">The names of "base_form" you'd like to match.</param>
+	/// <param name="returnTrueIfNull">If there are no listed base forms on <paramref name="pokemonFormRoot"/>, should this function return true?</param>
+	/// <returns></returns>
+	/// <exception cref="InvalidDataException">Throws if it cannot find properties in the <paramref name="pokemonFormRoot"/></exception>
+	internal static bool IsPokemonFormWithMatchingBaseForm(JsonElement pokemonFormRoot, IEnumerable<string> baseFormNames, bool returnTrueIfNull)
 	{
 
 		JsonElement triggerConditions = pokemonFormRoot.GetProperty("trigger_conditions");
@@ -169,16 +195,16 @@ internal static class PokeApiUtils
 
 		}
 
-		// This is, if properBaseForms is 0, return returnIfNull. Otherwise, false.
-		return properBaseForms == 0 && returnIfNull;
+		// This is, if properBaseForms is 0, return returnTrueIfNull. Otherwise, false.
+		return properBaseForms == 0 && returnTrueIfNull;
 
 	}
 
 	/// <summary>
-	/// Takes in a "pokemon-form" to create stats.
+	/// Takes in a "pokemon-form" to create references to the default location of their <see cref="PokemonType"/> assets.
 	/// </summary>
 	/// <param name="formRootElement">A "pokemon-form" object"</param>
-	/// <returns>Type references to the default location of those types.</returns>
+	/// <returns>References to the default location of those types.</returns>
 	/// <exception cref="InvalidDataException"></exception>
 	internal static ImmutableArray<AssetReference<PokemonType>> CreateFormTypeReferences(JsonElement formRootElement)
 	{
@@ -202,10 +228,10 @@ internal static class PokeApiUtils
 	}
 
 	/// <summary>
-	/// Takes in a "pokemon" to create stats.
+	/// Takes in a "pokemon" to create <see cref="BattleStats"/> based on the input.
 	/// </summary>
 	/// <param name="pokemonRootElement">A "pokemon" object"</param>
-	/// <returns>BattleStats from the "pokemon" object.</returns>
+	/// <returns><see cref="BattleStats"/> from the "pokemon" object.</returns>
 	/// <exception cref="InvalidDataException"></exception>
 	internal static BattleStats CreatePokemonBattleStats(JsonElement pokemonRootElement)
 	{

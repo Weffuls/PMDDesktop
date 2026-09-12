@@ -4,19 +4,25 @@ using System.Text.Json;
 namespace PMDDesktop.Server.Assets.Builder.Species;
 
 /// <summary>
-/// This file contains extremely specialized helper functions for BuildSpecies relating to the PMDCollab's SpriteCollab.
-/// They are delegated here to help BuildSpecies be easy to follow the flow of.
+/// This file contains extremely specialized helper functions for <see cref="BuildSpecies"/> relating to the <see href="https://github.com/PMDCollab/SpriteCollab">PMDCollab's SpriteCollab</see>.
+/// They are delegated here to help <see cref="BuildSpecies"/> be easy to follow the flow of.
 /// </summary>
 internal static class SpriteCollabUtils
 {
 
 	/// <summary>
 	/// Opinionated list of groups to skip.
-	/// These don't make much sense in our program.
+	/// These groups don't make much sense in our program.
 	/// </summary>
 	public static readonly string[] EXCLUDED_GROUPS = ["cutscene", "skytemple"];
 
-	public static async Task<JsonElement> GetSpeciesTop(string index, SpriteCollabZip zip)
+	/// <summary>
+	/// Get the top element of a species in the tracker.json.
+	/// </summary>
+	/// <param name="species">The species to use to find the index.</param>
+	/// <param name="zip">The <see cref="SpriteCollabZip"/> to use to get the tracker.json file.</param>
+	/// <returns>A JsonElement of the species top in tracker.json.</returns>
+	public static async Task<JsonElement> GetSpeciesTop(MetaSpecies species, SpriteCollabZip zip)
 	{
 
 		JsonElement tracker = await zip.GetTrackerJSON();
@@ -25,6 +31,11 @@ internal static class SpriteCollabUtils
 
 	}
 
+	/// <summary>
+	/// Get all <see cref="MetaPortraits"/>s and <see cref="MetaSprites"/>s that would belong to <paramref name="species"/>, automatically assigning <see cref="GenderAlignment"/>s where needed.
+	/// </summary>
+	/// <param name="species">The species to examine to find <see cref="MetaVisual"/>s.</param>
+	/// <returns>An enumerable of all found <see cref="MetaVisual"/>s.</returns>
 	public static async Task<IEnumerable<MetaVisual>> GetAllVisuals(MetaSpecies species)
 	{
 
@@ -42,6 +53,12 @@ internal static class SpriteCollabUtils
 
 	}
 
+	/// <summary>
+	/// <para>Attempts to match visuals with their counterparts, if one has a <see cref="GenderAlignment"/>, and another has <see cref="GenderAlignment.None"/>, then it is reflected to be the opposite of each other.</para>
+	/// <para>This ensures that each male/female gender difference is matched with a counterpart instead of a male/none or none/female combo.</para>
+	/// <para>This mutates the Enumerable in-place.</para>
+	/// </summary>
+	/// <param name="visuals">Enumerable of <see cref="MetaVisual"/>s to perform this reflection on. The <see cref="MetaVisual"/>s will be modified in-place.</param>
 	private static void ReflectVisualGendersInPlace(IEnumerable<MetaVisual> visuals)
 	{
 
@@ -72,10 +89,10 @@ internal static class SpriteCollabUtils
 	}
 
 	/// <summary>
-	/// Returns the "reflected" or "opposite" gender. That is, male into female and female into male.
+	/// Returns the "reflected" or "opposite" <see cref="GenderAlignment"/>. That is, <see cref="GenderAlignment.Male"/> into <see cref="GenderAlignment.Female"/> and <see cref="GenderAlignment.Female"/> into <see cref="GenderAlignment.Male"/>.
 	/// </summary>
-	/// <param name="gender">The gender to reflect.</param>
-	/// <returns>The "reflected" or "opposite" gender of the input.</returns>
+	/// <param name="gender">The <see cref="GenderAlignment"/> to reflect.</param>
+	/// <returns>The "reflected" or "opposite" <see cref="GenderAlignment"/> of the input.</returns>
 	private static GenderAlignment GetReflectedGender(GenderAlignment gender)
 	{
 
@@ -89,6 +106,13 @@ internal static class SpriteCollabUtils
 
 	}
 
+	/// <summary>
+	/// Add this <paramref name="visualElement"/> as a <see cref="MetaPortraits"/> and/or <see cref="MetaSprites"/> if applicable, then recurse into the "subgroups" found to add those too.
+	/// </summary>
+	/// <param name="species"></param>
+	/// <param name="visualElement"></param>
+	/// <param name="currentNames"></param>
+	/// <returns></returns>
 	private static async Task<IEnumerable<MetaVisual>> RecurseSubgroups(MetaSpecies species, JsonElement visualElement, IEnumerable<string> currentNames)
 	{
 
@@ -127,11 +151,13 @@ internal static class SpriteCollabUtils
 	}
 
 	/// <summary>
-	/// 
+	/// If needed, create a <see cref="MetaSprites"/> and a <see cref="MetaPortraits"/> based on <paramref name="visualElement"/>.
 	/// </summary>
-	/// <param name="visualElement"></param>
+	/// <param name="species"><see cref="MetaSpecies"/> that the created <see cref="MetaVisual"/>s will have their <see cref="MetaVisual.Species"/> property set to.</param>
+	/// <param name="visualElement">The element to create the <see cref="MetaPortraits"/> and <see cref="MetaSprites"/> from.</param>
 	/// <param name="groupNames">Group names, INCLUDING THIS ONE!!</param>
-	/// <returns></returns>
+	/// <returns>Returns an enumerable containing any <see cref="MetaVisual"/>s that were created (if any).</returns>
+	/// <remarks>You must include all group names, including past ones and the current one that this <paramref name="visualElement"/> contains.</remarks>
 	private static List<MetaVisual> MaybeCreateMetaVisualsInPlace(MetaSpecies species, JsonElement visualElement, IEnumerable<string> groupNames)
 	{
 

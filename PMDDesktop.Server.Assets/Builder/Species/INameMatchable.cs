@@ -1,12 +1,15 @@
 ﻿namespace PMDDesktop.Server.Assets.Builder.Species;
 
+/// <summary>
+/// Interface for matching names inside the <see cref="BuildSpecies"/> routine, both strictly and loosely.
+/// </summary>
 internal interface INameMatchable
 {
 
 	/// <summary>
-	/// A collection of lists of words that can be matched, even if their content is strictly different.
-	/// For example, different words that mean the same thing.
-	/// Yes this is a hard-coded collection of overrides, yes better solutions would be loved.
+	/// <para>A collection of lists of words that can be matched, even if their content is strictly different.</para>
+	/// <para>For example, different words that mean the same thing.</para>
+	/// <para>Yes this is a hard-coded collection of overrides, yes better solutions would be loved.</para>
 	/// </summary>
 	internal static readonly string[][] SYNONYM_GROUPS = [
 		[
@@ -19,6 +22,12 @@ internal interface INameMatchable
 		]
 	];
 
+	/// <summary>
+	/// Tries a bunch of different methods to match names. Higher numbers mean they're closer.
+	/// </summary>
+	/// <param name="left">Left-side <see cref="INameMatchable"/></param>
+	/// <param name="right">Right-side <see cref="INameMatchable"/></param>
+	/// <returns>A number indicating how similar the names are.</returns>
 	internal static int CalculateNameMatches(INameMatchable left, INameMatchable right)
 	{
 
@@ -29,6 +38,12 @@ internal interface INameMatchable
 
 	}
 
+	/// <summary>
+	/// Sees if both <see cref="INameMatchable"/>s have the same words.
+	/// </summary>
+	/// <param name="left">Left-side <see cref="INameMatchable"/></param>
+	/// <param name="right">Right-side <see cref="INameMatchable"/></param>
+	/// <returns>True if both names contain all the same words.</returns>
 	internal static bool IsSameNameAnyOrder(INameMatchable left, INameMatchable right)
 	{
 
@@ -46,6 +61,13 @@ internal interface INameMatchable
 
 	}
 
+	/// <summary>
+	/// Sees if both <see cref="INameMatchable"/>s have the same words, in the exact same order.
+	/// </summary>
+	/// <param name="left">Left-side <see cref="INameMatchable"/></param>
+	/// <param name="right">Right-side <see cref="INameMatchable"/></param>
+	/// <returns>True if both names contain all the same words.</returns>
+	/// <remarks>Honestly this is just here to further clarify the purpose of <see cref="IsSameNameAnyOrder"/></remarks>
 	internal static bool IsSameNameExact(INameMatchable left, INameMatchable right)
 	{
 
@@ -63,6 +85,12 @@ internal interface INameMatchable
 
 	}
 
+	/// <summary>
+	/// Tries to shift and combine words to match names. Higher numbers mean they're closer.
+	/// </summary>
+	/// <param name="left">Left-side array of strings.</param>
+	/// <param name="right">Right-side array of strings.</param>
+	/// <returns>A number indicating how similar the names are.</returns>
 	private static int CompareNames(string[] left, string[] right)
 	{
 
@@ -86,6 +114,13 @@ internal interface INameMatchable
 
 	}
 
+	/// <summary>
+	/// <para>Do these two strings match according to our matching rules?</para>
+	/// <para>Matching rules include a direct string comparison after 'normalizing' the strings, and a check if they share a group in <see cref="SYNONYM_GROUPS"/>.</para>
+	/// </summary>
+	/// <param name="left">Left-side string.</param>
+	/// <param name="right">Right-side string.</param>
+	/// <returns>True if they do match.</returns>
 	static bool SinglePartsMatch(string left, string right)
 	{
 
@@ -109,6 +144,12 @@ internal interface INameMatchable
 
 	}
 
+	/// <summary>
+	/// <para>Applies a few rules to make <paramref name="inputString"/> more suitable for matching.</para>
+	/// <para>Modifications include but are not limited to: going all-lowercase, removing all characters except a-z or 0-9, and trimming whitespace.</para>
+	/// </summary>
+	/// <param name="inputString">String to normalize.</param>
+	/// <returns>Returns the new, modified string.</returns>
 	static string NormalizeStringForMatching(string inputString)
 	{
 
@@ -129,6 +170,13 @@ internal interface INameMatchable
 
 	}
 
+	/// <summary>
+	/// <para>Applies rules to every string in <paramref name="inputStrings"/> to make them more suitable for matching.</para>
+	/// <para>Modifications include but are not limited to: going all-lowercase, removing all characters except a-z or 0-9, and trimming whitespace.</para>
+	/// </summary>
+	/// <param name="inputStrings">Strings to normalize.</param>
+	/// <returns>Returns an enumerable with the modified strings.</returns>
+	/// <seealso cref="NormalizeStringForMatching(string)"/>
 	static IEnumerable<string> NormalizeStringsForMatching(IEnumerable<string> inputStrings)
 	{
 
@@ -139,6 +187,10 @@ internal interface INameMatchable
 
 	}
 
+	/// <summary>
+	/// Get all individual "words" for matching with <see cref="INameMatchable"/>.
+	/// </summary>
+	/// <returns>An enumerable containing "words" to use in matching.</returns>
 	IEnumerable<string> GetMatchableParts();
 
 }

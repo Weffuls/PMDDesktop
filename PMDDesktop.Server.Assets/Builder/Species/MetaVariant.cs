@@ -3,9 +3,8 @@
 namespace PMDDesktop.Server.Assets.Builder.Species;
 
 /// <summary>
-/// Holds a variant and metadata about it.
+/// Object for holding Metadata during the <see cref="BuildSpecies"/> routine about an <see cref="SpeciesVariant"/> before creating it.
 /// </summary>
-/// <param name="variant">The variant we're talking about.</param>
 internal class MetaVariant : MetaAsset
 {
 
@@ -25,10 +24,29 @@ internal class MetaVariant : MetaAsset
 
 	}
 
+	/// <summary>
+	/// The gender that this variant is aligning to. Helps with portraying gender differences. Linked forms should match the alignment or be <see cref="GenderAlignment.None"/>
+	/// </summary>
 	internal GenderAlignment GenderAlignment { get; set; }
+
+	/// <summary>
+	/// The species that this <see cref="MetaVariant"/> belongs to.
+	/// </summary>
 	internal MetaSpecies Species { get; set; }
+
+	/// <summary>
+	/// The (standalone) <see cref="MetaForm"/> that this variant was directly created for.
+	/// </summary>
 	internal MetaForm BaseForm { get; set; }
+
+	/// <summary>
+	/// <see cref="MetaForm"/>s that this Variant could also turn into under certain conditions.
+	/// </summary>
 	internal List<MetaForm> ExtraForms { get; set; }
+
+	/// <summary>
+	/// The name of this <see cref="MetaVariant"/>. Also used to determine the <see cref="Location"/>.
+	/// </summary>
 	internal string Name { get; set; }
 
 	internal override AssetLocation Location => new(Species.Location, "variants", Name);
