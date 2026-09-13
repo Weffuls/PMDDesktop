@@ -187,6 +187,29 @@ internal interface INameMatchable
 
 	}
 
+	internal static IEnumerable<string> RemoveCommonNames(INameMatchable primary, IEnumerable<INameMatchable> matchables)
+	{
+
+		List<string> uncommonNames = [];
+
+		IEnumerable<INameMatchable> noSelf = matchables.Where(matchable => matchable != primary);
+
+		int count = noSelf.Count();
+
+		foreach (string primaryName in primary.GetMatchableParts())
+		{
+
+			IEnumerable<IEnumerable<string>> normalizedNames = noSelf.Select(match => NormalizeStringsForMatching(match.GetMatchableParts()));
+
+			if (normalizedNames.Count(names => names.Contains(primaryName)) != count)
+				uncommonNames.Add(primaryName);
+
+		}
+
+		return uncommonNames;
+
+	}
+
 	/// <summary>
 	/// Get all individual "words" for matching with <see cref="INameMatchable"/>.
 	/// </summary>

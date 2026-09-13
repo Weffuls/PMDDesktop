@@ -134,6 +134,8 @@ internal class MetaForm : MetaAsset, INameMatchable
 		int lowestSpecificityTiebreaker = int.MaxValue; // Tie-breaker, so lower counts with the same match count are prioritized.
 		List<MetaVisual> foundVisuals = [];
 
+
+
 		foreach (MetaVisual visual in Species.metaAssets.OfType<MetaVisual>())
 		{
 
@@ -141,7 +143,8 @@ internal class MetaForm : MetaAsset, INameMatchable
 				continue;
 
 			int specificity = visual.GetMatchableParts().Count();
-			int matchResults = INameMatchable.CalculateNameMatches(this, visual);
+			INameMatchable matchable = new NameMatchableGroup(INameMatchable.RemoveCommonNames(this, Species.metaAssets.OfType<MetaForm>()));
+			int matchResults = INameMatchable.CalculateNameMatches(matchable, visual);
 
 			// If this is not the best match, leave.
 			if (matchResults < highestMatchResult)
