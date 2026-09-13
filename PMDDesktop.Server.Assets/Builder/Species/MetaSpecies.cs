@@ -23,6 +23,7 @@ internal class MetaSpecies : MetaAsset
 		SoloName = pokemonSpeciesRoot.GetProperty("name").GetString()
 			?? throw new InvalidDataException($"No name found on {pokemonSpeciesRoot}");
 
+		PokemonSpeciesRoot = pokemonSpeciesRoot;
 		ApiZip = apiZip;
 		SpriteZip = spriteZip;
 
@@ -41,9 +42,14 @@ internal class MetaSpecies : MetaAsset
 	internal SpriteCollabZip SpriteZip { get; init; }
 
 	/// <summary>
+	/// Root <see cref="JsonElement"/> of the "pokemon-species" object.
+	/// </summary>
+	internal JsonElement PokemonSpeciesRoot { get; init; }
+
+	/// <summary>
 	/// The name of the tail end of the <see cref="Location"/> that the <see cref="Data.Species"/> will be saved to.
 	/// </summary>
-	internal string DataName => $"{FormattedIndex}-{SoloName}";
+	internal string DataName => FormatDataName(SpeciesIndex, SoloName);
 
 	/// <summary>
 	/// The name of the species alone, (e.g. "pikachu" or "mudkip")
@@ -58,7 +64,7 @@ internal class MetaSpecies : MetaAsset
 	/// <summary>
 	/// The Pokédex Number of the species, but padded to 4 digits.
 	/// </summary>
-	internal string FormattedIndex => $"{SpeciesIndex:0000}";
+	internal string FormattedIndex => FormatIndex(SpeciesIndex);
 
 	internal override AssetLocation Location => new("species", DataName);
 
@@ -70,7 +76,24 @@ internal class MetaSpecies : MetaAsset
 	internal override async Task<Asset> CreateAsset()
 	{
 
-		return new Data.Species(Location);
+		return new Data.Species(Location)
+		{
+			EvolvesFrom = await PokeApiUtils.ResolveEvolutionDetails(this)
+		};
+
+	}
+
+	internal static string FormatIndex(int index)
+	{
+
+		return $"{index:0000}";
+
+	}
+
+	internal static string FormatDataName(int index, string soloName)
+	{
+
+		return $"{FormatIndex(index)}-{soloName}";
 
 	}
 

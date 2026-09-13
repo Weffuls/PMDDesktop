@@ -269,4 +269,100 @@ internal static class PokeApiUtils
 
 	}
 
+	/// <summary>
+	/// <para>Creates a <see cref="SpeciesEvolutionDetails"/> (if applicable) for the provided <paramref name="pokemonSpeciesRoot"/>.</para>
+	/// <para>Will only output something if <paramref name="pokemonSpeciesRoot"/> is not the first species in an evolution chain.</para>
+	/// </summary>
+	/// <param name="pokemonSpeciesRoot">The root of the "pokemon-species" object to create this <see cref="SpeciesEvolutionDetails"/> for.</param>
+	/// <param name="zip">A <see cref="PokeApiZip"/> to use to retrieve the "evolution-chain" object.</param>
+	/// <returns>A <see cref="SpeciesEvolutionDetails"/> if the species is evolved into by another species, otherwise null.</returns>
+	internal static async Task<SpeciesEvolutionDetails?> ResolveEvolutionDetails(MetaSpecies species)
+	{
+
+		if (species.PokemonSpeciesRoot.GetProperty("evolves_from_species").ValueKind == JsonValueKind.Null)
+			return null;
+
+
+		// Get FromSpecies info.
+
+		string evolvesFromUrl = species.PokemonSpeciesRoot.GetProperty("evolves_from_species").GetProperty("url").GetString()
+			?? throw new InvalidDataException("Unable to get evolves_from_species.name as a String.");
+
+		JsonElement evolvesFromSpeciesRoot = await ResolveApiUrl(evolvesFromUrl, species.ApiZip);
+		MetaSpecies evolvesFromSpecies = new(evolvesFromSpeciesRoot, species.ApiZip, species.SpriteZip);
+
+
+		// Get evolution_chain root.
+
+		string chainApiUrl = species.PokemonSpeciesRoot.GetProperty("evolution_chain").GetProperty("url").GetString()
+			?? throw new InvalidDataException("Unable to get evolution_chain.url as a String.");
+
+		string speciesName = species.SoloName;
+
+		JsonElement chainRoot = await ResolveApiUrl(chainApiUrl, species.ApiZip);
+
+		JsonElement? evolvesToElement = FindRelevantEvolutionRecursive(speciesName, chainRoot.GetProperty("chain"));
+
+		int minimumLevel = 0;
+
+		if (evolvesToElement is JsonElement foundElement)
+		{
+
+			ExamineEvolvesToElement(foundElement, out minimumLevel);
+
+		}
+
+
+		// Create the SpeciesEvolutionDetails
+
+		return new()
+		{
+			FromSpecies = new(evolvesFromSpecies.Location),
+			MinimumLevel = minimumLevel
+		};
+
+	}
+
+	private static void ExamineEvolvesToElement(JsonElement evolvesToElement, out int minimumLevel)
+	{
+
+		minimumLevel = 0;
+
+		foreach (JsonElement details in evolvesToElement.GetProperty("evolution_details").EnumerateArray())
+		{
+
+			JsonElement minLevelProperty = details.GetProperty("min_level");
+
+			if (minLevelProperty.ValueKind == JsonValueKind.Number)
+				minimumLevel = details.GetProperty("min_level").GetInt32();
+
+		}
+
+	}
+
+	private static JsonElement? FindRelevantEvolutionRecursive(string lookingForName, JsonElement current)
+	{
+
+		JsonElement evolvesList = current.GetProperty("evolves_to");
+
+		foreach (JsonElement evolvesTo in evolvesList.EnumerateArray())
+		{
+
+			string speciesName = evolvesTo.GetProperty("species").GetProperty("name").GetString()
+				?? throw new InvalidDataException("Unable to read species.name");
+
+			if (speciesName == lookingForName)
+				return evolvesTo;
+
+			JsonElement? recursiveResults = FindRelevantEvolutionRecursive(lookingForName, evolvesTo);
+
+			if (recursiveResults is not null)
+				return recursiveResults;
+
+		}
+
+		return null;
+
+	}
+
 }

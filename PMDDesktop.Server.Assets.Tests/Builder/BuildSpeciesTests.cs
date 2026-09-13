@@ -149,6 +149,22 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 
 	}
 
+	[Fact]
+	public void AllEvolutionsHaveValidReferences()
+	{
+
+		Assert.All(fixture.assets.OfType<Species>(), (species) =>
+		{
+
+			if (species.EvolvesFrom is null)
+				return;
+
+			Assert.NotNull(species.EvolvesFrom.FromSpecies.GetReference(fixture.assets));
+
+		});
+
+	}
+
 	#endregion Linked Data
 
 	#region Bulbasaur/Ivysaur/Venusaur Checks
@@ -157,10 +173,19 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 	public void BulbasaurEvolutionLine()
 	{
 
-		// TODO: Implement this once possible.
-		// The system is not finished without it.
+		Species bulbasaur = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0001-bulbasaur");
+		Species ivysaur = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0002-ivysaur");
+		Species venusaur = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0003-venusaur");
 
-		Assert.Fail("There is no evolution system yet.");
+		Assert.Null(bulbasaur.EvolvesFrom);
+
+		Assert.NotNull(ivysaur.EvolvesFrom);
+		Assert.Equal(bulbasaur, ivysaur.EvolvesFrom.FromSpecies.GetReference(fixture.assets));
+		Assert.NotEqual(0, ivysaur.EvolvesFrom.MinimumLevel);
+
+		Assert.NotNull(venusaur.EvolvesFrom);
+		Assert.Equal(ivysaur, venusaur.EvolvesFrom.FromSpecies.GetReference(fixture.assets));
+		Assert.NotEqual(0, venusaur.EvolvesFrom.MinimumLevel);
 
 	}
 
@@ -195,10 +220,14 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 	public void EspurrEvolutionLine()
 	{
 
-		// TODO: Implement this once possible.
-		// The system is not finished without it.
+		Species espurr = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0677-espurr");
+		Species meowstic = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0678-meowstic");
 
-		Assert.Fail("There is no evolution system yet.");
+		Assert.Null(espurr.EvolvesFrom);
+
+		Assert.NotNull(meowstic.EvolvesFrom);
+		Assert.Equal(espurr, meowstic.EvolvesFrom.FromSpecies.GetReference(fixture.assets));
+		Assert.NotEqual(0, meowstic.EvolvesFrom.MinimumLevel);
 
 	}
 
@@ -234,10 +263,14 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 	public void FomantisEvolutionLine()
 	{
 
-		// TODO: Implement this once possible.
-		// The system is not finished without it.
+		Species fomantis = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0753-fomantis");
+		Species lurantis = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0754-lurantis");
 
-		Assert.Fail("There is no evolution system yet.");
+		Assert.Null(fomantis.EvolvesFrom);
+
+		Assert.NotNull(lurantis.EvolvesFrom);
+		Assert.Equal(fomantis, lurantis.EvolvesFrom.FromSpecies.GetReference(fixture.assets));
+		Assert.NotEqual(0, lurantis.EvolvesFrom.MinimumLevel);
 
 	}
 
@@ -272,10 +305,19 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 	public void ScatterbugEvolutionLine()
 	{
 
-		// TODO: Implement this once possible.
-		// The system is not finished without it.
+		Species scatterbug = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0664-scatterbug");
+		Species spewpa = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0665-spewpa");
+		Species vivillon = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0666-vivillon");
 
-		Assert.Fail("There is no evolution system yet.");
+		Assert.Null(scatterbug.EvolvesFrom);
+
+		Assert.NotNull(spewpa.EvolvesFrom);
+		Assert.Equal(scatterbug, spewpa.EvolvesFrom.FromSpecies.GetReference(fixture.assets));
+		Assert.NotEqual(0, spewpa.EvolvesFrom.MinimumLevel);
+
+		Assert.NotNull(vivillon.EvolvesFrom);
+		Assert.Equal(spewpa, vivillon.EvolvesFrom.FromSpecies.GetReference(fixture.assets));
+		Assert.NotEqual(0, vivillon.EvolvesFrom.MinimumLevel);
 
 	}
 

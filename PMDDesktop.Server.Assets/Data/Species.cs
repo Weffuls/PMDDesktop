@@ -11,4 +11,6 @@ public class Species : Asset
 
 	internal Species(AssetLocation location) : base(location) { }
 
+	public SpeciesEvolutionDetails? EvolvesFrom { get; internal set; }
+
 }
