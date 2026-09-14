@@ -42,6 +42,15 @@ public abstract class SaveData
 	public DateTime CreationDate { get; init; }
 
 	/// <summary>
+	/// The SaveDataManager this SaveData belongs to. Can be null if not yet assigned to a SaveDataManager.
+	/// </summary>
+	/// <remarks>
+	/// To avoid entering an invalid state, do not interchange SaveDatas between SaveDataManagers.
+	/// </remarks>
+	[JsonIgnore]
+	public SaveDataManager? Manager { get; internal set; }
+
+	/// <summary>
 	/// Creates a new Save Data instance. The GUID will be a randomly generated GUID.
 	/// Immediately marked Dirty, add it to the SaveDataManager to start saving this data.
 	/// </summary>

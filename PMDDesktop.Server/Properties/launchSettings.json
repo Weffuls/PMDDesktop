@@ -12,6 +12,10 @@
       "commandName": "Project",
       "commandLineArgs": "assets build",
       "hotReloadEnabled": true
+    },
+    "Build Assets (Delete Assets)": {
+      "commandName": "Project",
+      "commandLineArgs": "assets build --delete-assets"
     }
   }
 }

@@ -9,7 +9,7 @@ public readonly struct BuildStep
 		this.name = name;
 	}
 
-	internal delegate Task StepFunction();
+	internal delegate Task StepFunction(AssetManager assets);
 
 	internal readonly StepFunction onExecute;
 	public readonly string name;

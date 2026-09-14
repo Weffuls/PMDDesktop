@@ -49,9 +49,9 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 			throw new InvalidOperationException("assetFileTypes already has data in it and SetAssetFileTypes() was called again!");
 
 		// This should find all classes implementing "Asset."
-		IEnumerable<Type> saveTypes = TypeUtils.GetInstanceableClassesAssignableTo(typeof(Asset));
+		IEnumerable<Type> assetTypes = TypeUtils.GetInstanceableClassesAssignableTo(typeof(Asset));
 
-		foreach (Type type in saveTypes)
+		foreach (Type type in assetTypes)
 		{
 
 			AssetFileNameAttribute fileNameAttribute = type.GetCustomAttribute<AssetFileNameAttribute>()
@@ -71,6 +71,14 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 	internal void Add(Asset asset)
 	{
 
+		if (asset.Manager != null)
+		{
+			if (asset.Manager == this)
+				throw new InvalidOperationException($"{asset} is already assigned to {asset.Manager}, the same manager it's trying to be added to.");
+			else
+				throw new InvalidOperationException($"{asset} already has Manager {asset.Manager} assigned to it.");
+		}
+
 		if (allAssets.TryGetValue(asset.Location, out Asset? blockingAsset))
 		{
 
@@ -83,11 +91,21 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 
 		allAssets.Add(asset.Location, asset);
 
-		Console.WriteLine($"Added SaveData ({asset.GetType().Name}): {asset}");
+		asset.Manager = this;
+
+		Console.WriteLine($"Added Asset ({asset.GetType().Name}): {asset}");
 
 	}
 
-	internal static async Task WriteAsset(Asset asset)
+	public async Task WriteAllAssets()
+	{
+
+		foreach (Asset asset in allAssets.Values)
+			await WriteAsset(asset);
+
+	}
+
+	private static async Task WriteAsset(Asset asset)
 	{
 
 		string dirPath = asset.Location.GetDirectory();
@@ -158,7 +176,7 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 				?? throw new Exception($"Deserialized asset data from {filePath} was null.");
 
 			if (deserialized is not Asset asset)
-				throw new InvalidCastException($"{deserialized} couldn't be cast to SaveData");
+				throw new InvalidCastException($"{deserialized} couldn't be cast to Asset");
 
 			asset.Location = AssetLocation.LocationFromPath(filePath);
 
