@@ -49,9 +49,9 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 			throw new InvalidOperationException("assetFileTypes already has data in it and SetAssetFileTypes() was called again!");
 
 		// This should find all classes implementing "Asset."
-		IEnumerable<Type> saveTypes = TypeUtils.GetInstanceableClassesAssignableTo(typeof(Asset));
+		IEnumerable<Type> assetTypes = TypeUtils.GetInstanceableClassesAssignableTo(typeof(Asset));
 
-		foreach (Type type in saveTypes)
+		foreach (Type type in assetTypes)
 		{
 
 			AssetFileNameAttribute fileNameAttribute = type.GetCustomAttribute<AssetFileNameAttribute>()
@@ -93,7 +93,7 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 
 		asset.Manager = this;
 
-		Console.WriteLine($"Added SaveData ({asset.GetType().Name}): {asset}");
+		Console.WriteLine($"Added Asset ({asset.GetType().Name}): {asset}");
 
 	}
 
@@ -176,7 +176,7 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 				?? throw new Exception($"Deserialized asset data from {filePath} was null.");
 
 			if (deserialized is not Asset asset)
-				throw new InvalidCastException($"{deserialized} couldn't be cast to SaveData");
+				throw new InvalidCastException($"{deserialized} couldn't be cast to Asset");
 
 			asset.Location = AssetLocation.LocationFromPath(filePath);
 
