@@ -1,9 +1,10 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json.Serialization;
 
 namespace PMDDesktop.Server.Assets.Data;
 
 [AssetFileName("variant")]
-public class SpeciesVariant : Asset
+public sealed class SpeciesVariant : Asset
 {
 
 	public required AssetReference<Species> Species { get; init; }
@@ -12,11 +13,9 @@ public class SpeciesVariant : Asset
 	public required ImmutableArray<AssetReference<SpeciesForm>> OtherForms { get; init; }
 	public ImmutableArray<string> SpecialFlags { get; init; } = [];
 
-	internal SpeciesVariant(AssetLocation location) : base(location)
-	{
+	internal SpeciesVariant(AssetLocation location) : base(location) { }
 
-
-
-	}
+	[JsonConstructor]
+	private SpeciesVariant() : base() { }
 
 }

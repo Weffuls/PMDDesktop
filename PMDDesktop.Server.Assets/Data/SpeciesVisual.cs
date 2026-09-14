@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Text.Json.Serialization;
 
 namespace PMDDesktop.Server.Assets.Data;
 
@@ -15,11 +16,9 @@ public abstract class SpeciesVisual : Asset
 	/// </summary>
 	public ImmutableArray<AssetReference<SpeciesForm>> ForForms { get; internal set; }
 
-	internal SpeciesVisual(AssetLocation location) : base(location)
-	{
+	internal SpeciesVisual(AssetLocation location) : base(location) { }
 
-
-
-	}
+	[JsonConstructor]
+	protected internal SpeciesVisual() : base() { }
 
 }

@@ -3,7 +3,7 @@
 namespace PMDDesktop.Server.Assets.Data;
 
 [AssetFileName("species")]
-public class Species : Asset
+public sealed class Species : Asset
 {
 
 	[JsonConstructor]

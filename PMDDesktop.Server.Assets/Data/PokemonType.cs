@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace PMDDesktop.Server.Assets.Data;
 
 [AssetFileName("type")]
-public class PokemonType : Asset, IPokemonType
+public sealed class PokemonType : Asset, IPokemonType
 {
 
 	internal static AssetLocation DefaultTypeLocation(string typeName)
@@ -32,9 +32,9 @@ public class PokemonType : Asset, IPokemonType
 			reference.GetReference(Manager ?? throw new NullReferenceException($"Can't resolve references of Immunities of {this} because Manager is null.")
 		));
 
-	[JsonConstructor]
-	private PokemonType() : this(new()) { }
-
 	internal PokemonType(AssetLocation location) : base(location) { }
+	
+	[JsonConstructor]
+	private PokemonType() : base() { }
 
 }

@@ -1,11 +1,13 @@
-﻿namespace PMDDesktop.Server.Assets.Data;
+﻿using System.Text.Json.Serialization;
+
+namespace PMDDesktop.Server.Assets.Data;
 
 [AssetFileName("portraits")]
-public class SpeciesPortraits : SpeciesVisual
+public sealed class SpeciesPortraits : SpeciesVisual
 {
-	internal SpeciesPortraits(AssetLocation location) : base(location)
-	{
+	internal SpeciesPortraits(AssetLocation location) : base(location) { }
 
-	}
+	[JsonConstructor]
+	private SpeciesPortraits() : base() { }
 
 }

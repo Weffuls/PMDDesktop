@@ -10,6 +10,12 @@ public abstract class Asset
 		Location = location;
 	}
 
+	[JsonConstructor]
+	protected internal Asset()
+	{
+		
+	}
+
 	[JsonIgnore]
 	public AssetLocation Location { get; internal set; }
 

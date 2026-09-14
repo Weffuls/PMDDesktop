@@ -1,10 +1,13 @@
-﻿namespace PMDDesktop.Server.Assets.Data;
+﻿using System.Text.Json.Serialization;
+
+namespace PMDDesktop.Server.Assets.Data;
 
 [AssetFileName("sprites")]
-public class SpeciesSprites : SpeciesVisual
+public sealed class SpeciesSprites : SpeciesVisual
 {
-	internal SpeciesSprites(AssetLocation location) : base(location)
-	{
+	internal SpeciesSprites(AssetLocation location) : base(location) { }
 
-	}
+	[JsonConstructor]
+	private SpeciesSprites() : base() { }
+
 }
