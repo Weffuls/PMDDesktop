@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PMDDesktop.Server.Assets\PMDDesktop.Server.Assets.csproj" />
     <ProjectReference Include="..\PMDDesktop\PMDDesktop.csproj" />
   </ItemGroup>
 

@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
-namespace PMDDesktop.GameData;
+
+namespace PMDDesktop.Server.Saving.Data;
 
 /// <summary>
 /// This class holds information about a character's thoughts on another character.

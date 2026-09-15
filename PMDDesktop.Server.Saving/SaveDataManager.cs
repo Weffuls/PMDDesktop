@@ -1,5 +1,6 @@
 ﻿using PMDDesktop.Exceptions;
 using PMDDesktop.Utils;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
@@ -7,14 +8,15 @@ using System.Text.Json;
 namespace PMDDesktop.Server.Saving;
 
 /// <summary>
-/// Holds methods and fields related to SaveData management. It lives in its own static class to declutter the primary SaveData class.
+/// <para>Manages the saving, loading, retrieval, and removal of <see cref="SaveData"/>.</para>
+/// <para>One <see cref="SaveDataManager"/> instance should be used for all <see cref="SaveData"/>s that need to interact.</para>
 /// </summary>
-public class SaveDataManager : ISaveDataIndexable
+public class SaveDataManager : ISaveDataIndexable, IEnumerable<SaveData>
 {
 
 	/// <summary>
-	/// Creates a SaveDataManager.
-	/// Typically, this object is a singleton that'll be passed around.
+	/// <para>Creates a <see cref="SaveDataManager"/>.</para>
+	/// <para>Typically, this object is a singleton that'll be passed around; however there are no checks on having multiple.</para>
 	/// </summary>
 	public SaveDataManager()
 	{
@@ -22,22 +24,28 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Does this SaveDataManager actually write to files?
+	/// <para>Does this <see cref="SaveDataManager"/> actually write to files?</para>
+	/// <para>If this is false, file writes to the <b>filesystem/disk</b> will be skipped.</para>
 	/// </summary>
+	/// <remarks>
+	/// This is property as "false" is very useful in unit testing. Should probably be "true" during runtime.
+	/// </remarks>
 	public bool WritingEnabled { get; private set; }
 
 	/// <summary>
-	/// Is the SaveDataManager currently flushing?
+	/// Is the <see cref="SaveDataManager"/> currently flushing?
 	/// </summary>
 	public bool IsFlushing { get; private set; }
 
 	/// <summary>
-	/// This lists all known save datas. SaveDatas in this list will be periodically written to disk if their "Dirty" property is true.
+	/// <para>This lists all known save datas.</para>
+	/// <para><see cref="SaveData"/>s in this list will be to disk if when <see cref="SaveAllChanges()"/> is called and <see cref="SaveData.Dirty"/> is true.</para>
 	/// </summary>
 	private readonly Dictionary<Guid, SaveData> saveDatas = [];
 
 	/// <summary>
-	/// Save Datas queued for deletion. SaveDatas in this list will be deleted when changes are flushed.
+	/// <para><see cref="SaveData"/>s queued for deletion.</para>
+	/// <para><see cref="SaveData"/>s in this list will be deleted when changes are flushed with <see cref="SaveAllChanges()"/>.</para>
 	/// </summary>
 	private readonly Queue<SaveData> deleteQueue = [];
 
@@ -47,7 +55,7 @@ public class SaveDataManager : ISaveDataIndexable
 	private readonly Dictionary<Type, string> savePathCache = [];
 
 	/// <summary>
-	/// Loads from the 'save' directory, and enables writing.
+	/// Loads from the 'save' directory, and enables <see cref="WritingEnabled"/>.
 	/// </summary>
 	/// <remarks>
 	/// This can throw under many, many circumstances. If it does, cancel all operations and make sure the error is conveyed to the user.
@@ -67,7 +75,7 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Get a SaveData by type and GUID. Might be null if none is found.
+	/// Get a <see cref="SaveData"/> by type and <see cref="Guid"/>. Might be null if none is found.
 	/// </summary>
 	/// <typeparam name="T">The type to get.</typeparam>
 	/// <param name="GUID">The GUID of the object you're looking for.</param>
@@ -79,6 +87,13 @@ public class SaveDataManager : ISaveDataIndexable
 
 	}
 
+	/// <summary>
+	/// Try to get a <see cref="SaveData"/> by type and <see cref="Guid"/>. Will return false and <paramref name="data"/> will be null if not found.
+	/// </summary>
+	/// <typeparam name="T">The type of the <see cref="SaveData"/> to get.</typeparam>
+	/// <param name="GUID">The <see cref="Guid"/> of the object you're looking for.</param>
+	/// <param name="data">The found <see cref="SaveData"/>, if any was found. Will be null if the return was false.</param>
+	/// <returns>True if the <see cref="SaveData"/> is found.</returns>
 	public bool TryGetSave<T>(Guid GUID, [NotNullWhen(true)] out T? data) where T : SaveData
 	{
 
@@ -89,9 +104,9 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Internal function for checking if a GUID is unused.
+	/// Internal function for checking if a <see cref="Guid"/> is unused.
 	/// </summary>
-	/// <param name="GUID">The GUID you're checking the uniqueness of.</param>
+	/// <param name="GUID">The <see cref="Guid"/> you're checking the uniqueness of.</param>
 	/// <returns>true if this is unique, false if it is duplicated</returns>
 	internal bool IsUUIDFree(Guid GUID)
 	{
@@ -109,10 +124,11 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Internal function for getting SaveData by UID.
+	/// <para>Internal function for getting a <see cref="SaveData"/> object by <see cref="Guid"/>.</para>
+	/// <para>Either returns the <see cref="SaveData"/> if it was found, or null if it was not.</para>
 	/// </summary>
-	/// <param name="GUID">The UID of </param>
-	/// <returns></returns>
+	/// <param name="GUID">The <see cref="Guid"/> of the <see cref="SaveData"/> to attempt to get.</param>
+	/// <returns>The target <see cref="SaveData"/> object, or null.</returns>
 	internal SaveData? GetByGUID(Guid GUID)
 	{
 
@@ -123,8 +139,14 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// This function scans the save folder and attempts to load all the SaveData in that folder and create objects for them. It should be called once during initialization, and never again.
+	/// <para>This function scans the save folder and attempts to load all the <see cref="SaveData"/> in that folder and create objects for them.</para>
+	/// <para>It should be called once during initialization of a <see cref="SaveDataManager"/> with <see cref="WritingEnabled"/>, and never again.</para>
+	/// <para>It should not be called in situations like Unit Testing, it is intended for loading/saving server state.</para>
 	/// </summary>
+	/// <remarks>
+	/// <para>This function may throw in many different ways. Try your best to clearly communicate the thrown error to the user.</para>
+	/// <para>Continuing to use the <see cref="SaveDataManager"/> after this function throws may result in data corruption or loss.</para>
+	/// </remarks>
 	private async Task LoadAllSaveData()
 	{
 
@@ -170,14 +192,15 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Asynchronously saves all unsaved SaveData objects, one-by-one. May take time.
-	/// Will also delete any SaveData queued for deletion.
-	/// Try not to call while SaveData is being updated; saving won't fail but it might make continuity issues.
-	/// A good place to call this is when the GameActions queue is empty.
-	/// This can only be called once at a time.
+	/// <para>Asynchronously saves all unsaved <see cref="SaveData"/> objects, one-by-one. May take time.</para>
+	/// <para>Will also delete any <see cref="SaveData"/> queued for deletion.</para>
+	/// <para>Try not to call while <see cref="SaveData"/> is being updated; saving won't fail but it might make continuity issues.</para>
 	/// </summary>
 	/// <returns></returns>
-	/// <exception cref="InvalidOperationException">Throws if SaveData isn't initalized or if this function is already running.</exception>
+	/// <remarks>
+	/// This can only be called once at a time. Another attempt at concurrent saving/flushing will throw the new one.
+	/// </remarks>
+	/// <exception cref="InvalidOperationException">Throws if this function is <see cref="SaveDataManager"/> is already flushing/saving.</exception>
 	public async Task SaveAllChanges()
 	{
 
@@ -206,7 +229,10 @@ public class SaveDataManager : ISaveDataIndexable
 			{
 
 				if (data.Dirty)
+				{
+					data.OnBeforeSave();
 					await SaveDataToFile(data);
+				}
 
 			}
 
@@ -221,7 +247,7 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Returns the folder that this type would be saved to.
+	/// <para>Returns the folder path that this type would be saved to.</para>
 	/// </summary>
 	/// <param name="type">The type you're looking for the folder path of.</param>
 	/// <returns>The folder path of the type.</returns>
@@ -251,7 +277,7 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Returns the folder that this type would be saved to.
+	/// Returns the folder path that this type would be saved to.
 	/// </summary>
 	/// <param name="data">The data you're looking for the folder path of.</param>
 	/// <returns>The folder path of the type.</returns>
@@ -263,10 +289,10 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Returns the exact path (ends with .JSON) that a data is expecting to be written to.
+	/// Returns the exact path (ends with <b>.json</b>) that a <see cref="SaveData"/> object is expecting to be serialized and written to.
 	/// </summary>
 	/// <param name="data">The data you're looking for the file path for.</param>
-	/// <returns>The file path of the data.</returns>
+	/// <returns>The file path that the <see cref="SaveData"/>'s data should be saved to.</returns>
 	private string GetFilePath(SaveData data)
 	{
 
@@ -277,16 +303,23 @@ public class SaveDataManager : ISaveDataIndexable
 	/// <summary>
 	/// Serializes the data to JSON writes it to a file. Should be called when flushing changes.
 	/// </summary>
-	/// <param name="data">The data to save</param>
+	/// <param name="data">The <see cref="SaveData"/> to save</param>
 	/// <returns></returns>
-	/// <remarks>If LoadFromFilesAndEnableWriting() was not called, it will instead write to a null.</remarks>
+	/// <remarks>
+	/// <para>If <see cref="WritingEnabled"/> is false, it will instead write to a null, but it will still serialize the data.</para>
+	/// </remarks>
 	private async Task SaveDataToFile(SaveData data)
 	{
 
-		string dirPath = GetDirectoryPath(data);
+		if (WritingEnabled)
+		{
 
-		if (!Directory.Exists(dirPath))
-			Directory.CreateDirectory(dirPath);
+			string dirPath = GetDirectoryPath(data);
+
+			if (!Directory.Exists(dirPath))
+				Directory.CreateDirectory(dirPath);
+
+		}
 
 		await using Stream stream = WritingEnabled
 			? File.Create(GetFilePath(data))
@@ -299,12 +332,15 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Deletes the file that a data would've saved to. Should be called when flushing changes.
+	/// Deletes the file that a <see cref="SaveData"/> would've saved to. Should be called when flushing changes.
 	/// </summary>
-	/// <param name="data">The data to delete.</param>
-	/// <returns></returns>
+	/// <param name="data">The <see cref="SaveData"/> to delete.</param>
+	/// <returns>Resolves returned <see cref="Task"/> once file is deleted.</returns>
 	private async Task EraseSaveDataFile(SaveData data)
 	{
+
+		if (!WritingEnabled)
+			return;
 
 		string path = GetFilePath(data);
 
@@ -318,9 +354,10 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Begin tracking this object and saving it.
+	/// <para>Begin tracking this <see cref="SaveData"/> and saving it.</para>
 	/// </summary>
-	/// <param name="data">The SaveData to begin tracking and saving.</param>
+	/// <param name="data">The <see cref="SaveData"/> to begin tracking and saving.</param>
+	/// <exception cref="InvalidOperationException">Throws if the <see cref="Guid"/> is already being used in the <see cref="SaveDataManager"/> or if the <see cref="SaveData"/> already exists in the <see cref="SaveDataManager"/>.</exception>
 	public void Add(SaveData data)
 	{
 
@@ -351,10 +388,12 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Disable this SaveData and queue the delition of the file it is saving to.
-	/// The object will NOT be disposed of instantly.
-	/// The file SaveData will be removed from the list immediately; but the file won't be deleted until the next "flush" happens.
+	/// <para>Unlink this <see cref="SaveData"/> and queue the deletion of the file it is saving to.</para>
 	/// </summary>
+	/// <remarks>
+	/// <para>The <see cref="SaveData"/> object will still exist until the .NET garbage collector collects it.</para>
+	/// <para><paramref name="data"/> will be removed from <see cref="saveDatas"/> immediately; but will be moved to <see cref="SaveDataManager.deleteQueue"/> and the file won't be deleted until the next "flush" happens.</para>
+	/// </remarks>
 	public void Remove(SaveData data)
 	{
 
@@ -363,7 +402,15 @@ public class SaveDataManager : ISaveDataIndexable
 
 			if (matchingData == data)
 			{
+				// Remove the data.
 				saveDatas.Remove(data.GUID);
+
+				// Alert save datas of removal.
+				foreach (SaveData alerting in saveDatas.Values)
+					alerting.OnAnySaveDataRemoved(data);
+				data.OnAnySaveDataRemoved(data);
+
+				// Queue deletion.
 				deleteQueue.Enqueue(data);
 				data.Manager = null;
 				return;
@@ -378,17 +425,21 @@ public class SaveDataManager : ISaveDataIndexable
 	}
 
 	/// <summary>
-	/// Allows you to enumerate through tracked SaveData of a type.
+	/// Returns an <see cref="IEnumerator{SaveData}"/> that iterates through all <see cref="SaveData"/> in the <see cref="SaveDataManager"/>.
 	/// </summary>
-	/// <typeparam name="T">The type you'd like to enumerate though.</typeparam>
-	/// <returns>An enumerable of only the matching type of active save data.</returns>
-	public IEnumerable<T> EnumerateData<T>()
+	/// <returns>An <see cref="IEnumerator{SaveData}"/> that iterates through all <see cref="SaveData"/> objects in the <see cref="SaveDataManager"/>.</returns>
+	public IEnumerator<SaveData> GetEnumerator()
 	{
+		return saveDatas.Values.GetEnumerator();
+	}
 
-		foreach (SaveData data in saveDatas.Values)
-			if (data is T typedData)
-				yield return typedData;
-
+	/// <summary>
+	/// Returns an <see cref="IEnumerator{SaveData}"/> that iterates through all <see cref="SaveData"/>s in the <see cref="SaveDataManager"/>.
+	/// </summary>
+	/// <returns>An <see cref="IEnumerator{SaveData}"/> that iterates through all <see cref="SaveData"/> objects in the <see cref="SaveDataManager"/>.</returns>
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return saveDatas.Values.GetEnumerator();
 	}
 
 }

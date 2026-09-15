@@ -1,15 +1,14 @@
-﻿using PMDDesktop.Server.Saving;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace PMDDesktop.Server.Game.Data;
+namespace PMDDesktop.Server.Saving.Data;
 
 
 [SaveSubdirectory("character")]
-internal sealed class Character() : GameData()
+public sealed class Character() : SaveData()
 {
 
 	[JsonInclude]
-	public string nickname = string.Empty;
+	public string Nickname { get; set; } = string.Empty;
 	[JsonInclude]
 	public RelationshipContainer Relationships { get; private set; } = new();
 	[JsonInclude]
