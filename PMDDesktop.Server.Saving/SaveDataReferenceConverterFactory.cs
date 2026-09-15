@@ -3,6 +3,9 @@ using System.Text.Json.Serialization;
 
 namespace PMDDesktop.Server.Saving;
 
+/// <summary>
+/// <see cref="JsonConverterFactory"/> to aid in the creation of <see cref="SaveDataReferenceConverter{SaveData}"/> for serializing/deserializing <see cref="SaveDataReference{SaveData}"/>.
+/// </summary>
 internal class SaveDataReferenceConverterFactory : JsonConverterFactory
 {
 

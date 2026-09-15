@@ -4,9 +4,9 @@ using System.Text.Json.Serialization;
 namespace PMDDesktop.Server.Saving;
 
 /// <summary>
-/// JsonConverter to convert SaveDataReference into a simple string of the referenced GUID.
+/// <see cref="JsonConverter{SaveDataReference{SaveData}}"/> to convert <see cref="SaveDataReference{SaveData}"/> into a simple string of the referenced <see cref="Guid"/>.
 /// </summary>
-/// <typeparam name="T">The Type of SaveData referenced.</typeparam>
+/// <typeparam name="T">The Type of <see cref="SaveData"/> referenced.</typeparam>
 internal class SaveDataReferenceConverter<T> : JsonConverter<SaveDataReference<T>> where T : SaveData
 {
 	public override SaveDataReference<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
