@@ -8,7 +8,7 @@ public sealed class Character() : SaveData()
 {
 
 	[JsonInclude]
-	public string nickname = string.Empty;
+	public string Nickname { get; set; } = string.Empty;
 	[JsonInclude]
 	public RelationshipContainer Relationships { get; private set; } = new();
 	[JsonInclude]

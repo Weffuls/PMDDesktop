@@ -10,8 +10,8 @@ public class Relationship()
 {
 
 	[JsonInclude]
-	public float friendship = 0.0f;
+	public float Friendship { get; set; } = 0.0f;
 	[JsonInclude]
-	public float trust = 0.0f;
+	public float Trust { get; set; } = 0.0f;
 
 }
