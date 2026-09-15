@@ -4,30 +4,21 @@ using System.Collections.Immutable;
 using System.IO.Compression;
 using System.Text.Json;
 
-namespace PMDDesktop.Server.Assets.Builder.BuildSteps;
+namespace PMDDesktop.Server.Assets.Builder.Types;
 
-internal static class BuildSpecies
+internal class BuildTypes
 {
 
-	private class SpeciesRecord
+	public static async Task StartBuildStep(AssetManager assets)
 	{
 
-		public string identifier = string.Empty;
-
-	}
-
-	public static async Task StartBuildStep()
-	{
-
-		await BuildTypes();
-
-		await BuildTopLevelSpecies();
+		await BuildTypeAssets(assets);
 
 		return;
 
 	}
 
-	private static async Task BuildTypes()
+	private static async Task BuildTypeAssets(AssetManager assets)
 	{
 
 		using PokeApiZip zip = await ZipManager.GetPokeApiZip();
@@ -37,7 +28,7 @@ internal static class BuildSpecies
 
 			using Stream stream = await entry.OpenAsync();
 
-			JsonDocument json = JsonDocument.Parse(stream);
+			using JsonDocument json = JsonDocument.Parse(stream);
 			JsonElement root = json.RootElement;
 
 			string typeName = json.RootElement.GetProperty("name").GetString()
@@ -51,7 +42,7 @@ internal static class BuildSpecies
 			type.Weaknesses = CreateTypeReferences(damageRelations.GetProperty("double_damage_from"));
 			type.Immunities = CreateTypeReferences(damageRelations.GetProperty("no_damage_from"));
 
-			await AssetManager.WriteAsset(type);
+			assets.Add(type);
 
 		}
 
@@ -73,32 +64,6 @@ internal static class BuildSpecies
 		}
 
 		return list.ToImmutable();
-
-	}
-
-	private static async Task BuildTopLevelSpecies()
-	{
-
-		using PokeApiZip zip = await ZipManager.GetPokeApiZip();
-
-		foreach (ZipArchiveEntry entry in zip.EnumerateSpecies())
-		{
-
-			using Stream stream = await entry.OpenAsync();
-
-			JsonDocument json = JsonDocument.Parse(stream);
-
-			int speciesNumber = json.RootElement.GetProperty("id").GetInt32();
-			string speciesName = json.RootElement.GetProperty("name").GetString()
-				?? throw new Exception();
-
-			AssetLocation location = new("species", $"{speciesNumber:0000}-{speciesName}");
-
-			Species species = new(location);
-
-			await AssetManager.WriteAsset(species);
-
-		}
 
 	}
 

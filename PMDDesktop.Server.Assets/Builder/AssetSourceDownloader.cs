@@ -26,16 +26,16 @@ public static class AssetSourceDownloader
 	/// <param name="saveName">The file name you'd like to write to.</param>
 	/// <returns>The path of the downloaded file.</returns>
 	/// <remarks>This will throw if the http response isn't a successful response.</remarks>
-	public static async Task<string> DownloadAFile(Uri httpUrl, string saveName)
+	public static async Task<string> DownloadAFile(Uri httpUrl, string saveName, bool forceRedownload = false)
 	{
 
 		Directory.CreateDirectory(saveFolderPath);
 		string savePath = Path.Combine(saveFolderPath, saveName);
 
-		if (!downloadedHashes.Add(savePath))
+		if (!downloadedHashes.Add(savePath) && !forceRedownload)
 			return savePath;
 
-		if (!AlwaysRedownload && File.Exists(savePath))
+		if (!AlwaysRedownload && File.Exists(savePath) && !forceRedownload)
 		{
 			Console.WriteLine($"Skipping download from {httpUrl} because {saveName} already exists.");
 			return savePath;
@@ -52,20 +52,6 @@ public static class AssetSourceDownloader
 		// Note that this is created after we ensure that the response is successful, that way we don't leave blank files on the system.
 		using FileStream fileStream = new(savePath, FileMode.Create);
 
-		// Check how big the content length is.
-		// It might be null.....
-		long bytesTarget = response.Content.Headers.ContentLength ?? -1;
-		string targetString;
-		if (bytesTarget != -1)
-		{
-			string size = SizeUtils.ByteSizeToHumanReadable(bytesTarget);
-			targetString = $" of {size}";
-		}
-		else
-		{
-			targetString = string.Empty;
-		}
-
 		// This is a little confusing.
 		// We read from the download stream asyncronously.
 		// byteCount gets set to the count of bytes that we just read.
@@ -73,6 +59,7 @@ public static class AssetSourceDownloader
 		byte[] buffer = new byte[1024 * 8];
 		int byteCount;
 		long bytesDownloaded = 0;
+		long lastProgressUpdate = 0;
 		while ((byteCount = await downloadStream.ReadAsync(buffer)) > 0)
 		{
 
@@ -81,15 +68,17 @@ public static class AssetSourceDownloader
 
 			// This chunk handles updating the progress bar.
 			bytesDownloaded += byteCount;
-			string downloadedSize = SizeUtils.ByteSizeToHumanReadable(bytesDownloaded);
-			OneWayRange progress = new(bytesDownloaded, bytesTarget);
-			AssetBuilder.WriteProgress($"{httpUrl}", $"{downloadedSize}{targetString}", progress);
+			long currentProgressUpdate = bytesDownloaded >> 24; // Preference; about once every 16 MiB
+
+			if (currentProgressUpdate > lastProgressUpdate)
+			{
+				lastProgressUpdate = currentProgressUpdate;
+				Console.WriteLine($"{DateTime.Now:MM/dd HH:mm:ss.fff} ==> {SizeUtils.ByteSizeToHumanReadable(bytesDownloaded)}");
+			}
 
 		}
 
-		AssetBuilder.WriteProgress($"{httpUrl}", SizeUtils.ByteSizeToHumanReadable(bytesDownloaded), 1.0f);
-		Console.WriteLine();
-		Console.WriteLine($"Download successful. Saved as {saveName}");
+		Console.WriteLine($"Download of {SizeUtils.ByteSizeToHumanReadable(bytesDownloaded)} successful. Saved as {saveName}");
 
 		// Sleep for a moment.
 		// Give servers a chance to rest + avoid ratelimiting when downloading multiple files.

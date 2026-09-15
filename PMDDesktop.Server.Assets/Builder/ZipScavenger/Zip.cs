@@ -3,10 +3,27 @@ using System.Text.RegularExpressions;
 
 namespace PMDDesktop.Server.Assets.Builder.ZipScavenger;
 
-internal abstract class Zip(string path) : IDisposable, IAsyncDisposable
+internal abstract class Zip : IDisposable, IAsyncDisposable
 {
 
-	private ZipArchive _archive = ZipFile.OpenRead(path);
+	public Zip(string path)
+	{
+		_archive = ZipFile.OpenRead(path);
+	}
+
+	public Zip(ZipArchive archive)
+	{
+		_archive = archive;
+	}
+
+	private ZipArchive _archive;
+
+	public ZipArchiveEntry GetEntry(string entryPath)
+	{
+
+		return _archive.GetEntry(entryPath) ?? throw new KeyNotFoundException($"Could not find an entry for '{entryPath}'");
+
+	}
 
 	protected IEnumerable<ZipArchiveEntry> EnumerateEntries(Regex regex)
 	{
