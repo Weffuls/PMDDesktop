@@ -1,9 +1,8 @@
-﻿using PMDDesktop.Server.Saving;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace PMDDesktop.Server.Game.Data;
+namespace PMDDesktop.Server.Saving.Data;
 
-internal class RelationshipContainer
+public class RelationshipContainer
 {
 
 	[JsonInclude]

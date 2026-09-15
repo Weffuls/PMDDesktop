@@ -1,11 +1,10 @@
-﻿using PMDDesktop.Server.Saving;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace PMDDesktop.Server.Game.Data;
+namespace PMDDesktop.Server.Saving.Data;
 
 
 [SaveSubdirectory("character")]
-internal sealed class Character() : GameData()
+public sealed class Character() : SaveData()
 {
 
 	[JsonInclude]

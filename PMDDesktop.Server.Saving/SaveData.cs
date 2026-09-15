@@ -42,7 +42,7 @@ public abstract class SaveData
 	/// <para>Creates a new Save Data instance. The GUID will be a randomly generated GUID.</para>
 	/// <para>It will initally be marked Dirty; add it to the SaveDataManager to start saving this data.</para>
 	/// </summary>
-	protected SaveData()
+	protected internal SaveData()
 	{
 
 		GUID = Guid.NewGuid();
