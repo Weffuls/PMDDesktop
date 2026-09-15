@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="PMDDesktop.Client/PMDDesktop.Client.csproj" />
   <Project Path="PMDDesktop.Server.Assets.Tests/PMDDesktop.Server.Assets.Tests.csproj" />
   <Project Path="PMDDesktop.Server.Assets/PMDDesktop.Server.Assets.csproj" />
   <Project Path="PMDDesktop.Server.Saving/PMDDesktop.Server.Saving.csproj" />
