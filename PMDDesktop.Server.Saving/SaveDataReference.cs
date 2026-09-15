@@ -10,7 +10,7 @@ namespace PMDDesktop.Server.Saving;
 /// <remarks>
 /// <para>Note that during reserialization, if the SaveDataReference variable is readonly, it may run into problems with the GUID missing.</para>
 /// </remarks>
-[JsonConverter(typeof(SaveDataReferenceConverter<>))]
+[JsonConverter(typeof(SaveDataReferenceConverterFactory))]
 public sealed class SaveDataReference<T> where T : SaveData
 {
 
