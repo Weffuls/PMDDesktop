@@ -48,15 +48,6 @@ public abstract class SaveData
 	public SaveDataManager? Manager { get; internal set; }
 
 	/// <summary>
-	/// The SaveDataManager this SaveData belongs to. Can be null if not yet assigned to a SaveDataManager.
-	/// </summary>
-	/// <remarks>
-	/// To avoid entering an invalid state, do not interchange SaveDatas between SaveDataManagers.
-	/// </remarks>
-	[JsonIgnore]
-	public SaveDataManager? Manager { get; internal set; }
-
-	/// <summary>
 	/// <para>Creates a new <see cref="SaveData"/> instance. The <see cref="Guid"/> will be a randomly generated <see cref="Guid"/>.</para>
 	/// <para><see cref="Dirty"/> will initally be true; add it to the <see cref="SaveDataManager"/> to start saving this data.</para>
 	/// </summary>
