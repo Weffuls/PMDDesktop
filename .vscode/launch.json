@@ -1,0 +1,35 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "C#: PMDDesktop.Server [Start Server]",
+			"type": "dotnet",
+			"request": "launch",
+			"projectPath": "${workspaceFolder}/PMDDesktop.Server/PMDDesktop.Server.csproj",
+			"launchConfigurationId": "TargetFramework=;Start Server"
+		},
+		{
+			"name": "C#: PMDDesktop.Server [Build Assets]",
+			"type": "dotnet",
+			"request": "launch",
+			"projectPath": "${workspaceFolder}/PMDDesktop.Server/PMDDesktop.Server.csproj",
+			"launchConfigurationId": "TargetFramework=;Build Assets"
+		},
+		{
+			"name": "C#: PMDDesktop.Server [Build Assets (Delete Assets)]",
+			"type": "dotnet",
+			"request": "launch",
+			"projectPath": "${workspaceFolder}/PMDDesktop.Server/PMDDesktop.Server.csproj",
+			"launchConfigurationId": "TargetFramework=;Build Assets (Delete Assets)"
+		},
+		{
+			"name": "C#: PMDDesktop.Client",
+			"type": "dotnet",
+			"request": "launch",
+			"projectPath": "${workspaceFolder}/PMDDesktop.Client/PMDDesktop.Client.csproj"
+		}
+	]
+}
