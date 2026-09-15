@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using PMDDesktop.GameData;
+using System.Text.Json.Serialization;
 
 namespace PMDDesktop.Server.Saving.Data;
 
