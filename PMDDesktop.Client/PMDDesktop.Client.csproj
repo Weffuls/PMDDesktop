@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType Condition="'$(Configuration)' != 'Debug'">WinExe</OutputType>
 		<OutputType Condition="'$(Configuration)' == 'Debug'">Exe</OutputType>
@@ -6,6 +6,7 @@
 		<RollForward>Major</RollForward>
 		<PublishReadyToRun>false</PublishReadyToRun>
 		<TieredCompilation>false</TieredCompilation>
+		<Nullable>Enable</Nullable>
 	</PropertyGroup>
 	<PropertyGroup>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
@@ -26,5 +27,8 @@
 	<ItemGroup>
 		<PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
 		<PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\PMDDesktop\PMDDesktop.csproj" />
 	</ItemGroup>
 </Project>
