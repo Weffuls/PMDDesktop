@@ -84,6 +84,10 @@ internal sealed class DebugMenuComponent : DrawableGameComponent
 		if (PMDGame.KeyDownThisFrame(Keys.Enter))
 			menu.Items[selectedIndex].Selected();
 
+		if (PMDGame.KeyDownThisFrame(Keys.Back))
+			if (menuStack.Count > 0)
+				PopStackMenu();
+
 		base.Update(gameTime);
 
 	}
