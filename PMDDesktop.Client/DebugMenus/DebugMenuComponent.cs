@@ -18,7 +18,7 @@ internal sealed class DebugMenuComponent : DrawableGameComponent
 
 		this.PMDGame = game;
 
-		menu = new DebugMenuRoot(this);
+		menu = new RootDebugMenu(this);
 
 		UpdateMenuPathText();
 
