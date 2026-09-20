@@ -163,7 +163,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 
 			context.Response.StatusCode = 200;
 			context.Response.ContentType = "application/json";
-			await context.Response.WriteAsJsonAsync(CreateResponse(deserialized, game), AppInfo.NETWORK_JSON_OPTIONS);
+			await context.Response.WriteAsJsonAsync(await CreateResponse(deserialized, game), AppInfo.NETWORK_JSON_OPTIONS);
 
 		}
 		catch (UserRequestException e) // Intended for user-facing errors, like bad inputs, 
@@ -200,6 +200,6 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 
 	}
 
-	protected abstract TRes CreateResponse(TReq request, GameServer game);
+	protected abstract Task<TRes> CreateResponse(TReq request, GameServer game);
 
 }

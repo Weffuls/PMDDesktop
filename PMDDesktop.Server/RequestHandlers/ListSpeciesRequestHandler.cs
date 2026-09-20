@@ -7,7 +7,7 @@ namespace PMDDesktop.Server.RequestHandlers;
 public class ListSpeciesRequestHandler : JsonRequestHandler<ListSpeciesRequest, ListSpeciesResponse>
 {
 
-	protected override ListSpeciesResponse CreateResponse(ListSpeciesRequest request, GameServer game)
+	protected override async Task<ListSpeciesResponse> CreateResponse(ListSpeciesRequest request, GameServer game)
 	{
 
 		return new()
