@@ -16,18 +16,18 @@ public sealed class UserManager() : IEnumerable<User>, IUserIndexable
 	public bool WritingEnabled { get; private set; } = false;
 
 	/// <summary>
-	/// This is a dictionary with all the <see cref="User"/>s being managed by this <see cref="UserManager"/>.
+	/// <para>This is a dictionary with all the <see cref="User"/>s mapped to their <see cref="User.GUID"/>.</para>
 	/// </summary>
 	/// <remarks>
-	/// <para>Entries are created and removed by the owning <see cref="UserManager"/>.</para>
+	/// <para>This dictionary's entries are not managed by the <see cref="UserManager"/>, but instead by the <see cref="User"/>s as they are attached/detached. <b>Do not let <see cref="UserManager"/> write to this dictionary.</b></para>
 	/// </remarks>
-	private Dictionary<Guid, User> users = [];
+	internal Dictionary<Guid, User> guids = [];
 
 	/// <summary>
 	/// <para>This is a dictionary with all the <see cref="User.LoginHandle"/>s mapped to their <see cref="User"/>.</para>
 	/// </summary>
 	/// <remarks>
-	/// <para>This dictionary's entries are not managed by the <see cref="UserManager"/>, but instead by the <see cref="User"/>s inside <see cref="users"/>. <b>Do not let <see cref="UserManager"/> write to this dictionary.</b></para>
+	/// <para>This dictionary's entries are not managed by the <see cref="UserManager"/>, but instead by the <see cref="User"/>s inside <see cref="guids"/>. <b>Do not let <see cref="UserManager"/> write to this dictionary.</b></para>
 	/// </remarks>
 	internal Dictionary<string, User> loginHandles = [];
 
@@ -35,13 +35,13 @@ public sealed class UserManager() : IEnumerable<User>, IUserIndexable
 	/// <para>This is a dictionary with all the <see cref="UserAccessToken"/>s mapped to their <see cref="UserAccessToken.TokenString"/>.</para>
 	/// </summary>
 	/// <remarks>
-	/// <para>This dictionary's entries are not managed by the <see cref="UserManager"/>, but instead by the <see cref="User"/>s inside <see cref="users"/>. <b>Do not let <see cref="UserManager"/> write to this dictionary.</b></para>
+	/// <para>This dictionary's entries are not managed by the <see cref="UserManager"/>, but instead by the <see cref="User"/>s inside <see cref="guids"/>. <b>Do not let <see cref="UserManager"/> write to this dictionary.</b></para>
 	/// </remarks>
 	internal Dictionary<string, UserAccessToken> accessTokens = [];
 
 	public IEnumerator<User> GetEnumerator()
 	{
-		return users.Values.GetEnumerator();
+		return guids.Values.GetEnumerator();
 	}
 
 	IEnumerator IEnumerable.GetEnumerator()
@@ -99,7 +99,7 @@ public sealed class UserManager() : IEnumerable<User>, IUserIndexable
 	public bool TryGetUser(Guid GUID, [NotNullWhen(true)] out User? user)
 	{
 
-		return users.TryGetValue(GUID, out user);
+		return guids.TryGetValue(GUID, out user);
 
 	}
 

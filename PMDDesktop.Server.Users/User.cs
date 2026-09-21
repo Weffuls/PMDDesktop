@@ -270,6 +270,8 @@ public sealed class User
 	{
 		
 		Manager = manager;
+
+		Manager.guids.Add(GUID, this);
 		
 		AttachLoginHandle();
 
@@ -280,6 +282,14 @@ public sealed class User
 
 	internal void DetachFromManager()
 	{
+
+		if (Manager==null)
+			throw new NullReferenceException($"{nameof(Manager)} is null. Cannot detach from nothing. Does this call to {nameof(DetachFromManager)} need to be skipped?");
+
+		if (Manager.guids[GUID] != this)
+			throw new InvalidOperationException($"{this} was not inside {Manager.guids} with key {GUID}.");
+		
+		Manager.guids.Remove(GUID);
 
 		DetachLoginHandle();
 

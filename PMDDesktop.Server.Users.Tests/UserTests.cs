@@ -94,4 +94,25 @@ public class UserTests
 
 	}
 
+	[Fact]
+	public async Task GetViaGUID()
+	{
+		
+		UserManager manager = new();
+		Assert.True(await manager.TryCreateUser(DEFAULT_USER_OPTIONS));
+
+		string? loginHandle = DEFAULT_USER_OPTIONS.LoginHandle;
+		Assert.NotNull(loginHandle);
+		Assert.True(manager.TryGetUserByLoginHandle(loginHandle, out User? user));
+
+		Guid guid = user.GUID;
+
+		Assert.True(manager.TryGetUser(guid, out User? guidUser));
+		Assert.NotNull(guidUser);
+
+		Assert.False(manager.TryGetUser(Guid.Empty, out User? notGuidUser));
+		Assert.Null(notGuidUser);
+
+	}
+
 }
