@@ -1,5 +1,6 @@
 ﻿using PMDDesktop.Requests;
 using PMDDesktop.Server.Game;
+using PMDDesktop.Server.Users;
 using PMDDesktop.Utils;
 using System.Reflection;
 using System.Text;
@@ -158,15 +159,18 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 
 		}
 
+		if (IRequestHandler.TryGetUserFromContext(game.State.Users, context, out User? user, out UserAccessToken? token))
+			await token.RefreshToken();
+
 		try
 		{
 
 			context.Response.StatusCode = 200;
 			context.Response.ContentType = "application/json";
-			await context.Response.WriteAsJsonAsync(await CreateResponse(deserialized, game), AppInfo.NETWORK_JSON_OPTIONS);
+			await context.Response.WriteAsJsonAsync(await CreateResponse(deserialized, game, user), AppInfo.NETWORK_JSON_OPTIONS);
 
 		}
-		catch (UserRequestException e) // Intended for user-facing errors, like bad inputs, 
+		catch (UserRequestException e) // Intended for user-facing errors, like bad inputs,
 		{
 
 			await WritePlainText(context, 400, e.Message);
@@ -200,6 +204,6 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 
 	}
 
-	protected abstract Task<TRes> CreateResponse(TReq request, GameServer game);
+	protected abstract Task<TRes> CreateResponse(TReq request, GameServer game, User? requestingUser);
 
 }

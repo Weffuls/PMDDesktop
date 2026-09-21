@@ -1,6 +1,8 @@
-﻿using PMDDesktop.Exceptions;
+﻿using System.Diagnostics.CodeAnalysis;
+using PMDDesktop.Exceptions;
 using PMDDesktop.Requests;
 using PMDDesktop.Server.Game;
+using PMDDesktop.Server.Users;
 using PMDDesktop.Utils;
 
 namespace PMDDesktop.Server.RequestHandlers;
@@ -41,6 +43,22 @@ internal interface IRequestHandler
 			Console.WriteLine(attribute.Path);
 
 		}
+
+	}
+
+	static bool TryGetUserFromContext(UserManager manager, HttpContext context, [NotNullWhen(true)] out User? user, [NotNullWhen(true)] out UserAccessToken? accessToken)
+	{
+
+		string? token = context.Request.Headers.Authorization;
+
+		if (token is null)
+		{
+			user = null;
+			accessToken = null;
+			return false;
+		}
+
+		return manager.TryUseAccessToken(token, out user, out accessToken);
 
 	}
 
