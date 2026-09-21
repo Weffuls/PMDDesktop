@@ -3,7 +3,7 @@
 public class UserTests
 {
 
-	public static readonly UserCreationOptions DEFAULT_USER_OPTIONS = new() 
+	public static readonly UserCreationOptions DEFAULT_USER_OPTIONS = new()
 	{
 		DisplayName = "Test User",
 		LoginHandle = "test",
@@ -49,7 +49,7 @@ public class UserTests
 	[Fact]
 	public async Task AccessTokenGrantsAccess()
 	{
-		
+
 		UserManager manager = new();
 		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
 		Assert.NotNull(user);
@@ -65,7 +65,7 @@ public class UserTests
 	[Fact]
 	public async Task LoginHandleChanges()
 	{
-		
+
 		UserManager manager = new();
 		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
 		Assert.NotNull(user);
@@ -89,7 +89,7 @@ public class UserTests
 	[Fact]
 	public async Task GetViaGUID()
 	{
-		
+
 		UserManager manager = new();
 		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
 		Assert.NotNull(user);
@@ -101,6 +101,48 @@ public class UserTests
 
 		Assert.False(manager.TryGetUser(Guid.Empty, out User? notGuidUser));
 		Assert.Null(notGuidUser);
+
+	}
+
+	[Fact]
+	public async Task IsTokenLimitEnforced()
+	{
+
+		UserManager manager = new();
+		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
+		Assert.NotNull(user);
+
+		for (int i = 0; i < User.ACCESS_TOKEN_LIMIT + 100; ++i)
+		{
+			await user.CreateAccessToken();
+		}
+
+		Assert.Equal(manager.accessTokens.Count, User.ACCESS_TOKEN_LIMIT);
+
+	}
+
+	[Fact]
+	public async Task AreOldestTokensRemovedOnLimit()
+	{
+
+		UserManager manager = new();
+		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
+		Assert.NotNull(user);
+
+		for (int i = 0; i < User.ACCESS_TOKEN_LIMIT; ++i)
+			await user.CreateAccessToken();
+
+		Assert.Equal(manager.accessTokens.Count, User.ACCESS_TOKEN_LIMIT);
+
+		List<UserAccessToken> seenTokens = [.. manager.accessTokens.Values];
+
+		for (int i = 0; i < User.ACCESS_TOKEN_LIMIT; ++i)
+			await user.CreateAccessToken();
+
+		Assert.Equal(manager.accessTokens.Count, User.ACCESS_TOKEN_LIMIT);
+
+		seenTokens.AddRange(manager.accessTokens.Values);
+		Assert.Distinct(seenTokens);
 
 	}
 
