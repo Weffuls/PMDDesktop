@@ -110,22 +110,22 @@ public sealed class UserManager() : IEnumerable<User>, IUserIndexable
 
 	}
 
-	public async Task<bool> TryCreateUser(UserCreationOptions options)
+	public async Task<User?> TryCreateUser(UserCreationOptions options)
 	{
 
 		User user = new()
 		{
 			Name = options.DisplayName
 		};
-		
+
 		if (options.LoginHandle is not null)
 			if (!await user.TrySetLoginHandle(options.LoginHandle))
-				return false;
+				return null;
 		if (options.PlainTextPassword is not null)
 			await user.SetPassword(options.PlainTextPassword);
 
 		user.AttachToManager(this);
-		return true;
+		return user;
 
 	}
 

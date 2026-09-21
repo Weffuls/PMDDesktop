@@ -15,11 +15,8 @@ public class UserTests
 	{
 
 		UserManager manager = new();
-		Assert.True(await manager.TryCreateUser(DEFAULT_USER_OPTIONS));
-		
-		string? loginHandle = DEFAULT_USER_OPTIONS.LoginHandle;
-		Assert.NotNull(loginHandle);
-		Assert.True(manager.TryGetUserByLoginHandle(loginHandle, out User? user));
+		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
+		Assert.NotNull(user);
 
 		string? defaultPassword = DEFAULT_USER_OPTIONS.PlainTextPassword;
 		Assert.NotNull(defaultPassword);
@@ -35,14 +32,11 @@ public class UserTests
 	{
 
 		UserManager manager = new();
-		Assert.True(await manager.TryCreateUser(DEFAULT_USER_OPTIONS with
+		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS with
 		{
 			PlainTextPassword = null
-		}));
-
-		string? loginHandle = DEFAULT_USER_OPTIONS.LoginHandle;
-		Assert.NotNull(loginHandle);
-		Assert.True(manager.TryGetUserByLoginHandle(loginHandle, out User? user));
+		});
+		Assert.NotNull(user);
 
 		string? defaultPassword = DEFAULT_USER_OPTIONS.PlainTextPassword;
 		Assert.NotNull(defaultPassword);
@@ -57,11 +51,8 @@ public class UserTests
 	{
 		
 		UserManager manager = new();
-		Assert.True(await manager.TryCreateUser(DEFAULT_USER_OPTIONS));
-
-		string? loginHandle = DEFAULT_USER_OPTIONS.LoginHandle;
-		Assert.NotNull(loginHandle);
-		Assert.True(manager.TryGetUserByLoginHandle(loginHandle, out User? user));
+		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
+		Assert.NotNull(user);
 
 		UserAccessToken token = await user.CreateAccessToken();
 
@@ -76,11 +67,12 @@ public class UserTests
 	{
 		
 		UserManager manager = new();
-		Assert.True(await manager.TryCreateUser(DEFAULT_USER_OPTIONS));
+		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
+		Assert.NotNull(user);
 
 		string? loginHandle = DEFAULT_USER_OPTIONS.LoginHandle;
 		Assert.NotNull(loginHandle);
-		Assert.True(manager.TryGetUserByLoginHandle(loginHandle, out User? user));
+		Assert.True(manager.TryGetUserByLoginHandle(loginHandle, out _));
 
 		string newHandle = "new-handle";
 
@@ -99,11 +91,8 @@ public class UserTests
 	{
 		
 		UserManager manager = new();
-		Assert.True(await manager.TryCreateUser(DEFAULT_USER_OPTIONS));
-
-		string? loginHandle = DEFAULT_USER_OPTIONS.LoginHandle;
-		Assert.NotNull(loginHandle);
-		Assert.True(manager.TryGetUserByLoginHandle(loginHandle, out User? user));
+		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
+		Assert.NotNull(user);
 
 		Guid guid = user.GUID;
 
