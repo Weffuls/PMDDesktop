@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 namespace PMDDesktop.Server.Users.Tests;
 
