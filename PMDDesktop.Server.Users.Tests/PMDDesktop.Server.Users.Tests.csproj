@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../PMDDesktop.Server.Users/PMDDesktop.Server.Users.csproj" />
+    <ProjectReference Include="../PMDDesktop/PMDDesktop.csproj" />
   </ItemGroup>
 
   <ItemGroup>
