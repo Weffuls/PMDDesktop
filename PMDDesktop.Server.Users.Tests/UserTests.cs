@@ -146,4 +146,33 @@ public class UserTests
 
 	}
 
+	[Fact]
+	public async Task DeleteUserTest()
+	{
+
+		UserManager manager = new();
+		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
+		Assert.NotNull(user);
+		await user.CreateAccessToken();
+
+		Assert.True(manager.TryGetUser(user.GUID, out _));
+
+		Assert.NotEmpty(manager.accessTokens);
+		Assert.NotEmpty(manager.guids);
+		Assert.NotEmpty(manager.loginHandles);
+
+		Assert.True(user.IsAlive());
+
+		Assert.True(await user.TryRemoveUser());
+
+		Assert.False(manager.TryGetUser(user.GUID, out _));
+
+		Assert.Empty(manager.accessTokens);
+		Assert.Empty(manager.guids);
+		Assert.Empty(manager.loginHandles);
+
+		Assert.False(user.IsAlive());
+
+	}
+
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace PMDDesktop.Server.Users;
@@ -7,6 +8,11 @@ public sealed class User
 {
 
 	private static PasswordHasher<User> PASSWORD_HASHER = new();
+
+	/// <summary>
+	/// A list
+	/// </summary>
+	private static string[] DELETE_USER_FOLDER_ITEMS = ["user.json", "picture.jpg", "picture.png"];
 
 	/// <summary>
 	/// <para>Limit of <see cref="UserAccessToken"/>s assigned to one <see cref="User"/>.</para>
@@ -52,10 +58,12 @@ public sealed class User
 	public Guid GUID { get; internal set; } = Guid.NewGuid();
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	[JsonIgnore]
 	public UserManager? Manager {get; private set;}
+
+	public bool? WritingEnabled {get; private set;}
 
 	private List<UserAccessToken> accessTokens = [];
 
@@ -72,13 +80,13 @@ public sealed class User
 	}
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	/// <param name="newHandle"></param>
 	/// <returns></returns>
 	public async Task<bool> TrySetLoginHandle(string? newHandle)
 	{
-		
+
 		// Handle is not the same.
 		if (newHandle == LoginHandle)
 			return false;
@@ -109,7 +117,7 @@ public sealed class User
 
 	private void DetachLoginHandle()
 	{
-		
+
 		if (LoginHandle is null)
 			return;
 
@@ -169,16 +177,54 @@ public sealed class User
 
 	}
 
-	public async Task WriteNewData()
+	[ExcludeFromCodeCoverage]
+	internal async Task WriteNewData()
 	{
 
 		if (Manager is null) // ????? This state doesn't make any sense.
 			throw new InvalidOperationException($"{this} shouldn't be writing its data without being attached to a {nameof(Manager)}.");
 
-		if (!Manager.WritingEnabled)
+		if (WritingEnabled is null)
+			throw new InvalidOperationException($"{this} shouldn't be deleting its data while {WritingEnabled} is null!");
+
+		if (WritingEnabled != true)
 			return;
 
 		throw new NotImplementedException();
+
+	}
+
+	/// <summary>
+	/// <para>Deletes the user folder and all *explicitly written* data inside it.</para>
+	/// </summary>
+	/// <returns></returns>
+	/// <remarks>
+	/// <para>This function does not recursive delete. Instead it has a list of items to delete. This approach is taken to minimize data loss in the event that something goes wrong.</para>
+	/// </remarks>
+	[ExcludeFromCodeCoverage]
+	private async Task DeleteUserFolder()
+	{
+
+		if (WritingEnabled is null)
+			throw new InvalidOperationException($"{this} shouldn't be deleting its data while {WritingEnabled} is null!");
+
+		if (WritingEnabled != true)
+			return;
+
+		foreach (string item in DELETE_USER_FOLDER_ITEMS)
+		{
+
+			string path = Path.Join(GetUserFolder(), item);
+
+			if (File.Exists(path))
+				File.Delete(path);
+
+		}
+
+		if (Directory.GetFileSystemEntries(GetUserFolder()).Length == 0)
+			Directory.Delete(GetUserFolder(), false);
+		else
+			Console.WriteLine($"CANNOT DELETE ALL OF {this}'s user folder!!!");
 
 	}
 
@@ -219,7 +265,7 @@ public sealed class User
 
 	private void AttachAccessToken(UserAccessToken token)
 	{
-		
+
 		// if (accessTokens.Any(existing => existing.TokenString == token.TokenString))
 		// 	throw new Exception($"The token: {token.TokenString} is already in {this}'s {nameof(accessTokens)}.");
 
@@ -250,7 +296,7 @@ public sealed class User
 
 		foreach (UserAccessToken token in accessTokens)
 		{
-			
+
 			oldest ??= token;
 
 			if (oldest.ExpiryDate > token.ExpiryDate)
@@ -268,11 +314,12 @@ public sealed class User
 
 	internal void AttachToManager(UserManager manager)
 	{
-		
+
 		Manager = manager;
+		WritingEnabled = manager.WritingEnabled;
 
 		Manager.guids.Add(GUID, this);
-		
+
 		AttachLoginHandle();
 
 		foreach (UserAccessToken token in accessTokens)
@@ -288,7 +335,7 @@ public sealed class User
 
 		if (Manager.guids[GUID] != this)
 			throw new InvalidOperationException($"{this} was not inside {Manager.guids} with key {GUID}.");
-		
+
 		Manager.guids.Remove(GUID);
 
 		DetachLoginHandle();
@@ -297,6 +344,29 @@ public sealed class User
 			DetachAccessToken(token);
 
 		Manager = null;
+
+	}
+
+	public bool IsAlive() => Manager is not null;
+
+	/// <summary>
+	/// <para>Try to remove this <see cref="User"/> from its <see cref="UserManager"/>.</para>
+	/// <para>If the assigned <see cref="UserManager"/> has <see cref="UserManager.WritingEnabled"/>, then this function will also attempt to delete the user's folder from the filesystem, so that it will not be restored in future sessions.</para>
+	/// </summary>
+	/// <remarks>
+	/// If <see cref="UserManager.WritingEnabled"/> is enabled, this function may still throw if an IO-related error occurs.
+	/// </remarks>
+	public async Task<bool> TryRemoveUser()
+	{
+
+		if (Manager is null)
+			return false;
+
+		DetachFromManager();
+
+		await DeleteUserFolder();
+
+		return true;
 
 	}
 
