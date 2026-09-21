@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace PMDDesktop.Server.Users;
@@ -9,7 +9,7 @@ public sealed class UserReference
 
 	public Guid GUID { get; private set; }
 
-	
+
 	public UserReference(User initalValue)
 	{
 
@@ -17,7 +17,7 @@ public sealed class UserReference
 
 	}
 
-	
+
 	internal UserReference(Guid directGuid)
 	{
 
@@ -25,16 +25,16 @@ public sealed class UserReference
 
 	}
 
-	
-	public User GetUser(IUserIndexable indexable)
+
+	public User? GetUser(IUserIndexable indexable)
 	{
 
 		return indexable.GetUser(GUID);
 
 	}
 
-	
-	public bool TryGetUser(IUserIndexable indexable, [NotNullWhen(true)] out User user)
+
+	public bool TryGetUser(IUserIndexable indexable, [NotNullWhen(true)] out User? user)
 	{
 
 		return indexable.TryGetUser(GUID, out user);

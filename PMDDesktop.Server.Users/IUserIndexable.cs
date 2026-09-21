@@ -8,10 +8,8 @@ namespace PMDDesktop.Server.Users;
 public interface IUserIndexable
 {
 
-	
-	User GetUser(Guid GUID);
+	User? GetUser(Guid GUID);
 
-	
-	bool TryGetUser(Guid GUID, [NotNullWhen(true)] out User user);
+	bool TryGetUser(Guid GUID, [NotNullWhen(true)] out User? user);
 
 }

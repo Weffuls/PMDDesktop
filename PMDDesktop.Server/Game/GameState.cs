@@ -1,5 +1,6 @@
 ﻿using PMDDesktop.Server.Assets;
 using PMDDesktop.Server.Saving;
+using PMDDesktop.Server.Users;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PMDDesktop.Server.Game;
@@ -50,5 +51,6 @@ public class GameState : IAssetIndexable, ISaveDataIndexable
 
 	public SaveDataManager Saves { get; } = new();
 	public AssetManager Assets { get; } = new();
+	public UserManager Users { get; } = new();
 
 }

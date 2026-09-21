@@ -3,17 +3,30 @@
 public class UserTests
 {
 
+	public static readonly UserCreationOptions DEFAULT_USER_OPTIONS = new() 
+	{
+		DisplayName = "Test User",
+		LoginHandle = "test",
+		PlainTextPassword = "Test123"
+	};
+
 	[Fact]
 	public async Task PasswordVerification()
 	{
 
-		User user = new();
+		UserManager manager = new();
+		Assert.True(await manager.TryCreateUser(DEFAULT_USER_OPTIONS));
+		
+		string? loginHandle = DEFAULT_USER_OPTIONS.LoginHandle;
+		Assert.NotNull(loginHandle);
+		Assert.True(manager.TryGetUserByLoginHandle(loginHandle, out User? user));
 
-		await user.SetPassword("Test123");
+		string? defaultPassword = DEFAULT_USER_OPTIONS.PlainTextPassword;
+		Assert.NotNull(defaultPassword);
 
 		Assert.False(await user.VerifyPassword("Test456"));
 		Assert.False(await user.VerifyPassword(""));
-		Assert.True(await user.VerifyPassword("Test123"));
+		Assert.True(await user.VerifyPassword(defaultPassword));
 
 	}
 
@@ -21,10 +34,63 @@ public class UserTests
 	public async Task NullPasswordVerification()
 	{
 
-		User user = new();
+		UserManager manager = new();
+		Assert.True(await manager.TryCreateUser(DEFAULT_USER_OPTIONS with
+		{
+			PlainTextPassword = null
+		}));
 
-		Assert.False(await user.VerifyPassword("Test123"));
+		string? loginHandle = DEFAULT_USER_OPTIONS.LoginHandle;
+		Assert.NotNull(loginHandle);
+		Assert.True(manager.TryGetUserByLoginHandle(loginHandle, out User? user));
+
+		string? defaultPassword = DEFAULT_USER_OPTIONS.PlainTextPassword;
+		Assert.NotNull(defaultPassword);
+
+		Assert.False(await user.VerifyPassword(defaultPassword));
 		Assert.False(await user.VerifyPassword("Test456"));
+
+	}
+
+	[Fact]
+	public async Task AccessTokenGrantsAccess()
+	{
+		
+		UserManager manager = new();
+		Assert.True(await manager.TryCreateUser(DEFAULT_USER_OPTIONS));
+
+		string? loginHandle = DEFAULT_USER_OPTIONS.LoginHandle;
+		Assert.NotNull(loginHandle);
+		Assert.True(manager.TryGetUserByLoginHandle(loginHandle, out User? user));
+
+		UserAccessToken token = await user.CreateAccessToken();
+
+		Assert.True(manager.TryUseAccessToken(token.TokenString, out User? outUser));
+
+		Assert.Equal(user, outUser);
+
+	}
+
+	[Fact]
+	public async Task LoginHandleChanges()
+	{
+		
+		UserManager manager = new();
+		Assert.True(await manager.TryCreateUser(DEFAULT_USER_OPTIONS));
+
+		string? loginHandle = DEFAULT_USER_OPTIONS.LoginHandle;
+		Assert.NotNull(loginHandle);
+		Assert.True(manager.TryGetUserByLoginHandle(loginHandle, out User? user));
+
+		string newHandle = "new-handle";
+
+		Assert.True(await user.TrySetLoginHandle(newHandle));
+
+		Assert.False(manager.TryGetUserByLoginHandle(loginHandle, out User? oldHandleUser));
+		Assert.Null(oldHandleUser);
+
+		Assert.True(manager.TryGetUserByLoginHandle(newHandle, out User? newHandleUser));
+		Assert.NotNull(newHandleUser);
 
 	}
 
