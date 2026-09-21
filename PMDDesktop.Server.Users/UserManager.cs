@@ -87,15 +87,6 @@ public sealed class UserManager() : IEnumerable<User>, IUserIndexable
 
 	}
 
-	public User? GetUser(Guid GUID)
-	{
-
-		TryGetUser(GUID, out User? user);
-
-		return user;
-
-	}
-
 	public bool TryGetUser(Guid GUID, [NotNullWhen(true)] out User? user)
 	{
 

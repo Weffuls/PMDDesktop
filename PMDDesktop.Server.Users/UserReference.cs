@@ -26,14 +26,6 @@ public sealed class UserReference
 	}
 
 
-	public User? GetUser(IUserIndexable indexable)
-	{
-
-		return indexable.GetUser(GUID);
-
-	}
-
-
 	public bool TryGetUser(IUserIndexable indexable, [NotNullWhen(true)] out User? user)
 	{
 
