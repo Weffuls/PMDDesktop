@@ -1,10 +1,11 @@
 ﻿using PMDDesktop.Server.Assets;
 using PMDDesktop.Server.Saving;
+using PMDDesktop.Server.Users;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PMDDesktop.Server.Game;
 
-public class GameServer : IAssetIndexable, ISaveDataIndexable
+public class GameServer : IAssetIndexable, ISaveDataIndexable, IUserIndexable
 {
 
 	public GameServer()
@@ -74,4 +75,8 @@ public class GameServer : IAssetIndexable, ISaveDataIndexable
 		return State.TryGetSave(GUID, out data);
 	}
 
+	public bool TryGetUser(Guid GUID, [NotNullWhen(true)] out User? user)
+	{
+		return State.TryGetUser(GUID, out user);
+	}
 }
