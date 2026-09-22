@@ -217,7 +217,7 @@ public sealed class User
 		if (WritingEnabled != true)
 			return;
 
-		using FileStream jsonFile = File.OpenWrite(GetUserJSONPath());
+		using FileStream jsonFile = File.Create(GetUserJSONPath());
 
 		await JsonSerializer.SerializeAsync(jsonFile, this, AppInfo.JSON_OPTIONS);
 
