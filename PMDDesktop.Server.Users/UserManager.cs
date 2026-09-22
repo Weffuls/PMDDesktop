@@ -98,7 +98,7 @@ public sealed class UserManager() : IEnumerable<User>, IUserIndexable
 	/// <remarks>
 	/// This can be safely unit tested, as it takes in a stream instead of reading from a file.
 	/// </remarks>
-	internal async Task LoadAndAddUserJson(Stream stream, Guid guid)
+	internal async Task<User> LoadAndAddUserJson(Stream stream, Guid guid)
 	{
 
 		User deserialized = JsonSerializer.Deserialize<User>(stream, AppInfo.JSON_OPTIONS)
@@ -107,6 +107,8 @@ public sealed class UserManager() : IEnumerable<User>, IUserIndexable
 		deserialized.GUID = guid; // GUID will be randomized by default, we need to load the previous GUID.
 
 		deserialized.AttachToManager(this);
+
+		return deserialized;
 
 	}
 
