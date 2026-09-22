@@ -8,7 +8,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	<InternalsVisibleTo Include="PMDDesktop.Server.Users.Tests"/>
+	<InternalsVisibleTo Include="PMDDesktop.Server.Users.Tests" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\PMDDesktop\PMDDesktop.csproj" />
 	</ItemGroup>
 
 </Project>

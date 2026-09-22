@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 
 namespace PMDDesktop.Server.Users;
 
@@ -38,6 +39,87 @@ public sealed class UserManager() : IEnumerable<User>, IUserIndexable
 	/// <para>This dictionary's entries are not managed by the <see cref="UserManager"/>, but instead by the <see cref="User"/>s inside <see cref="guids"/>. <b>Do not let <see cref="UserManager"/> write to this dictionary.</b></para>
 	/// </remarks>
 	internal Dictionary<string, UserAccessToken> accessTokens = [];
+
+	/// <summary>
+	/// Loads from the 'users' and 'roles' directories, and enables <see cref="WritingEnabled"/>.
+	/// </summary>
+	/// <remarks>
+	/// This can throw under many, many circumstances. If it does, cancel all operations and make sure the error is conveyed to the user.
+	/// </remarks>
+	[ExcludeFromCodeCoverage]
+	public async Task LoadFromFilesAndEnableWriting()
+	{
+
+		// Since Users check the WritingEnabled value, we need to set this before loading.
+		WritingEnabled = true;
+
+		await LoadAllUserData();
+
+		await LoadAllRoleData();
+
+	}
+
+	/// <summary>
+	/// This manages creating <see cref="User"/> objects by loading their data from the "users" folder.
+	/// </summary>
+	[ExcludeFromCodeCoverage]
+	private async Task LoadAllUserData()
+	{
+
+		string userRootDirPath = Path.Combine(AppContext.BaseDirectory, "users");
+
+		if (!Directory.Exists(userRootDirPath))
+			Directory.CreateDirectory(userRootDirPath);
+
+		foreach (string subDirPath in Directory.EnumerateDirectories(userRootDirPath))
+		{
+
+			string guidParsable = Path.GetFileName(subDirPath);
+
+			// This is not okay. All user folders should have GUIDs are their names.
+			if (!Guid.TryParse(guidParsable, out Guid loadedGUID))
+				throw new Exception($"Couldn't parse {guidParsable} as a GUID at {subDirPath}");
+
+			string userFilePath = Path.Join(subDirPath, User.USER_FILE_NAME);
+
+			using FileStream readStream = File.OpenRead(userFilePath);
+
+			await LoadAndAddUserJson(readStream, loadedGUID);
+
+		}
+
+	}
+
+	/// <summary>
+	/// Internal function for loading a JSON stream and adding the resulting <see cref="User"/> to this <see cref="UserManager"/>.
+	/// </summary>
+	/// <param name="stream">A JSON stream with <see cref="User"/> data inside.</param>
+	/// <returns></returns>
+	/// <remarks>
+	/// This can be safely unit tested, as it takes in a stream instead of reading from a file.
+	/// </remarks>
+	internal async Task LoadAndAddUserJson(Stream stream, Guid guid)
+	{
+
+		User deserialized = JsonSerializer.Deserialize<User>(stream, AppInfo.JSON_OPTIONS)
+					?? throw new Exception($"Deserialized save data from {stream} was null.");
+
+		deserialized.GUID = guid; // GUID will be randomized by default, we need to load the previous GUID.
+
+		deserialized.AttachToManager(this);
+
+	}
+
+	/// <summary>
+	/// This manages creating <see cref="Role"/> objects by loading their data from the "users" folder.
+	/// </summary>
+	[ExcludeFromCodeCoverage]
+	private async Task LoadAllRoleData()
+	{
+
+		// Not yet implemented.
+
+	}
 
 	public IEnumerator<User> GetEnumerator()
 	{

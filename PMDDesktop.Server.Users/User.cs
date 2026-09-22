@@ -1,18 +1,25 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace PMDDesktop.Server.Users;
 
+[JsonConverter(typeof(UserConverter))]
 public sealed class User
 {
 
 	private static PasswordHasher<User> PASSWORD_HASHER = new();
 
 	/// <summary>
-	/// A list
+	/// The name of the file that <see cref="User"/> data should be serialized to.
 	/// </summary>
-	private static string[] DELETE_USER_FOLDER_ITEMS = ["user.json", "picture.jpg", "picture.png"];
+	public static readonly string USER_FILE_NAME = "user.json";
+
+	/// <summary>
+	/// A list of items to delete when deleting a <see cref="User"/>.
+	/// </summary>
+	private static string[] DELETE_USER_FOLDER_ITEMS = [USER_FILE_NAME, "picture.jpg", "picture.png"];
 
 	/// <summary>
 	/// <para>Limit of <see cref="UserAccessToken"/>s assigned to one <see cref="User"/>.</para>
@@ -41,14 +48,14 @@ public sealed class User
 	/// <para>Should be unique.</para>
 	/// </summary>
 	[JsonInclude]
-	public string? LoginHandle { get; private set; }
+	public string? LoginHandle { get; internal set; }
 
 	/// <summary>
 	/// <para>Hashed password used to log in.</para>
 	/// <para>In the event that it is null, access to this account cannot be granted via password.</para>
 	/// </summary>
 	[JsonInclude]
-	private string? HashedPassword { get; set; }
+	internal string? HashedPassword { get; set; }
 
 	/// <summary>
 	/// <para>A unique <see cref="Guid"/> for each <see cref="User"/>. Stays consistant even when the <see cref="User"/>'s handle changes.</para>
@@ -61,11 +68,21 @@ public sealed class User
 	///
 	/// </summary>
 	[JsonIgnore]
-	public UserManager? Manager {get; private set;}
+	public UserManager? Manager { get; private set; }
 
-	public bool? WritingEnabled {get; private set;}
+	public bool? WritingEnabled { get; private set; }
 
-	private List<UserAccessToken> accessTokens = [];
+	internal List<UserAccessToken> accessTokens = [];
+
+	public async Task SetName(string newName)
+	{
+
+		Name = newName;
+
+		if (Manager is not null)
+			await WriteNewData();
+
+	}
 
 	/// <summary>
 	/// Salt and hash the user's password, then store it in HashedPassword.
@@ -76,6 +93,9 @@ public sealed class User
 	{
 
 		HashedPassword = PASSWORD_HASHER.HashPassword(this, plainText);
+
+		if (Manager is not null)
+			await WriteNewData();
 
 	}
 
@@ -100,6 +120,9 @@ public sealed class User
 		LoginHandle = newHandle;
 
 		AttachLoginHandle();
+
+		if (Manager is not null)
+			await WriteNewData();
 
 		return true;
 
@@ -173,7 +196,7 @@ public sealed class User
 	public string GetUserJSONPath()
 	{
 
-		return Path.Combine(GetUserFolder(), "user.json");
+		return Path.Combine(GetUserFolder(), USER_FILE_NAME);
 
 	}
 
@@ -187,10 +210,16 @@ public sealed class User
 		if (WritingEnabled is null)
 			throw new InvalidOperationException($"{this} shouldn't be deleting its data while {WritingEnabled} is null!");
 
+		foreach (UserAccessToken token in accessTokens)
+			if (DateTime.UtcNow >= token.ExpiryDate)
+				await RevokeAccessToken(token, false);
+
 		if (WritingEnabled != true)
 			return;
 
-		throw new NotImplementedException();
+		using FileStream jsonFile = File.OpenWrite(GetUserJSONPath());
+
+		await JsonSerializer.SerializeAsync(jsonFile, this, AppInfo.JSON_OPTIONS);
 
 	}
 
@@ -251,13 +280,16 @@ public sealed class User
 	{
 
 		while (accessTokens.Count >= ACCESS_TOKEN_LIMIT)
-			await TryRevokeOldestAccessToken();
+			await TryRevokeOldestAccessToken(false);
 
 		UserAccessToken token = UserAccessToken.CreateNewToken(this);
 
 		accessTokens.Add(token);
 
 		AttachAccessToken(token);
+
+		if (Manager is not null)
+			await WriteNewData();
 
 		return token;
 
@@ -273,12 +305,15 @@ public sealed class User
 
 	}
 
-	public async Task RevokeAccessToken(UserAccessToken token)
+	public async Task RevokeAccessToken(UserAccessToken token, bool writeAfterwards = true)
 	{
 
 		accessTokens.Remove(token);
 
 		DetachAccessToken(token);
+
+		if (Manager is not null && writeAfterwards)
+			await WriteNewData();
 
 	}
 
@@ -289,7 +324,7 @@ public sealed class User
 
 	}
 
-	private async Task<bool> TryRevokeOldestAccessToken()
+	private async Task<bool> TryRevokeOldestAccessToken(bool writeAfterwards = true)
 	{
 
 		UserAccessToken? oldest = null;
@@ -307,7 +342,7 @@ public sealed class User
 		if (oldest is null)
 			return false;
 
-		await RevokeAccessToken(oldest);
+		await RevokeAccessToken(oldest, writeAfterwards);
 		return true;
 
 	}
@@ -330,7 +365,7 @@ public sealed class User
 	internal void DetachFromManager()
 	{
 
-		if (Manager==null)
+		if (Manager == null)
 			throw new NullReferenceException($"{nameof(Manager)} is null. Cannot detach from nothing. Does this call to {nameof(DetachFromManager)} need to be skipped?");
 
 		if (Manager.guids[GUID] != this)

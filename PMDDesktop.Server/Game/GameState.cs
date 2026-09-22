@@ -26,6 +26,7 @@ public class GameState : IAssetIndexable, ISaveDataIndexable, IUserIndexable
 
 		await Saves.LoadFromFilesAndEnableWriting();
 		await Assets.LoadFromFiles();
+		await Users.LoadFromFilesAndEnableWriting();
 
 	}
 
