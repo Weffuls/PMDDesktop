@@ -10,7 +10,7 @@ public sealed class UserRole
 
 	internal Dictionary<UserPermission, bool> permissionSettings = [];
 	public string Name {get; set;} = "Unnamed Role";
-	public Guid guid = Guid.NewGuid();
+	public Guid GUID { get; internal set; } = Guid.NewGuid();
 
 	public async Task SetPermission(UserPermission permission, bool? preference)
 	{
@@ -29,6 +29,22 @@ public sealed class UserRole
 			return value;
 
 		return null;
+
+	}
+
+	internal static UserRole CreateDefaultRole()
+	{
+
+		UserRole role = new()
+		{
+			GUID = Guid.Empty,
+			Name = "Default (Everyone)"
+		};
+
+		foreach (UserPermission permission in UserPermission.ALL.Where(perm => perm.EnabledForDefault))
+			role.permissionSettings.Add(permission, true);
+
+		return role;
 
 	}
 

@@ -30,4 +30,24 @@ public class UserRoleTests
 
 	}
 
+	[Fact]
+	public void DefaultRoleHasAllEnabledByDefaultPermissions()
+	{
+
+		UserRole role = UserRole.CreateDefaultRole();
+
+		Assert.All(UserPermission.ALL.Where(perm => perm.EnabledForDefault), perm => Assert.True(role.GetPermission(perm)));
+
+	}
+
+	[Fact]
+	public void DefaultRoleHasNoDisabledByDefaultPermissions()
+	{
+
+		UserRole role = UserRole.CreateDefaultRole();
+
+		Assert.All(UserPermission.ALL.Where(perm => !perm.EnabledForDefault), perm => Assert.Null(role.GetPermission(perm)));
+
+	}
+
 }
