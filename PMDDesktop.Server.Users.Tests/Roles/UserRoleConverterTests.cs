@@ -1,5 +1,5 @@
-﻿using System.Text.Json;
-using PMDDesktop.Server.Users.Roles;
+﻿using PMDDesktop.Server.Users.Roles;
+using System.Text.Json;
 
 namespace PMDDesktop.Server.Users.Tests.Roles;
 
@@ -71,55 +71,23 @@ public class UserRoleConverterTests
 
 	}
 
-	[Fact]
-	public async Task RoundTripRoleWithSpecifiedPermissionKeepsTrue()
+	[Theory]
+	[InlineData(true)]
+	[InlineData(false)]
+	[InlineData(null)]
+	public async Task RoundTripRoleWithSpecifiedPermissionKeepsValue(bool? value)
 	{
 
 		UserRole role = new();
 
-		await role.SetPermission(UserPermission.MANAGE_ROLES, true);
+		await role.SetPermission(UserPermission.MANAGE_USERS, value);
 
 		JsonDocument document = JsonSerializer.SerializeToDocument(role);
 
 		UserRole? newRole = JsonSerializer.Deserialize<UserRole>(document);
 		Assert.NotNull(newRole);
 
-		Assert.Equal(true, newRole.GetPermission(UserPermission.MANAGE_ROLES));
-
-	}
-
-	[Fact]
-	public async Task RoundTripRoleWithSpecifiedPermissionKeepsFalse()
-	{
-
-		UserRole role = new();
-
-		await role.SetPermission(UserPermission.MANAGE_ROLES, false);
-
-		JsonDocument document = JsonSerializer.SerializeToDocument(role);
-
-		UserRole? newRole = JsonSerializer.Deserialize<UserRole>(document);
-		Assert.NotNull(newRole);
-
-		Assert.Equal(false, newRole.GetPermission(UserPermission.MANAGE_ROLES));
-
-	}
-
-	[Fact]
-	public async Task RoundTripRoleWithSpecifiedPermissionKeepsNull()
-	{
-
-		UserRole role = new();
-
-		await role.SetPermission(UserPermission.MANAGE_USERS, null);
-
-		JsonDocument document = JsonSerializer.SerializeToDocument(role);
-
-		UserRole? newRole = JsonSerializer.Deserialize<UserRole>(document);
-		Assert.NotNull(newRole);
-
-		Assert.Null(newRole.GetPermission(UserPermission.MANAGE_USERS));
-		Assert.Null(newRole.GetPermission(UserPermission.MANAGE_ROLES));
+		Assert.Equal(value, newRole.GetPermission(UserPermission.MANAGE_USERS));
 
 	}
 
