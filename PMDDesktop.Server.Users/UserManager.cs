@@ -1,11 +1,25 @@
-﻿using System.Collections;
+﻿using PMDDesktop.Server.Users.Roles;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace PMDDesktop.Server.Users;
 
-public sealed class UserManager() : IEnumerable<User>, IUserIndexable
+public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexable
 {
+
+	public UserManager()
+	{
+
+		RoleManager = new(this);
+
+	}
+
+	/// <summary>
+	/// <para><see cref="UserRoleManager"/> attached to this <see cref="UserManager."/></para>
+	/// <para>Used when checking for <see cref="UserRole"/>s and their <see cref="UserPermission"/>s.</para>
+	/// </summary>
+	public UserRoleManager RoleManager { get; }
 
 	/// <summary>
 	/// <para>Does this <see cref="UserManager"/> actually write to files?</para>
@@ -202,6 +216,11 @@ public sealed class UserManager() : IEnumerable<User>, IUserIndexable
 		user.AttachToManager(this);
 		return user;
 
+	}
+
+	public bool TryGetRole(Guid GUID, [NotNullWhen(true)] out UserRole? role)
+	{
+		return RoleManager.TryGetRole(GUID, out role);
 	}
 
 }

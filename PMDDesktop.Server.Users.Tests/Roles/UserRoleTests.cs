@@ -50,4 +50,14 @@ public class UserRoleTests
 
 	}
 
+	[Fact]
+	public void DefaultRoleIsMarkedAsDefaultRole()
+	{
+
+		UserRole role = UserRole.CreateDefaultRole();
+
+		Assert.True(role.IsDefaultRole);
+
+	}
+
 }
