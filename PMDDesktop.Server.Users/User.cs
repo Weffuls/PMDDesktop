@@ -350,6 +350,9 @@ public sealed class User
 	internal void AttachToManager(UserManager manager)
 	{
 
+		if (Manager != null)
+			throw new InvalidOperationException($"This existing value of {nameof(Manager)} is not null. Cannot attach while already attached. Does this call to {nameof(AttachToManager)} need to be skipped, or does {nameof(DetachFromManager)} need to be called first?");
+
 		Manager = manager;
 		WritingEnabled = manager.WritingEnabled;
 
