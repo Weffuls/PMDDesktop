@@ -1,12 +1,23 @@
 ﻿using PMDDesktop.Server.Assets;
 using PMDDesktop.Server.Saving;
 using PMDDesktop.Server.Users;
+using PMDDesktop.Server.Users.Roles;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PMDDesktop.Server.Game;
 
 public class GameState : IAssetIndexable, ISaveDataIndexable, IUserIndexable
 {
+
+	public GameState()
+	{
+
+		Saves = [];
+		Assets = new();
+		Users = new();
+		Roles = Users.RoleManager;
+
+	}
 
 	[ExcludeFromCodeCoverage]
 	public static async Task<GameState> CreateAndLoadFiles()
@@ -55,8 +66,9 @@ public class GameState : IAssetIndexable, ISaveDataIndexable, IUserIndexable
 		return Users.TryGetUser(GUID, out user);
 	}
 
-	public SaveDataManager Saves { get; } = new();
-	public AssetManager Assets { get; } = new();
-	public UserManager Users { get; } = new();
+	public SaveDataManager Saves { get; }
+	public AssetManager Assets { get; }
+	public UserManager Users { get; }
+	public UserRoleManager Roles { get; }
 
 }
