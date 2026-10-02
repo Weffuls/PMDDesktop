@@ -69,7 +69,7 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 
 		await LoadAllUserData();
 
-		await LoadAllRoleData();
+		await RoleManager.LoadFromFiles();
 
 	}
 
@@ -123,17 +123,6 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 		deserialized.AttachToManager(this);
 
 		return deserialized;
-
-	}
-
-	/// <summary>
-	/// This manages creating <see cref="Role"/> objects by loading their data from the "users" folder.
-	/// </summary>
-	[ExcludeFromCodeCoverage]
-	private async Task LoadAllRoleData()
-	{
-
-		// Not yet implemented.
 
 	}
 
@@ -214,6 +203,7 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 			await user.SetPassword(options.PlainTextPassword);
 
 		user.AttachToManager(this);
+		await user.WriteNewData();
 		return user;
 
 	}
