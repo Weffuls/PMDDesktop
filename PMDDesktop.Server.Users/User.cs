@@ -205,10 +205,10 @@ public sealed class User
 	{
 
 		if (Manager is null) // ????? This state doesn't make any sense.
-			throw new InvalidOperationException($"{this} shouldn't be writing its data without being attached to a {nameof(Manager)}.");
+			throw new InvalidOperationException($"{this} shouldn't be writing its data to a file while {nameof(Manager)} is null!");
 
 		if (WritingEnabled is null)
-			throw new InvalidOperationException($"{this} shouldn't be deleting its data while {WritingEnabled} is null!");
+			throw new InvalidOperationException($"{this} shouldn't be writing its data to a file while {nameof(WritingEnabled)} is null!");
 
 		foreach (UserAccessToken token in accessTokens)
 			if (DateTime.UtcNow >= token.ExpiryDate)
@@ -235,7 +235,7 @@ public sealed class User
 	{
 
 		if (WritingEnabled is null)
-			throw new InvalidOperationException($"{this} shouldn't be deleting its data while {WritingEnabled} is null!");
+			throw new InvalidOperationException($"{this} shouldn't be deleting its data from the filesystem while {nameof(WritingEnabled)} is null!");
 
 		if (WritingEnabled != true)
 			return;
