@@ -74,6 +74,8 @@ public sealed class User
 
 	internal List<UserAccessToken> accessTokens = [];
 
+	#region Name
+
 	public async Task SetName(string newName)
 	{
 
@@ -83,6 +85,10 @@ public sealed class User
 			await WriteNewData();
 
 	}
+
+	#endregion
+
+	#region Login Handle & Password
 
 	/// <summary>
 	/// Salt and hash the user's password, then store it in HashedPassword.
@@ -177,6 +183,10 @@ public sealed class User
 
 	}
 
+	#endregion
+
+	#region Saving
+
 	/// <summary>
 	/// Return the filesystem folder that should contain all of this user's data.
 	/// </summary>
@@ -257,6 +267,10 @@ public sealed class User
 
 	}
 
+	#endregion
+
+	#region Generic Object Overrides
+
 	public override bool Equals(object? obj)
 	{
 
@@ -275,6 +289,10 @@ public sealed class User
 	{
 		return HashCode.Combine(GUID);
 	}
+
+	#endregion
+
+	#region Access Tokens
 
 	public async Task<UserAccessToken> CreateAccessToken()
 	{
@@ -347,6 +365,10 @@ public sealed class User
 
 	}
 
+	#endregion
+
+	#region Manager Attaching
+
 	internal void AttachToManager(UserManager manager)
 	{
 
@@ -387,6 +409,10 @@ public sealed class User
 
 	public bool IsAlive() => Manager is not null;
 
+	#endregion
+
+	#region User Deletion
+
 	/// <summary>
 	/// <para>Try to remove this <see cref="User"/> from its <see cref="UserManager"/>.</para>
 	/// <para>If the assigned <see cref="UserManager"/> has <see cref="UserManager.WritingEnabled"/>, then this function will also attempt to delete the user's folder from the filesystem, so that it will not be restored in future sessions.</para>
@@ -407,5 +433,7 @@ public sealed class User
 		return true;
 
 	}
+
+	#endregion
 
 }
