@@ -1,4 +1,6 @@
-﻿namespace PMDDesktop.Server.Users.Tests;
+﻿using PMDDesktop.Server.Users.Roles;
+
+namespace PMDDesktop.Server.Users.Tests;
 
 public class UserTests
 {
@@ -172,6 +174,70 @@ public class UserTests
 		Assert.Empty(manager.loginHandles);
 
 		Assert.False(user.IsAlive());
+
+	}
+
+	// I'm not sure if there's a better place for these role/permission/user tests. They test way more than just the User.cs file, but they start and end there.
+	[Fact]
+	public async Task UserGetsPermission()
+	{
+
+		UserManager manager = new();
+		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
+		Assert.NotNull(user);
+
+		UserRoleManager roleManager = manager.RoleManager;
+		UserRole? role = await roleManager.TryCreateRole();
+		Assert.NotNull(role);
+		await role.SetPermission(UserPermission.MANAGE_ROLES, true);
+
+		Assert.False(user.HasPermission(UserPermission.MANAGE_ROLES));
+
+		Assert.True(await user.TryAddRole(role));
+
+		Assert.True(user.HasPermission(UserPermission.MANAGE_ROLES));
+
+		Assert.True(await user.TryRemoveRole(role));
+
+		Assert.False(user.HasPermission(UserPermission.MANAGE_ROLES));
+
+	}
+
+	[Fact]
+	public async Task UserPermissionsRespectHierarchy()
+	{
+
+		UserManager manager = new();
+		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
+		Assert.NotNull(user);
+
+		UserRoleManager roleManager = manager.RoleManager;
+		UserRole? givingRole = await roleManager.TryCreateRole();
+		Assert.NotNull(givingRole);
+		await givingRole.SetPermission(UserPermission.MANAGE_ROLES, true);
+		await user.TryAddRole(givingRole);
+
+		UserRole? takingRole = await roleManager.TryCreateRole();
+		Assert.NotNull(takingRole);
+		await takingRole.SetPermission(UserPermission.MANAGE_ROLES, false);
+		await user.TryAddRole(takingRole);
+
+		UserRole? nothingRole = await roleManager.TryCreateRole();
+		Assert.NotNull(nothingRole);
+		await nothingRole.SetPermission(UserPermission.MANAGE_ROLES, null);
+		await user.TryAddRole(nothingRole);
+
+		await roleManager.SetOrder([givingRole.GUID, takingRole.GUID, nothingRole.GUID]);
+		Assert.True(user.HasPermission(UserPermission.MANAGE_ROLES));
+
+		await roleManager.SetOrder([takingRole.GUID, givingRole.GUID, nothingRole.GUID]);
+		Assert.False(user.HasPermission(UserPermission.MANAGE_ROLES));
+
+		await roleManager.SetOrder([nothingRole.GUID, givingRole.GUID, takingRole.GUID]);
+		Assert.True(user.HasPermission(UserPermission.MANAGE_ROLES));
+
+		await roleManager.SetOrder([nothingRole.GUID, takingRole.GUID, givingRole.GUID]);
+		Assert.False(user.HasPermission(UserPermission.MANAGE_ROLES));
 
 	}
 

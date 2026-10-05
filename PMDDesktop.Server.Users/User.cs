@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using PMDDesktop.Server.Users.Roles;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -73,6 +74,12 @@ public sealed class User
 	public bool? WritingEnabled { get; private set; }
 
 	internal List<UserAccessToken> accessTokens = [];
+
+	/// <summary>
+	/// <para>Collection of <see cref="UserRole"/>s assigned to this user by their <see cref="Guid"/>s. Order does not matter, use <see cref="UserRoleManager.roleOrder"/> for order instead.</para>
+	/// <para>Also, <see cref="UserRoleManager.DefaultRole"/> is not included in this. It is implied to always be assigned.</para>
+	/// </summary>
+	internal HashSet<Guid> roles = [];
 
 	#region Name
 
@@ -431,6 +438,64 @@ public sealed class User
 		await DeleteUserFolder();
 
 		return true;
+
+	}
+
+	#endregion
+
+	#region Role/Permission Management
+
+	public async Task<bool> TryAddRole(UserRole role)
+	{
+
+		if (!roles.Add(role.GUID))
+			return false;
+
+		await WriteNewData();
+
+		return true;
+
+	}
+
+	public async Task<bool> TryRemoveRole(UserRole role)
+	{
+
+		if (!roles.Remove(role.GUID))
+			return false;
+
+		await WriteNewData();
+
+		return true;
+
+	}
+
+	public bool HasRole(UserRole role)
+	{
+
+		return roles.Contains(role.GUID);
+
+	}
+
+	public bool HasPermission(UserPermission permission)
+	{
+
+		if (Manager is null)
+			throw new NullReferenceException($"Can't check if {this} has a permission if {nameof(Manager)} is null!");
+
+		foreach (UserRole role in Manager.RoleManager)
+		{
+
+			if (!HasRole(role))
+				continue;
+
+			bool? newState = role.GetPermission(permission);
+
+			if (newState is bool final)
+				return final;
+
+		}
+
+		return false;
 
 	}
 
