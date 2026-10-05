@@ -177,6 +177,24 @@ public class UserTests
 
 	}
 
+	[Fact]
+	public async Task CanChangeName()
+	{
+
+		UserManager manager = new();
+		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
+		Assert.NotNull(user);
+
+		string originalName = user.Name;
+
+		await user.SetName("Waffles");
+
+		Assert.Equal("Waffles", user.Name);
+
+		Assert.NotEqual(originalName, user.Name);
+
+	}
+
 	// I'm not sure if there's a better place for these role/permission/user tests. They test way more than just the User.cs file, but they start and end there.
 	[Fact]
 	public async Task UserGetsPermission()
