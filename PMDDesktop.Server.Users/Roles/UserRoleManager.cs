@@ -181,9 +181,6 @@ public sealed class UserRoleManager : IRoleIndexable, IEnumerable<UserRole>
 	public async Task WriteNewRoleOrder()
 	{
 
-		if (Manager is null) // ????? This state doesn't make any sense.
-			throw new InvalidOperationException($"{this} shouldn't be writing its data to a file while {nameof(Manager)} is null!");
-
 		if (!WritingEnabled)
 			return;
 
