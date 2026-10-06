@@ -330,7 +330,7 @@ public sealed class User
 
 	}
 
-	public async Task RevokeAccessToken(UserAccessToken token, bool writeAfterwards = true)
+	internal async Task RevokeAccessToken(UserAccessToken token, bool writeAfterwards)
 	{
 
 		accessTokens.Remove(token);
@@ -339,6 +339,13 @@ public sealed class User
 
 		if (Manager is not null && writeAfterwards)
 			await WriteNewData();
+
+	}
+
+	public async Task RevokeAccessToken(UserAccessToken token)
+	{
+
+		await RevokeAccessToken(token, true);
 
 	}
 
