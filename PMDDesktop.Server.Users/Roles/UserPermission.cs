@@ -14,13 +14,16 @@ public sealed class UserPermission
 		IEnumerable<FieldInfo> permissionFields = fields.Where(field => field.FieldType.IsAssignableTo(typeof(UserPermission)));
 
 		IEnumerable<UserPermission> permissionObjects = permissionFields.Select(field =>
-			(UserPermission?) field.GetValue(ALL)
+			(UserPermission?)field.GetValue(ALL)
 				?? throw new NullReferenceException($"Unable to convert {field} to {nameof(UserPermission)}"));
 
 		ALL = ImmutableArray.Create([.. permissionObjects]);
 
 	}
 
+	/// <summary>
+	/// Array containing all <see cref="UserPermission"/> objects. (Should not change after initial creation.)
+	/// </summary>
 	public static readonly ImmutableArray<UserPermission> ALL;
 
 	public static readonly UserPermission MANAGE_USERS = new()
@@ -44,24 +47,27 @@ public sealed class UserPermission
 	/// <summary>
 	/// Name that is stored and compared to track permission in a <see cref="UserRole"/>.
 	/// </summary>
-	public required string DataName {get; init;}
+	public required string DataName { get; init; }
 
 	/// <summary>
 	/// User-facing name that is displayed to users when viewing permissions.
 	/// </summary>
-	public required string FriendlyName {get; init;}
+	public required string FriendlyName { get; init; }
 
 	/// <summary>
 	/// User-facing description for what a permission does.
 	/// </summary>
-	public required string FriendlyDescription {get; init;}
+	public required string FriendlyDescription { get; init; }
 
 	/// <summary>
 	/// Weather to always grant this permission for admin users, to prevent losing ability to regain the permission.
 	/// </summary>
-	public required bool AlwaysForAdmin {get; init;}
+	public required bool AlwaysForAdmin { get; init; }
 
-	public required bool EnabledForDefault {get; init;}
+	/// <summary>
+	/// Weather to enable this permission for the default role when first created. (Can still be disabled for that role afterwards.)
+	/// </summary>
+	public required bool EnabledForDefault { get; init; }
 
 	private UserPermission() { }
 

@@ -10,6 +10,9 @@ namespace PMDDesktop.Server.Users;
 public sealed class User
 {
 
+	/// <summary>
+	/// <see cref="PasswordHasher{User}"/> to use to hash passwords.
+	/// </summary>
 	private static PasswordHasher<User> PASSWORD_HASHER = new();
 
 	/// <summary>
@@ -59,20 +62,27 @@ public sealed class User
 	internal string? HashedPassword { get; set; }
 
 	/// <summary>
-	/// <para>A unique <see cref="Guid"/> for each <see cref="User"/>. Stays consistant even when the <see cref="User"/>'s handle changes.</para>
+	/// <para>A unique <see cref="Guid"/> for this <see cref="User"/>. Stays consistant even when the <see cref="User"/>'s handle changes.</para>
 	/// <para>This should be used for long-term references to a specific <see cref="User"/>.</para>
 	/// </summary>
 	[JsonIgnore]
 	public Guid GUID { get; internal set; } = Guid.NewGuid();
 
 	/// <summary>
-	///
+	/// Attached <see cref="UserManager"/> that controls this <see cref="User"/>.
 	/// </summary>
 	[JsonIgnore]
 	public UserManager? Manager { get; private set; }
 
+	/// <summary>
+	/// Is/Was <see cref="UserManager.WritingEnabled"/> on the last used or currently active <see cref="UserManager"/>.
+	/// </summary>
 	public bool? WritingEnabled { get; private set; }
 
+	/// <summary>
+	/// <para>List of <see cref="UserAccessToken"/>s currently belonging to this <see cref="User"/>.</para>
+	/// <para>May include expired <see cref="UserAccessToken"/>s.</para>
+	/// </summary>
 	internal List<UserAccessToken> accessTokens = [];
 
 	/// <summary>
@@ -83,6 +93,11 @@ public sealed class User
 
 	#region Name
 
+	/// <summary>
+	/// Set the <see cref="Name"/> of this <see cref="User"/>.
+	/// </summary>
+	/// <param name="newName">The new name of the <see cref="User"/>.</param>
+	/// <returns>Completes task once changes are saved.</returns>
 	public async Task SetName(string newName)
 	{
 
@@ -100,8 +115,8 @@ public sealed class User
 	/// <summary>
 	/// Salt and hash the user's password, then store it in HashedPassword.
 	/// </summary>
-	/// <param name="plainText"></param>
-	/// <returns></returns>
+	/// <param name="plainText">The plaintext password to be hashed.</param>
+	/// <returns>Completes task after saving completes.</returns>
 	public async Task SetPassword(string plainText)
 	{
 
@@ -113,10 +128,10 @@ public sealed class User
 	}
 
 	/// <summary>
-	///
+	/// Try to set <see cref="LoginHandle"/> to the input. Will fail if it is not unique.
 	/// </summary>
-	/// <param name="newHandle"></param>
-	/// <returns></returns>
+	/// <param name="newHandle">The string to change the new handle to.</param>
+	/// <returns>True if the handle was changed and saved.</returns>
 	public async Task<bool> TrySetLoginHandle(string? newHandle)
 	{
 
@@ -141,6 +156,9 @@ public sealed class User
 
 	}
 
+	/// <summary>
+	/// Add the current <see cref="LoginHandle"/> to <see cref="UserManager.loginHandles"/>.
+	/// </summary>
 	private void AttachLoginHandle()
 	{
 
@@ -151,6 +169,9 @@ public sealed class User
 
 	}
 
+	/// <summary>
+	/// Remove the current <see cref="LoginHandle"/> from <see cref="UserManager.loginHandles"/>.
+	/// </summary>
 	private void DetachLoginHandle()
 	{
 
@@ -217,6 +238,11 @@ public sealed class User
 
 	}
 
+	/// <summary>
+	/// Saves all data relating to this <see cref="User"/> object.
+	/// </summary>
+	/// <returns>Task completes once data is written.</returns>
+	/// <exception cref="InvalidOperationException">If the <see cref="Manager"/> or if <see cref="WritingEnabled"/> is null.</exception>
 	[ExcludeFromCodeCoverage]
 	internal async Task WriteNewData()
 	{
@@ -243,7 +269,7 @@ public sealed class User
 	/// <summary>
 	/// <para>Deletes the user folder and all *explicitly written* data inside it.</para>
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>Completes task once folder is deleted... or after it fails to delete due to having unmanaged filesystem entries.</returns>
 	/// <remarks>
 	/// <para>This function does not recursive delete. Instead it has a list of items to delete. This approach is taken to minimize data loss in the event that something goes wrong.</para>
 	/// </remarks>
@@ -301,6 +327,13 @@ public sealed class User
 
 	#region Access Tokens
 
+	/// <summary>
+	/// Create a new <see cref="UserAccessToken"/> for this user.
+	/// </summary>
+	/// <returns>Returns the new <see cref="UserAccessToken"/>.</returns>
+	/// <remarks>
+	/// Will remove existing access tokens if <see cref="ACCESS_TOKEN_LIMIT"/> is exceeded.
+	/// </remarks>
 	public async Task<UserAccessToken> CreateAccessToken()
 	{
 
@@ -320,6 +353,13 @@ public sealed class User
 
 	}
 
+	/// <summary>
+	/// Attaches <paramref name="token"/> to the attached <see cref="UserManager"/>.
+	/// </summary>
+	/// <param name="token">The <see cref="UserAccessToken"/> to attach to <see cref="Manager"/>.</param>
+	/// <remarks>
+	/// Attaching will be skipped if <see cref="Manager"/> is null, so this is safe to call when detached.
+	/// </remarks>
 	private void AttachAccessToken(UserAccessToken token)
 	{
 
@@ -330,6 +370,12 @@ public sealed class User
 
 	}
 
+	/// <summary>
+	/// Revokes <paramref name="token"/>, removes it from the <see cref="UserManager"/>, then (optionally) saves.
+	/// </summary>
+	/// <param name="token">The <see cref="UserAccessToken"/> to revoke.</param>
+	/// <param name="writeAfterwards">Should save afterwards? Always skipped if <see cref="Manager"/> is null.</param>
+	/// <returns>Completes task when saving completes.</returns>
 	internal async Task RevokeAccessToken(UserAccessToken token, bool writeAfterwards)
 	{
 
@@ -342,6 +388,11 @@ public sealed class User
 
 	}
 
+	/// <summary>
+	/// Revokes <paramref name="token"/>, removes it from the <see cref="UserManager"/>, then saves.
+	/// </summary>
+	/// <param name="token">The <see cref="UserAccessToken"/> to revoke.</param>
+	/// <returns>Completes task when saving completes.</returns>
 	public async Task RevokeAccessToken(UserAccessToken token)
 	{
 
@@ -349,6 +400,13 @@ public sealed class User
 
 	}
 
+	/// <summary>
+	/// Detaches <paramref name="token"/> from the attached <see cref="UserManager"/>.
+	/// </summary>
+	/// <param name="token">The <see cref="UserAccessToken"/> to detach to <see cref="Manager"/>.</param>
+	/// <remarks>
+	/// Detaching will be skipped if <see cref="Manager"/> is null, so this is safe to call when detached.
+	/// </remarks>
 	private void DetachAccessToken(UserAccessToken token)
 	{
 
@@ -356,6 +414,11 @@ public sealed class User
 
 	}
 
+	/// <summary>
+	/// Attempt to revoke the oldest <see cref="UserAccessToken"/> managed by this <see cref="User"/>. Can optionally save afterwards.
+	/// </summary>
+	/// <param name="writeAfterwards">Should save afterwards?</param>
+	/// <returns>Returns true if an access token was revoked.</returns>
 	private async Task<bool> TryRevokeOldestAccessToken(bool writeAfterwards = true)
 	{
 
@@ -383,6 +446,11 @@ public sealed class User
 
 	#region Manager Attaching
 
+	/// <summary>
+	/// Attach to a <see cref="UserManager"/> to provide this <see cref="User"/>'s data to the <paramref name="manager"/>.
+	/// </summary>
+	/// <param name="manager">The <see cref="UserManager"/> to attach to.</param>
+	/// <exception cref="InvalidOperationException">Throws if already attached to a <see cref="UserManager"/>.</exception>
 	internal void AttachToManager(UserManager manager)
 	{
 
@@ -401,6 +469,13 @@ public sealed class User
 
 	}
 
+	/// <summary>
+	/// Detach from the attached <see cref="UserManager"/> to remove this <see cref="User"/>'s data from the attached <see cref="UserManager"/>.
+	/// </summary>
+	/// <exception cref="InvalidOperationException">Throws if not currently attached to a <see cref="UserManager"/>.</exception>
+	/// <remarks>
+	/// This doesn't really need to be called on server shutdown. It is called internally when deleting a user.
+	/// </remarks>
 	internal void DetachFromManager()
 	{
 
@@ -452,6 +527,15 @@ public sealed class User
 
 	#region Role/Permission Management
 
+	/// <summary>
+	/// Try to add a <see cref="UserRole"/> to this <see cref="User"/>. Allows the <see cref="User"/> to be influenced by the <see cref="UserRole"/>'s <see cref="UserPermission"/>s.
+	/// </summary>
+	/// <param name="role">The <see cref="UserRole"/> to add to the <see cref="User"/>.</param>
+	/// <returns>Returns true if it was added successfully.</returns>
+	/// <remarks>
+	/// <para>Primarily fails when the <see cref="UserRole"/> is already on the <see cref="User"/>.</para>
+	/// <para>This also saves the user.</para>
+	/// </remarks>
 	public async Task<bool> TryAddRole(UserRole role)
 	{
 
@@ -464,6 +548,15 @@ public sealed class User
 
 	}
 
+	/// <summary>
+	/// Try to remove a <see cref="UserRole"/> from this <see cref="User"/>. Stops the <see cref="User"/> from being influenced by the <see cref="UserRole"/>'s <see cref="UserPermission"/>s.
+	/// </summary>
+	/// <param name="role">The <see cref="UserRole"/> to remove from the <see cref="User"/>.</param>
+	/// <returns>Returns true if it was removed successfully.</returns>
+	/// <remarks>
+	/// <para>Primarily fails when the <see cref="User"/> does not have the <see cref="UserRole"/>.</para>
+	/// <para>This also saves the user.</para>
+	/// </remarks>
 	public async Task<bool> TryRemoveRole(UserRole role)
 	{
 
@@ -476,6 +569,11 @@ public sealed class User
 
 	}
 
+	/// <summary>
+	/// Check if the <see cref="User"/> has <paramref name="role"/> assigned to it.
+	/// </summary>
+	/// <param name="role">The <see cref="UserRole"/> to check for.</param>
+	/// <returns>True if this user is assigned this role.</returns>
 	public bool HasRole(UserRole role)
 	{
 
@@ -483,6 +581,12 @@ public sealed class User
 
 	}
 
+	/// <summary>
+	/// Does this <see cref="User"/>, looking at the assigned <see cref="UserRole"/>s with respect to <see cref="UserRoleManager"/>'s role order, have <paramref name="permission"/>?
+	/// </summary>
+	/// <param name="permission"></param>
+	/// <returns>Returns true if this user has the <paramref name="permission"/>.</returns>
+	/// <exception cref="NullReferenceException">Throws if not currently attached to a <see cref="UserManager"/>.</exception>
 	public bool HasPermission(UserPermission permission)
 	{
 

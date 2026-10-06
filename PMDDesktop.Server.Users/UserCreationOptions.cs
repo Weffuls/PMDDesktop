@@ -1,10 +1,21 @@
-namespace PMDDesktop.Server.Users;
+﻿namespace PMDDesktop.Server.Users;
 
 public sealed record class UserCreationOptions
 {
 
-	public required string DisplayName {get; set;}
-	public string? PlainTextPassword {get; set;}
-	public string? LoginHandle {get; set;}
+	/// <summary>
+	/// The initial value to set <see cref="User.Name"/>.
+	/// </summary>
+	public required string DisplayName { get; set; }
+
+	/// <summary>
+	/// The value to hash to create <see cref="User.HashedPassword"/>.
+	/// </summary>
+	public string? PlainTextPassword { get; set; }
+
+	/// <summary>
+	/// The initial value to set <see cref="User.LoginHandle"/>. Must be unique.
+	/// </summary>
+	public string? LoginHandle { get; set; }
 
 }

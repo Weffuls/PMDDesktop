@@ -57,6 +57,11 @@ internal class UserConverter : JsonConverter<User>
 
 	}
 
+	/// <summary>
+	/// Writes a single <see cref="UserAccessToken"/> JSON object.
+	/// </summary>
+	/// <param name="writer">The <see cref="Utf8JsonWriter"/> to write to.</param>
+	/// <param name="token">The <see cref="UserAccessToken"/> to write.</param>
 	private static void WriteToken(Utf8JsonWriter writer, UserAccessToken token)
 	{
 
@@ -69,6 +74,14 @@ internal class UserConverter : JsonConverter<User>
 
 	}
 
+	/// <summary>
+	/// Quickly read <paramref name="name"/> (non-nullable string) from <paramref name="document"/> and remove <paramref name="name"/> from <paramref name="propertyList"/>.
+	/// </summary>
+	/// <param name="document">The <see cref="JsonDocument"/> to read from.</param>
+	/// <param name="propertyList">The <see cref="List{string}"/> to remove <paramref name="name"/> from.</param>
+	/// <param name="name">The <see cref="string"/> to read from <see cref="JsonDocument"/> and to remove from <paramref name="propertyList"/>.</param>
+	/// <returns>Returns the read string.</returns>
+	/// <exception cref="JsonException">If name is null.</exception>
 	private static string QuickReadString(JsonDocument document, List<string> propertyList, string name)
 	{
 
@@ -79,6 +92,13 @@ internal class UserConverter : JsonConverter<User>
 
 	}
 
+	/// <summary>
+	/// Quickly read <paramref name="name"/> (nullable string) from <paramref name="document"/> and remove <paramref name="name"/> from <paramref name="propertyList"/>.
+	/// </summary>
+	/// <param name="document">The <see cref="JsonDocument"/> to read from.</param>
+	/// <param name="propertyList">The <see cref="List{string}"/> to remove <paramref name="name"/> from.</param>
+	/// <param name="name">The <see cref="string"/> to read from <see cref="JsonDocument"/> and to remove from <paramref name="propertyList"/>.</param>
+	/// <returns>Returns the read string, or null if it is null.</returns>
 	private static string? QuickReadNullableString(JsonDocument document, List<string> propertyList, string name)
 	{
 
@@ -88,6 +108,13 @@ internal class UserConverter : JsonConverter<User>
 
 	}
 
+	/// <summary>
+	/// Reads the array of <see cref="UserAccessToken"/> JSON objects, and returns a <see cref="List{UserAccessToken}"/> based on it.
+	/// </summary>
+	/// <param name="document">The <see cref="JsonDocument"/> of a <see cref="User"/>.</param>
+	/// <param name="user">The <see cref="User"/> object to assign the created <see cref="UserAccessToken"/>s to.</param>
+	/// <returns>Returns a <see cref="List{UserAccessToken}"/> of read <see cref="UserAccessToken"/>s.</returns>
+	/// <exception cref="JsonException">Throws if any read token string was null.</exception>
 	private static List<UserAccessToken> ReadTokenArray(JsonDocument document, User user)
 	{
 

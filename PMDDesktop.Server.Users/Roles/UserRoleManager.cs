@@ -5,9 +5,17 @@ using System.Text.Json;
 
 namespace PMDDesktop.Server.Users.Roles;
 
+/// <summary>
+/// Manages <see cref="UserRole"/>s. Allows the creation of new <see cref="UserRole"/> objects and handles the saving/loading of them, as well as maintaining the order of roles.
+/// </summary>
 public sealed class UserRoleManager : IRoleIndexable, IEnumerable<UserRole>
 {
 
+	/// <summary>
+	/// <para>Creates a new <see cref="UserRoleManager"/> that's paied with <paramref name="userManager"/>.</para>
+	/// <para>This <see cref="UserRoleManager"/> will be tightly linked to the given <see cref="UserManager"/></para>
+	/// </summary>
+	/// <param name="userManager">The <see cref="UserManager"/> to pair with.</param>
 	internal UserRoleManager(UserManager userManager)
 	{
 
@@ -17,6 +25,9 @@ public sealed class UserRoleManager : IRoleIndexable, IEnumerable<UserRole>
 
 	}
 
+	/// <summary>
+	/// The <see cref="UserManager"/> that's paired with this <see cref="UserRoleManager"/>.
+	/// </summary>
 	public UserManager Manager { get; private init; }
 
 	/// <summary>
@@ -49,6 +60,10 @@ public sealed class UserRoleManager : IRoleIndexable, IEnumerable<UserRole>
 	/// </summary>
 	internal Guid[] roleOrder = [];
 
+	/// <summary>
+	/// Loads from the "roles" directory and "roleOrder.json" file to retrieve saved role data.
+	/// </summary>
+	/// <returns>Task completes when loading is finished.</returns>
 	internal async Task LoadFromFiles()
 	{
 
@@ -111,9 +126,9 @@ public sealed class UserRoleManager : IRoleIndexable, IEnumerable<UserRole>
 	}
 
 	/// <summary>
-	/// Gets the primary JSON that contains this <see cref="UserRole"/>'s data, located inside the <see cref="UserRole"/> folder.
+	/// Returns the path to the "roleOrder.json" file, intended to be used to save/load the order of roles.
 	/// </summary>
-	/// <returns>A path pointing to where the <see cref="UserRole"/>'s json data is/should be stored.</returns>
+	/// <returns>A path poiting to the "roleOrder.json" file.</returns>
 	internal static string GetOrderJSONPath()
 	{
 
@@ -121,6 +136,13 @@ public sealed class UserRoleManager : IRoleIndexable, IEnumerable<UserRole>
 
 	}
 
+	/// <summary>
+	/// Loads the role order from roleOrder.json. Skips if the file doesn't exist; otherwise, the file is also checked for validity and may throw.
+	/// </summary>
+	/// <returns>Task completes when role order is set or doesn't load.</returns>
+	/// <remarks>
+	/// Calls <see cref="LoadRoleOrder(Stream)"/> to read the stream.
+	/// </remarks>
 	[ExcludeFromCodeCoverage]
 	private async Task LoadRoleOrder()
 	{
@@ -136,6 +158,10 @@ public sealed class UserRoleManager : IRoleIndexable, IEnumerable<UserRole>
 
 	}
 
+	/// <summary>
+	/// Loads the role order from the provided stream in Guid[] JSON format. JSON and order is checked for validity and may throw.
+	/// </summary>
+	/// <returns>Task completes when role order is set.</returns>
 	internal async Task LoadRoleOrder(Stream stream)
 	{
 
@@ -153,7 +179,7 @@ public sealed class UserRoleManager : IRoleIndexable, IEnumerable<UserRole>
 	/// <para>Will fail if duplicated GUIDs are provided, or GUIDs that do not correspond to <see cref="UserRole"/>s in this <see cref="UserRoleManager"/>.</para>
 	/// </summary>
 	/// <param name="guidOrder"></param>
-	/// <returns>Task resolves once order is set and changes are saved.</returns>
+	/// <returns>Task completes once order is set and changes are saved.</returns>
 	public async Task SetOrder(IEnumerable<Guid> guidOrder)
 	{
 
@@ -178,6 +204,10 @@ public sealed class UserRoleManager : IRoleIndexable, IEnumerable<UserRole>
 
 	}
 
+	/// <summary>
+	/// If <see cref="WritingEnabled"/> is true, will write the current <see cref="roleOrder"/> to "roleOrder.json".
+	/// </summary>
+	/// <returns></returns>
 	public async Task WriteNewRoleOrder()
 	{
 
@@ -195,6 +225,10 @@ public sealed class UserRoleManager : IRoleIndexable, IEnumerable<UserRole>
 		return guids.TryGetValue(GUID, out role);
 	}
 
+	/// <summary>
+	/// Try to create a new <see cref="UserRole"/>, will return null if it could not be done. It will have default settings and no permissions set.
+	/// </summary>
+	/// <returns>The created <see cref="UserRole"/>, or null if it failed.</returns>
 	public async Task<UserRole?> TryCreateRole()
 	{
 

@@ -181,6 +181,12 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 
 	}
 
+	/// <summary>
+	/// Try to get a <see cref="User"/> by their <see cref="User.LoginHandle"/>. Will return false and <paramref name="user"/> will be null if not found.
+	/// </summary>
+	/// <param name="handle">The <see cref="User.LoginHandle"/> of the <see cref="User"/> you're looking for.</param>
+	/// <param name="user">The found <see cref="User"/>, if any was found. Will be null if the return was false.</param>
+	/// <returns>True if the <see cref="User"/> is found, and <paramref name="user"/> will not be null.</returns>
 	public bool TryGetUserByLoginHandle(string handle, [NotNullWhen(true)] out User? user)
 	{
 
@@ -188,6 +194,12 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 
 	}
 
+	/// <summary>
+	/// Try to create a new <see cref="User"/>, will return null if it could not be done.
+	/// </summary>
+	/// <param name="options"><see cref="UserCreationOptions"/> to specify how the <see cref="User"/> should be created.</param>
+	/// <returns>The created <see cref="User"/>, or null if it failed.</returns>
+	/// <remarks>Primary failing condition is if the <see cref="UserCreationOptions.LoginHandle"/> is not unique.</remarks>
 	public async Task<User?> TryCreateUser(UserCreationOptions options)
 	{
 
