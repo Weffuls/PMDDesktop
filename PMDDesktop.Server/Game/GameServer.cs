@@ -1,11 +1,12 @@
 ﻿using PMDDesktop.Server.Assets;
 using PMDDesktop.Server.Saving;
 using PMDDesktop.Server.Users;
+using PMDDesktop.Server.Users.Roles;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PMDDesktop.Server.Game;
 
-public class GameServer : IAssetIndexable, ISaveDataIndexable, IUserIndexable
+public class GameServer : IAssetIndexable, ISaveDataIndexable, IUserIndexable, IRoleIndexable
 {
 
 	public GameServer()
@@ -79,4 +80,10 @@ public class GameServer : IAssetIndexable, ISaveDataIndexable, IUserIndexable
 	{
 		return State.TryGetUser(GUID, out user);
 	}
+
+	public bool TryGetRole(Guid GUID, [NotNullWhen(true)] out UserRole? role)
+	{
+		return ((IRoleIndexable)State).TryGetRole(GUID, out role);
+	}
+
 }

@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace PMDDesktop.Server.Game;
 
-public class GameState : IAssetIndexable, ISaveDataIndexable, IUserIndexable
+public class GameState : IAssetIndexable, ISaveDataIndexable, IUserIndexable, IRoleIndexable
 {
 
 	public GameState()
@@ -64,6 +64,11 @@ public class GameState : IAssetIndexable, ISaveDataIndexable, IUserIndexable
 	public bool TryGetUser(Guid GUID, [NotNullWhen(true)] out User? user)
 	{
 		return Users.TryGetUser(GUID, out user);
+	}
+
+	public bool TryGetRole(Guid GUID, [NotNullWhen(true)] out UserRole? role)
+	{
+		return Roles.TryGetRole(GUID, out role);
 	}
 
 	public SaveDataManager Saves { get; }
