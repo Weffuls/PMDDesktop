@@ -160,7 +160,8 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 		}
 
 		if (IRequestHandler.TryGetUserFromContext(game.State.Users, context, out User? user, out UserAccessToken? token))
-			await token.RefreshToken();
+			if (token.NeedsRefresh())
+				await token.RefreshToken();
 
 		try
 		{
