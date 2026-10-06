@@ -1,7 +1,7 @@
 ﻿namespace PMDDesktop.Requests.Users;
 
 [ServerRequest("/api/users/get-info")]
-public sealed class GetUserInfoRequest : ServerRequest<GetUserInfoResponse>
+public sealed class GetUserInfoRequest : ServerRequest<UserInfoResponse>
 {
 
 	[QueryParameter]

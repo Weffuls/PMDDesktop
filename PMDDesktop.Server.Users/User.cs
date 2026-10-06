@@ -211,6 +211,13 @@ public sealed class User
 
 	}
 
+	public bool HasPassword()
+	{
+
+		return HashedPassword is not null;
+
+	}
+
 	#endregion
 
 	#region Saving
