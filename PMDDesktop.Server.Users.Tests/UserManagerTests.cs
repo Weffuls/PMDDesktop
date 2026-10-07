@@ -30,4 +30,17 @@ public class UserManagerTests
 
 	}
 
+	[Fact]
+	public async Task DefaultAdminUserIsAdmin()
+	{
+
+		UserManager manager = new();
+
+		User? user = await manager.TryCreateDefaultAdminUser();
+		Assert.NotNull(user);
+
+		Assert.True(user.IsAdmin);
+
+	}
+
 }

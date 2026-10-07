@@ -8,6 +8,16 @@ namespace PMDDesktop.Server.Users;
 public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexable
 {
 
+	private static readonly UserCreationOptions DEFAULT_ADMIN_OPTIONS = new()
+	{
+
+		DisplayName = "Default Admin User",
+		LoginHandle = "admin",
+		PlainTextPassword = "admin",
+		IsAdmin = true
+
+	};
+
 	public UserManager()
 	{
 
@@ -101,6 +111,10 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 			await LoadAndAddUserJson(readStream, loadedGUID);
 
 		}
+
+		// If no users were loaded, make a default Admin user to ensure there's a way to log in.
+		if (guids.Count == 0)
+			await TryCreateDefaultAdminUser();
 
 	}
 
@@ -218,6 +232,18 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 		user.AttachToManager(this);
 		await user.WriteNewData();
 		return user;
+
+	}
+
+	/// <summary>
+	/// <para>Create a new User account with handle "admin" and password "admin" and admin permissions.</para>
+	/// <para>Useful when starting the server for the first time without any users.</para>
+	/// </summary>
+	/// <returns></returns>
+	internal async Task<User?> TryCreateDefaultAdminUser()
+	{
+
+		return await TryCreateUser(DEFAULT_ADMIN_OPTIONS);
 
 	}
 
