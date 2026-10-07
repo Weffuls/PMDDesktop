@@ -23,7 +23,8 @@ internal class UserConverter : JsonConverter<User>
 		{
 			Name = QuickReadString(json, propertyList, nameof(User.Name)),
 			HashedPassword = QuickReadNullableString(json, propertyList, nameof(User.HashedPassword)),
-			LoginHandle = QuickReadNullableString(json, propertyList, nameof(User.LoginHandle))
+			LoginHandle = QuickReadNullableString(json, propertyList, nameof(User.LoginHandle)),
+			IsAdmin = QuickReadBoolean(json, propertyList, nameof(User.IsAdmin))
 		};
 
 		propertyList.Remove(TOKENS_PROPERTY_NAME);
@@ -47,6 +48,7 @@ internal class UserConverter : JsonConverter<User>
 		writer.WriteString(nameof(User.Name), value.Name);
 		writer.WriteString(nameof(User.HashedPassword), value.HashedPassword);
 		writer.WriteString(nameof(User.LoginHandle), value.LoginHandle);
+		writer.WriteBoolean(nameof(User.IsAdmin), value.IsAdmin);
 
 		writer.WriteStartArray(TOKENS_PROPERTY_NAME);
 		foreach (UserAccessToken token in value.accessTokens)
@@ -105,6 +107,22 @@ internal class UserConverter : JsonConverter<User>
 		propertyList.Remove(name);
 
 		return document.RootElement.GetProperty(name).GetString();
+
+	}
+
+	/// <summary>
+	/// Quickly read <paramref name="name"/> (boolean) from <paramref name="document"/> and remove <paramref name="name"/> from <paramref name="propertyList"/>.
+	/// </summary>
+	/// <param name="document">The <see cref="JsonDocument"/> to read from.</param>
+	/// <param name="propertyList">The <see cref="List{string}"/> to remove <paramref name="name"/> from.</param>
+	/// <param name="name">The <see cref="bool"/> to read from <see cref="JsonDocument"/> and to remove from <paramref name="propertyList"/>.</param>
+	/// <returns>Returns the read boolean.</returns>
+	private static bool QuickReadBoolean(JsonDocument document, List<string> propertyList, string name)
+	{
+
+		propertyList.Remove(name);
+
+		return document.RootElement.GetProperty(name).GetBoolean();
 
 	}
 

@@ -18,4 +18,6 @@ public sealed record class UserCreationOptions
 	/// </summary>
 	public string? LoginHandle { get; set; }
 
+	public bool IsAdmin { get; set; } = false;
+
 }

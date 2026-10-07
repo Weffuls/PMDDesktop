@@ -205,7 +205,8 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 
 		User user = new()
 		{
-			Name = options.DisplayName
+			Name = options.DisplayName,
+			IsAdmin = options.IsAdmin
 		};
 
 		if (options.LoginHandle is not null)

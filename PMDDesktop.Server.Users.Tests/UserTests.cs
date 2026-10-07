@@ -241,4 +241,27 @@ public class UserTests
 
 	}
 
+	[Fact]
+	public async Task AdminUserGetsPermissions()
+	{
+
+		UserManager manager = new();
+		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
+		Assert.NotNull(user);
+
+		// This test assumes that MANAGE_ROLE has AlwaysForAdmin enabled.
+		Assert.True(UserPermission.MANAGE_ROLES.AlwaysForAdmin);
+
+		Assert.False(user.HasPermission(UserPermission.MANAGE_ROLES));
+
+		await user.SetAdmin(true);
+
+		Assert.True(user.HasPermission(UserPermission.MANAGE_ROLES));
+
+		await user.SetAdmin(false);
+
+		Assert.False(user.HasPermission(UserPermission.MANAGE_ROLES));
+
+	}
+
 }

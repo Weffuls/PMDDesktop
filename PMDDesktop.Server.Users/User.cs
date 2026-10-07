@@ -80,6 +80,11 @@ public sealed class User
 	public bool? WritingEnabled { get; private set; }
 
 	/// <summary>
+	/// Specifies if this user is affected by <see cref="UserPermission.AlwaysForAdmin"/>.
+	/// </summary>
+	public bool IsAdmin { get; internal set; }
+
+	/// <summary>
 	/// <para>List of <see cref="UserAccessToken"/>s currently belonging to this <see cref="User"/>.</para>
 	/// <para>May include expired <see cref="UserAccessToken"/>s.</para>
 	/// </summary>
@@ -600,6 +605,11 @@ public sealed class User
 		if (Manager is null)
 			throw new NullReferenceException($"Can't check if {this} has a permission if {nameof(Manager)} is null!");
 
+		// Is this an admin permission?
+		// Checked after Manager because we shouldn't be checking for permissions on a detached user anyways.
+		if (permission.AlwaysForAdmin && IsAdmin)
+			return true;
+
 		foreach (UserRole role in Manager.RoleManager)
 		{
 
@@ -614,6 +624,21 @@ public sealed class User
 		}
 
 		return false;
+
+	}
+
+	/// <summary>
+	/// Set whether this <see cref="User"/> is an admin and is affected by <see cref="UserPermission.AlwaysForAdmin"/>.
+	/// </summary>
+	/// <param name="newState">Whether or not this <see cref="User"/> should be an admin.</param>
+	/// <returns>Completes task once changes are saved.</returns>
+	public async Task SetAdmin(bool newState)
+	{
+
+		IsAdmin = newState;
+
+		if (Manager is not null)
+			await WriteNewData();
 
 	}
 
