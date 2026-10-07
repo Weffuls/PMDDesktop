@@ -168,7 +168,14 @@ public sealed class UserRole
 	internal string GetRoleJSONPath()
 	{
 
-		return Path.Combine(AppContext.BaseDirectory, "roles", $"{GUID}.json");
+		return Path.Combine(GetRoleFolder(), $"{GUID}.json");
+
+	}
+
+	static internal string GetRoleFolder()
+	{
+
+		return Path.Combine(AppContext.BaseDirectory, "roles");
 
 	}
 
@@ -190,6 +197,7 @@ public sealed class UserRole
 		if (WritingEnabled != true)
 			return;
 
+		Directory.CreateDirectory(GetRoleFolder());
 		using FileStream jsonFile = File.Create(GetRoleJSONPath());
 
 		await JsonSerializer.SerializeAsync(jsonFile, this, AppInfo.JSON_OPTIONS);

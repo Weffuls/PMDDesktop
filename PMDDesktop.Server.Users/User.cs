@@ -272,6 +272,7 @@ public sealed class User
 		if (WritingEnabled != true)
 			return;
 
+		Directory.CreateDirectory(GetUserFolder());
 		using FileStream jsonFile = File.Create(GetUserJSONPath());
 
 		await JsonSerializer.SerializeAsync(jsonFile, this, AppInfo.JSON_OPTIONS);
