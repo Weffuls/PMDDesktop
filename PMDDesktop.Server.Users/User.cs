@@ -120,12 +120,15 @@ public sealed class User
 	/// <summary>
 	/// Salt and hash the user's password, then store it in HashedPassword.
 	/// </summary>
-	/// <param name="plainText">The plaintext password to be hashed.</param>
+	/// <param name="newPassword">The plaintext password to be hashed.</param>
 	/// <returns>Completes task after saving completes.</returns>
-	public async Task SetPassword(string plainText)
+	public async Task SetPassword(string? newPassword)
 	{
 
-		HashedPassword = PASSWORD_HASHER.HashPassword(this, plainText);
+		if (newPassword is string passwordText)
+			HashedPassword = PASSWORD_HASHER.HashPassword(this, passwordText);
+		else
+			HashedPassword = null;
 
 		if (Manager is not null)
 			await WriteNewData();
