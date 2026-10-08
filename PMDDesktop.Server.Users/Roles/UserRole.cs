@@ -172,7 +172,7 @@ public sealed class UserRole
 
 	}
 
-	static internal string GetRoleFolder()
+	internal static string GetRoleFolder()
 	{
 
 		return Path.Combine(AppContext.BaseDirectory, "roles");
@@ -250,6 +250,25 @@ public sealed class UserRole
 		await oldManager.WriteNewRoleOrder();
 
 		return true;
+
+	}
+
+	/// <summary>
+	/// <para>Returns the current index that this role is slotted in the role order.</para>
+	/// <para>Starts at 0, and ends at the current role count minus 1.</para>
+	/// <para>Numbers closer to 0 are first and have a higher priority in permission evaluation.</para>
+	/// </summary>
+	/// <returns>The index this role is located at in the role order.</returns>
+	public int GetCurrentOrderIndex()
+	{
+
+		if (Manager is null)
+			throw new InvalidOperationException($"{this} can't check its order index when {nameof(Manager)} is null!");
+
+		if (IsDefaultRole) // We can just assume this is the last role. It's faster + it's not even in the role order.
+			return Manager.roleOrder.Length;
+
+		return Manager.roleOrder.IndexOf(GUID);
 
 	}
 
