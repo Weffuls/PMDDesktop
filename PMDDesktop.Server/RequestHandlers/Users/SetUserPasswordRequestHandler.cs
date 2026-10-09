@@ -19,8 +19,12 @@ public class SetUserPasswordRequestHandler : JsonRequestHandler<SetUserPasswordR
 
 		// To change the login handle of someone who isn't yourself, you need the MANAGE_USERS permission.
 		if (user != requestingUser)
+		{
 			if (!requestingUser.HasPermission(UserPermission.MANAGE_USERS))
 				throw new UserRequestException($"You need permission to manage users to access this endpoint.");
+			if (!requestingUser.HigherThan(user))
+				throw new UserRequestException($"You are not high enough in the role hierarchy to perform this operation.");
+		}
 
 		await user.SetPassword(request.NewPassword);
 
