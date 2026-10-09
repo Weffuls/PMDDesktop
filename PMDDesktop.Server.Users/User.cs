@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 namespace PMDDesktop.Server.Users;
 
 [JsonConverter(typeof(UserConverter))]
-public sealed class User
+public sealed class User : IUserHierarchyComparable
 {
 
 	/// <summary>
@@ -643,6 +643,42 @@ public sealed class User
 
 		if (Manager is not null)
 			await WriteNewData();
+
+	}
+
+	/// <summary>
+	/// <para>Returns true if this <see cref="User"/> could edit <paramref name="target"/> based on <see cref="IUserHierarchyComparable"/>, given that it has the correct permissions.</para>
+	/// <para>Before you let an edit happen, ensure the user has both the correct permission and a higher hierarchy.</para>
+	/// </summary>
+	/// <returns>True if this user is higher than <paramref name="target"/>.</returns>
+	public bool HigherThan(IUserHierarchyComparable target)
+	{
+
+		return GetHierarchyPosition() > target.GetHierarchyPosition();
+
+	}
+
+	public int GetHierarchyPosition()
+	{
+
+		if (Manager is null)
+			throw new NullReferenceException($"Can't check where {this} is in the hierarchy if {nameof(Manager)} is null!");
+
+		// Checked after Manager because we shouldn't be checking for hierarchy on a detached user anyways.
+		if (IsAdmin)
+			return -1;
+
+		foreach (UserRole role in Manager.RoleManager)
+		{
+
+			if (!HasRole(role))
+				continue;
+
+			return role.GetCurrentOrderIndex();
+
+		}
+
+		throw new InvalidOperationException($"Not sure how this happened, but we didn't find a role that {this} matched with. Not even the default role.");
 
 	}
 

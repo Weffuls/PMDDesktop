@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace PMDDesktop.Server.Users.Roles;
 
 [JsonConverter(typeof(UserRoleConverter))]
-public sealed class UserRole
+public sealed class UserRole : IUserHierarchyComparable
 {
 
 	internal UserRole() { }
@@ -271,5 +271,7 @@ public sealed class UserRole
 		return Manager.roleOrder.IndexOf(GUID);
 
 	}
+
+	public int GetHierarchyPosition() => GetCurrentOrderIndex();
 
 }
