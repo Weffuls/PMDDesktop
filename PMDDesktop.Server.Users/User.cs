@@ -654,7 +654,7 @@ public sealed class User : IUserHierarchyComparable
 	public bool HigherThan(IUserHierarchyComparable target)
 	{
 
-		return GetHierarchyPosition() > target.GetHierarchyPosition();
+		return GetHierarchyPosition() < target.GetHierarchyPosition();
 
 	}
 
