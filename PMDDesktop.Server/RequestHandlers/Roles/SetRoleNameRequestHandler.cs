@@ -1,5 +1,4 @@
 ﻿using PMDDesktop.Requests.Roles;
-using PMDDesktop.Requests.Users;
 using PMDDesktop.Server.Game;
 using PMDDesktop.Server.Users;
 using PMDDesktop.Server.Users.Roles;
@@ -19,7 +18,7 @@ public class SetRoleNameRequestHandler : JsonRequestHandler<SetRoleNameRequest, 
 			throw new UserRequestException($"You need permission to manage roles to access this endpoint.");
 
 		if (!game.TryGetRole(request.GUID, out UserRole? role))
-			throw new UserRequestException($"{request.GUID} does not match a user.");
+			throw new UserRequestException($"{request.GUID} does not match a role.");
 
 		if (!requestingUser.HigherThan(role))
 			throw new UserRequestException($"You are not high enough in the role hierarchy to perform this operation.");
