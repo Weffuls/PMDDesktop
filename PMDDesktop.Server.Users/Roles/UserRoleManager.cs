@@ -93,9 +93,7 @@ public sealed class UserRoleManager : IRoleIndexable, IEnumerable<UserRole>
 			if (!Guid.TryParse(guidParsable, out Guid loadedGUID))
 				throw new Exception($"Couldn't parse {guidParsable} as a GUID at {filePath}");
 
-			string userFilePath = Path.Join(filePath, User.USER_FILE_NAME);
-
-			using FileStream readStream = File.OpenRead(userFilePath);
+			using FileStream readStream = File.OpenRead(filePath);
 
 			await LoadAndAddRoleJson(readStream, loadedGUID);
 

@@ -77,7 +77,7 @@ public sealed class User : IUserHierarchyComparable
 	/// <summary>
 	/// Is/Was <see cref="UserManager.WritingEnabled"/> on the last used or currently active <see cref="UserManager"/>.
 	/// </summary>
-	public bool? WritingEnabled { get; private set; }
+	public bool? WritingEnabled { get => Manager is not null ? Manager.WritingEnabled : field; private set; }
 
 	/// <summary>
 	/// Specifies if this user is affected by <see cref="UserPermission.AlwaysForAdmin"/>.
@@ -474,7 +474,6 @@ public sealed class User : IUserHierarchyComparable
 			throw new InvalidOperationException($"This existing value of {nameof(Manager)} is not null. Cannot attach while already attached. Does this call to {nameof(AttachToManager)} need to be skipped, or does {nameof(DetachFromManager)} need to be called first?");
 
 		Manager = manager;
-		WritingEnabled = manager.WritingEnabled;
 
 		Manager.guids.Add(GUID, this);
 
@@ -508,6 +507,7 @@ public sealed class User : IUserHierarchyComparable
 		foreach (UserAccessToken token in accessTokens)
 			DetachAccessToken(token);
 
+		WritingEnabled = Manager.WritingEnabled;
 		Manager = null;
 
 	}

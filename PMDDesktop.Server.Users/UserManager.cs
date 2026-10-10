@@ -74,12 +74,12 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 	public async Task LoadFromFilesAndEnableWriting()
 	{
 
-		// Since Users check the WritingEnabled value, we need to set this before loading.
-		WritingEnabled = true;
-
 		await LoadAllUserData();
 
 		await RoleManager.LoadFromFiles();
+
+		// This needs to be set after loading to prevent premature writing while loading.
+		WritingEnabled = true;
 
 	}
 
