@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace PMDDesktop.Server.Users.Roles;
@@ -18,6 +19,25 @@ public sealed class UserPermission
 				?? throw new NullReferenceException($"Unable to convert {field} to {nameof(UserPermission)}"));
 
 		ALL = ImmutableArray.Create([.. permissionObjects]);
+
+	}
+
+	public static bool TryGetPermissionByDataName(string dataName, [NotNullWhen(true)] out UserPermission? permission)
+	{
+
+		foreach (UserPermission checking in ALL)
+		{
+
+			if (checking.DataName != dataName)
+				continue;
+
+			permission = checking;
+			return true;
+
+		}
+
+		permission = null;
+		return false;
 
 	}
 
