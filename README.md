@@ -17,8 +17,8 @@ Here's a roadmap of features that need to be implemented before the project is r
 - [ ] Server
 	- [X] Save System
 	- [X] Asset System
-	- [ ] User System
- 		- [ ] Role System
+	- [X] User System
+ 		- [X] Role System
 	- [X] Pokémon Asset Parsing
  		- [X] Include gender differences
 		- [X] Include extra forms.
