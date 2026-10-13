@@ -1,4 +1,5 @@
-﻿using PMDDesktop.Requests.Roles;
+﻿using PMDDesktop.Requests.Permissions;
+using PMDDesktop.Requests.Roles;
 using PMDDesktop.Requests.Users;
 using PMDDesktop.Server.Users;
 using PMDDesktop.Server.Users.Roles;
@@ -56,6 +57,18 @@ internal static class GenericResponseCreators
 			IndexInRoleOrder = ofRole.GetCurrentOrderIndex(),
 			IsDefaultRole = ofRole.IsDefaultRole
 
+		};
+
+	}
+
+	internal static PermissionInfoResponse CreatePermissionInfoResponse(UserPermission ofPermission)
+	{
+
+		return new()
+		{
+			DataName = ofPermission.DataName,
+			FriendlyDescription = ofPermission.FriendlyDescription,
+			FriendlyName = ofPermission.FriendlyName
 		};
 
 	}
