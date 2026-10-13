@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	<ProjectReference Include="../PMDDesktop.Server.Users/PMDDesktop.Server.Users.csproj" />
 	<ProjectReference Include="..\PMDDesktop.Server.Assets\PMDDesktop.Server.Assets.csproj" />
 	<ProjectReference Include="..\PMDDesktop.Server.Saving\PMDDesktop.Server.Saving.csproj" />
 	<ProjectReference Include="..\PMDDesktop\PMDDesktop.csproj" />

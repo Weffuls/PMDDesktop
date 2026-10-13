@@ -1,11 +1,23 @@
 ﻿using PMDDesktop.Server.Assets;
 using PMDDesktop.Server.Saving;
+using PMDDesktop.Server.Users;
+using PMDDesktop.Server.Users.Roles;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PMDDesktop.Server.Game;
 
-public class GameState : IAssetIndexable, ISaveDataIndexable
+public class GameState : IAssetIndexable, ISaveDataIndexable, IUserIndexable, IRoleIndexable
 {
+
+	public GameState()
+	{
+
+		Saves = [];
+		Assets = new();
+		Users = new();
+		Roles = Users.RoleManager;
+
+	}
 
 	[ExcludeFromCodeCoverage]
 	public static async Task<GameState> CreateAndLoadFiles()
@@ -25,6 +37,7 @@ public class GameState : IAssetIndexable, ISaveDataIndexable
 
 		await Saves.LoadFromFilesAndEnableWriting();
 		await Assets.LoadFromFiles();
+		await Users.LoadFromFilesAndEnableWriting();
 
 	}
 
@@ -48,7 +61,19 @@ public class GameState : IAssetIndexable, ISaveDataIndexable
 		return Saves.TryGetSave(GUID, out data);
 	}
 
-	public SaveDataManager Saves { get; } = new();
-	public AssetManager Assets { get; } = new();
+	public bool TryGetUser(Guid GUID, [NotNullWhen(true)] out User? user)
+	{
+		return Users.TryGetUser(GUID, out user);
+	}
+
+	public bool TryGetRole(Guid GUID, [NotNullWhen(true)] out UserRole? role)
+	{
+		return Roles.TryGetRole(GUID, out role);
+	}
+
+	public SaveDataManager Saves { get; }
+	public AssetManager Assets { get; }
+	public UserManager Users { get; }
+	public UserRoleManager Roles { get; }
 
 }
