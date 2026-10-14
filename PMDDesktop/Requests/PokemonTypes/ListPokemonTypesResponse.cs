@@ -1,6 +1,6 @@
-﻿namespace PMDDesktop.Requests;
+﻿namespace PMDDesktop.Requests.PokemonTypes;
 
-public class ListTypesResponse : ServerResponse
+public class ListPokemonTypesResponse : ServerResponse
 {
 
 	public class TypeEntry

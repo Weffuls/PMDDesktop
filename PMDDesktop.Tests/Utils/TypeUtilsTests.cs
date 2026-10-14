@@ -1,4 +1,5 @@
 ﻿using PMDDesktop.Requests;
+using PMDDesktop.Requests.PokemonTypes;
 using PMDDesktop.Requests.Species;
 using PMDDesktop.Structs;
 using PMDDesktop.Utils;
@@ -79,11 +80,11 @@ public class TypeUtilsTests
 	// ListSpeciesRequest is a non-abstract class, so it SHOULD contain itself.
 	[InlineData(typeof(ListSpeciesRequest), typeof(ListSpeciesRequest), true)]
 	// ListTypesRequest is a non-abstract class that implements ServerRequest<>.
-	[InlineData(typeof(ServerRequest<>), typeof(ListTypesRequest), true)]
+	[InlineData(typeof(ServerRequest<>), typeof(ListPokemonTypesRequest), true)]
 	// The function should pick up assignable generic functions.
-	[InlineData(typeof(ServerRequest<ListTypesResponse>), typeof(ListTypesRequest), true)]
+	[InlineData(typeof(ServerRequest<ListPokemonTypesResponse>), typeof(ListPokemonTypesRequest), true)]
 	// It shouldn't get confused with non-assignable types that share the generic type.
-	[InlineData(typeof(ServerRequest<ListTypesResponse>), typeof(ListSpeciesRequest), false)]
+	[InlineData(typeof(ServerRequest<ListPokemonTypesResponse>), typeof(ListSpeciesRequest), false)]
 	public static void GetInstanceableClassesAssignableToTests(Type startingType, Type containsType, bool shouldContain)
 	{
 
