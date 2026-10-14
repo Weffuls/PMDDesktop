@@ -1,4 +1,5 @@
 ﻿using PMDDesktop.Requests;
+using PMDDesktop.Requests.Species;
 using PMDDesktop.Structs;
 using PMDDesktop.Utils;
 using System.Reflection;

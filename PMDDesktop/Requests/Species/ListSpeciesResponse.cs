@@ -1,4 +1,4 @@
-﻿namespace PMDDesktop.Requests;
+﻿namespace PMDDesktop.Requests.Species;
 
 public class ListSpeciesResponse : ServerResponse
 {
