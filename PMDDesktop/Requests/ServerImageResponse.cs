@@ -1,6 +1,6 @@
 ﻿namespace PMDDesktop.Requests;
 
-public class ServerImageResponse : ServerResponse
+public class ServerImageResponse : ServerJsonResponse
 {
 
 

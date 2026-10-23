@@ -1,6 +1,6 @@
 ﻿namespace PMDDesktop.Requests.Users;
 
-public sealed class ListUsersResponse : ServerResponse
+public sealed class ListUsersResponse : ServerJsonResponse
 {
 
 	/// <summary>

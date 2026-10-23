@@ -9,7 +9,7 @@ using System.Text.Json.Nodes;
 
 namespace PMDDesktop.Server.RequestHandlers;
 
-public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TReq : ServerRequest<TRes> where TRes : ServerResponse
+public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TReq : ServerRequest<TRes> where TRes : ServerJsonResponse
 {
 
 	private MemberInfo[] queryParameters;
