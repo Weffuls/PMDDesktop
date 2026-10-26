@@ -8,13 +8,13 @@ namespace PMDDesktop.Server.RequestHandlers.PokemonTypes;
 public class ListPokemonTypesRequestHandler : JsonRequestHandler<ListPokemonTypesRequest, ListPokemonTypesResponse>
 {
 
-	protected override async Task<ListPokemonTypesResponse> CreateResponse(ListPokemonTypesRequest request, GameServer game, User? requestingUser)
+	protected override async Task<ResponseJsonResult<ListPokemonTypesResponse, ResponseResultError>> CreateResponse(ListPokemonTypesRequest request, GameServer game, User? requestingUser)
 	{
 
-		return new()
+		return new(new ListPokemonTypesResponse()
 		{
 			Types = [.. game.State.Assets.OfType<PokemonType>().Select(TypeAssetToTypeEntry)]
-		};
+		});
 
 	}
 
