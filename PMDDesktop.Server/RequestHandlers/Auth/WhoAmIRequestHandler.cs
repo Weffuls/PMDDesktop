@@ -7,16 +7,16 @@ namespace PMDDesktop.Server.RequestHandlers.Auth;
 public class WhoAmIRequestHandler : JsonRequestHandler<WhoAmIRequest, WhoAmIResponse>
 {
 
-	protected override async Task<WhoAmIResponse> CreateResponse(WhoAmIRequest request, GameServer game, User? requestingUser)
+	protected override async Task<ResponseJsonResult<WhoAmIResponse, ResponseResultError>> CreateResponse(WhoAmIRequest request, GameServer game, User? requestingUser)
 	{
 
-		if (requestingUser is null)
-			throw new UserRequestException($"Please send your valid token in the Authorization header to access this endpoint.");
+		if (!GenericResponseCreators.TryAuthenticateUser(requestingUser, [], out ResponseResultError? error))
+			return new(error);
 
-		return new()
+		return new(new WhoAmIResponse()
 		{
 			GUID = requestingUser.GUID
-		};
+		});
 
 	}
 
