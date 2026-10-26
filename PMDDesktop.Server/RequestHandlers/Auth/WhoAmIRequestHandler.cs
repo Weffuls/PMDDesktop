@@ -10,7 +10,7 @@ public class WhoAmIRequestHandler : JsonRequestHandler<WhoAmIRequest, WhoAmIResp
 	protected override async Task<ResponseJsonResult<WhoAmIResponse, ResponseResultError>> CreateResponse(WhoAmIRequest request, GameServer game, User? requestingUser)
 	{
 
-		if (!GenericResponseCreators.TryAuthenticateUser(requestingUser, [], out ResponseResultError? error))
+		if (!CommonResponseHandlerChecks.TryAuthorizeUser(requestingUser, [], out ResponseResultError? error))
 			return new(error);
 
 		return new(new WhoAmIResponse()
