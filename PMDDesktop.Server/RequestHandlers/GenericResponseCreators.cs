@@ -13,7 +13,22 @@ internal static class GenericResponseCreators
 	internal static bool TryAuthenticateUser([NotNullWhen(true)] User? user, UserPermission[] permissionsNeeded, [NotNullWhen(false)] out ResponseResultError? error)
 	{
 
+		if (user is null)
+		{
+			error = new ResponseResultAuthenticationError(null);
+			return false;
+		}
 
+		IEnumerable<UserPermission> missingPermissions = permissionsNeeded.Where(permission => !user.HasPermission(permission));
+
+		if (!missingPermissions.Any())
+		{
+			error = new ResponseResultPermissionError(missingPermissions);
+			return false;
+		}
+
+		error = null;
+		return true;
 
 	}
 
