@@ -8,27 +8,24 @@ namespace PMDDesktop.Server.RequestHandlers.Roles;
 public class SetRolePermissionRequestHandler : JsonRequestHandler<SetRolePermissionRequest, RoleInfoResponse>
 {
 
-	protected override async Task<RoleInfoResponse> CreateResponse(SetRolePermissionRequest request, GameServer game, User? requestingUser)
+	protected override async Task<ResponseJsonResult<RoleInfoResponse, ResponseResultError>> CreateResponse(SetRolePermissionRequest request, GameServer game, User? requestingUser)
 	{
 
-		if (requestingUser is null)
-			throw new UserRequestException($"You need to be logged in to access this endpoint.");
+		if (!CommonResponseHandlerChecks.TryAuthorizeUser(requestingUser, [UserPermission.MANAGE_ROLES], out ResponseResultError? error1))
+			return new(error1);
 
-		if (!requestingUser.HasPermission(UserPermission.MANAGE_ROLES))
-			throw new UserRequestException($"You need permission to manage roles to access this endpoint.");
+		if (!CommonResponseHandlerChecks.TryGetRole(game, request.GUID, out UserRole? role, out ResponseResultError? error2))
+			return new(error2);
 
-		if (!game.TryGetRole(request.GUID, out UserRole? role))
-			throw new UserRequestException($"{request.GUID} does not match a role.");
+		if (!CommonResponseHandlerChecks.TryCompareHierarchy(requestingUser, role, out ResponseResultError? error3))
+			return new(error3);
 
-		if (!requestingUser.HigherThan(role))
-			throw new UserRequestException($"You are not high enough in the role hierarchy to perform this operation.");
-
-		if (!UserPermission.TryGetPermissionByDataName(request.PermissionDataName, out UserPermission? permission))
-			throw new UserRequestException($"Could not find a permission with the name '{request.PermissionDataName}' to set.");
+		if (!CommonResponseHandlerChecks.TryGetPermission(request.PermissionDataName, out UserPermission? permission, out ResponseResultError? error4))
+			return new(error4);
 
 		await role.SetPermission(permission, request.NewPermissionValue);
 
-		return GenericResponseCreators.CreateRoleInfoResponse(requestingUser, role);
+		return new(GenericResponseCreators.CreateRoleInfoResponse(requestingUser, role));
 
 	}
 

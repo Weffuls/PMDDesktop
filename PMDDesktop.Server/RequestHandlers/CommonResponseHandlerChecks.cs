@@ -111,4 +111,18 @@ internal static class CommonResponseHandlerChecks
 
 	}
 
+	internal static bool TryCompareHierarchy(User requestingUser, IUserHierarchyComparable expectedLower, [NotNullWhen(false)] out ResponseResultError? error)
+	{
+
+		if (!requestingUser.HigherThan(expectedLower))
+		{
+			error = new ResponseResultHierarchyError();
+			return false;
+		}
+
+		error = null;
+		return true;
+
+	}
+
 }

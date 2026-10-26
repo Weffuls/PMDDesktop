@@ -8,16 +8,16 @@ namespace PMDDesktop.Server.RequestHandlers.Roles;
 public class GetRoleInfoRequestHandler : JsonRequestHandler<GetRoleInfoRequest, RoleInfoResponse>
 {
 
-	protected override async Task<RoleInfoResponse> CreateResponse(GetRoleInfoRequest request, GameServer game, User? requestingUser)
+	protected override async Task<ResponseJsonResult<RoleInfoResponse, ResponseResultError>> CreateResponse(GetRoleInfoRequest request, GameServer game, User? requestingUser)
 	{
 
-		if (requestingUser is null)
-			throw new UserRequestException($"You need to be logged in to access this endpoint.");
+		if (!CommonResponseHandlerChecks.TryAuthorizeUser(requestingUser, [], out ResponseResultError? error1))
+			return new(error1);
 
-		if (!game.TryGetRole(request.GUID, out UserRole? role))
-			throw new UserRequestException($"{request.GUID} does not match a role.");
+		if (!CommonResponseHandlerChecks.TryGetRole(game, request.GUID, out UserRole? role, out ResponseResultError? error2))
+			return new(error2);
 
-		return GenericResponseCreators.CreateRoleInfoResponse(requestingUser, role);
+		return new(GenericResponseCreators.CreateRoleInfoResponse(requestingUser, role));
 
 	}
 
