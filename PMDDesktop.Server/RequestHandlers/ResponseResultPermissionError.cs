@@ -2,10 +2,10 @@
 
 namespace PMDDesktop.Server.RequestHandlers;
 
-public class ResponseResultPermissionError(params UserPermission[] permissions) : ResponseResultError
+public class ResponseResultPermissionError(params IEnumerable<UserPermission> permissions) : ResponseResultError
 {
 
-	public UserPermission[] Permissions { get; private init; } = permissions;
+	public UserPermission[] Permissions { get; private init; } = [.. permissions];
 	public override string GetErrorReason()
 	{
 
