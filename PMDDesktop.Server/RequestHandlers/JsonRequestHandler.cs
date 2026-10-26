@@ -1,7 +1,9 @@
-﻿using PMDDesktop.Requests;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using PMDDesktop.Requests;
 using PMDDesktop.Server.Game;
 using PMDDesktop.Server.Users;
 using PMDDesktop.Utils;
+using System.Buffers;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -52,11 +54,11 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 			try
 			{
 				json = (JsonObject?)await JsonNode.ParseAsync(context.Request.Body)
-					?? throw new UserRequestException("Parsed JsonNode was not a JsonObject or otherwise null.");
+					?? throw new Exception("Parsed JsonNode was not a JsonObject or otherwise null."); // TODO: Find a way to do this without throwing
 			}
 			catch (JsonException e)
 			{
-				throw new UserRequestException($"Error occurred while parsing JSON: {e.Message}", e);
+				throw new Exception($"Error occurred while parsing JSON: {e.Message}", e); // TODO: Find a way to do this without throwing
 			}
 			// Other exceptions should be unhandled. They'll be caught by HandleRequest as a 500 error.
 
@@ -67,7 +69,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 		{
 
 			if (json.ContainsKey(member.Name))
-				throw new UserRequestException($"'{member}' should be passed as a query parameter (url components after the ?) and not inside the JSON object.");
+				throw new Exception($"'{member}' should be passed as a query parameter (url components after the ?) and not inside the JSON object."); // TODO: Find a way to do this without throwing
 
 		}
 
@@ -81,12 +83,12 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 
 			// Get the member we're looking at, and remove it from our query list.
 			MemberInfo member = acceptableQueries.Find((member) => member.Name == key)
-				?? throw new UserRequestException($"Wasn't expecting a query with key '{key}'");
+				?? throw new Exception($"Wasn't expecting a query with key '{key}'"); // TODO: Find a way to do this without throwing
 			acceptableQueries.Remove(member);
 
 			if (query.Value.Count != 1) // We only allow one of each query.
 			{
-				throw new UserRequestException($"Cannot handle {query.Value.Count} values for {key}");
+				throw new Exception($"Cannot handle {query.Value.Count} values for {key}"); // TODO: Find a way to do this without throwing
 			}
 
 			// Get that value, now that we know it's a singleton, and parse it into a node.
@@ -101,7 +103,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 			}
 			catch (JsonException e)
 			{
-				throw new UserRequestException($"Error occurred while parsing query '{key}' as JSON: {e.Message}", e);
+				throw new Exception($"Error occurred while parsing query '{key}' as JSON: {e.Message}", e); // TODO: Find a way to do this without throwing
 			}
 
 			json.Add(key, node);
@@ -121,90 +123,48 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 
 		JsonObject json;
 
+		ResponseJsonResult<TRes, ResponseResultError> result;
+
 		try
 		{
 
 			json = await GetJsonObject(context);
 
-		}
-		catch (UserRequestException e) // Intended for user-facing errors, like bad inputs.
-		{
+			TReq deserialized = json.Deserialize<TReq>(AppInfo.NETWORK_JSON_OPTIONS)
+					?? throw new Exception($"Deserialized data from {context} was null.");
 
-			await WritePlainText(context, 400, e.Message);
-			return;
+			if (IRequestHandler.TryGetUserFromContext(game.State.Users, context, out User? user, out UserAccessToken? token))
+				if (token.NeedsRefresh())
+					await token.RefreshToken();
 
-		}
-		catch (Exception e)
-		{
-
-			await WritePlainText(context, 500, "Internal error while creating json object: " + e.Message);
-			return;
-
-		}
-
-		TReq deserialized;
-
-		try
-		{
-
-			deserialized = json.Deserialize<TReq>(AppInfo.NETWORK_JSON_OPTIONS)
-				?? throw new Exception($"Deserialized data from {context} was null.");
+			result = await CreateResponse(deserialized, game, user);
 
 		}
 		catch (Exception e)
 		{
 
-			await WritePlainText(context, 400, "Error while deserializing JSON: " + e.Message);
-			return;
+			result = new(new ResponseResultExceptionError(e));
 
 		}
 
-		if (IRequestHandler.TryGetUserFromContext(game.State.Users, context, out User? user, out UserAccessToken? token))
-			if (token.NeedsRefresh())
-				await token.RefreshToken();
-
-		try
+		if (!result.TryResult(out TRes? success, out ResponseResultError? error))
 		{
-
-			context.Response.StatusCode = 200;
-			context.Response.ContentType = "application/json";
-			await context.Response.WriteAsJsonAsync(await CreateResponse(deserialized, game, user), AppInfo.NETWORK_JSON_OPTIONS);
-
-		}
-		catch (UserRequestException e) // Intended for user-facing errors, like bad inputs,
-		{
-
-			await WritePlainText(context, 400, e.Message);
+			context.Response.ContentType = "text/plain";
+			context.Response.StatusCode = error.GetReturnCode();
+			byte[] messageBytes = Encoding.UTF8.GetBytes(error.GetErrorReason());
+			await context.Response.BodyWriter.WriteAsync(messageBytes);
 			return;
-
-		}
-		catch (Exception e)
-		{
-
-			await WritePlainText(context, 500, "Internal error while processing request: " + e.Message);
-			return;
-
 		}
 
-	}
+		context.Response.ContentType = "application/json";
+		context.Response.StatusCode = 200;
 
-	/// <summary>
-	/// Helper function to write a plain text response. Intended for error messages.
-	/// </summary>
-	/// <param name="context">Context to write to.</param>
-	/// <param name="code">Code to return.</param>
-	/// <param name="errorMessage">Message to send as a response.</param>
-	/// <returns></returns>
-	private static async Task WritePlainText(HttpContext context, int code, string errorMessage)
-	{
+		await context.Response.WriteAsJsonAsync(success, AppInfo.NETWORK_JSON_OPTIONS);
 
-		context.Response.StatusCode = code;
-		context.Response.ContentType = "text/plain";
-		await context.Response.BodyWriter.WriteAsync(Encoding.UTF8.GetBytes(errorMessage));
 		return;
 
 	}
 
-	protected abstract Task<TRes> CreateResponse(TReq request, GameServer game, User? requestingUser);
+	protected abstract Task<ResponseJsonResult<TRes, ResponseResultError>> CreateResponse(TReq request, GameServer game, User? requestingUser);
 
 }

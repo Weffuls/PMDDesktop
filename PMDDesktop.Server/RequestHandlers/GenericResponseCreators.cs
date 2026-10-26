@@ -1,4 +1,5 @@
-﻿using PMDDesktop.Requests.Permissions;
+﻿using System.Diagnostics.CodeAnalysis;
+using PMDDesktop.Requests.Permissions;
 using PMDDesktop.Requests.Roles;
 using PMDDesktop.Requests.Users;
 using PMDDesktop.Server.Users;
@@ -8,6 +9,13 @@ namespace PMDDesktop.Server.RequestHandlers;
 
 internal static class GenericResponseCreators
 {
+
+	internal static bool TryAuthenticateUser([NotNullWhen(true)] User? user, UserPermission[] permissionsNeeded, [NotNullWhen(false)] out ResponseResultError? error)
+	{
+
+
+
+	}
 
 	internal static UserInfoResponse CreateUserInfoResponse(User fromPOV, User ofUser)
 	{
