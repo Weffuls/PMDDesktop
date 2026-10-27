@@ -8,27 +8,33 @@ namespace PMDDesktop.Server.RequestHandlers.Users;
 public class SetUserPasswordRequestHandler : JsonRequestHandler<SetUserPasswordRequest, UserInfoResponse>
 {
 
-	protected override async Task<UserInfoResponse> CreateResponse(SetUserPasswordRequest request, GameServer game, User? requestingUser)
+	protected override async Task<ResponseJsonResult<UserInfoResponse, ResponseResultError>> CreateResponse(SetUserPasswordRequest request, GameServer game, User? requestingUser)
 	{
 
-		if (requestingUser is null)
-			throw new UserRequestException($"You need to be logged in to access this endpoint.");
+		// Check that they're logged in. We don't know what permissions they need yet.
+		if (!CommonResponseHandlerChecks.TryAuthorizeUser(requestingUser, [], out ResponseResultError? error1))
+			return new(error1);
 
-		if (!game.TryGetUser(request.GUID, out User? user))
-			throw new UserRequestException($"{request.GUID} does not match a user.");
+		if (!CommonResponseHandlerChecks.TryGetUser(game, request.GUID, out User? targetUser, out ResponseResultError? error2))
+			return new(error2);
 
 		// To change the login handle of someone who isn't yourself, you need the MANAGE_USERS permission.
-		if (user != requestingUser)
+		if (targetUser != requestingUser)
 		{
-			if (!requestingUser.HasPermission(UserPermission.MANAGE_USERS))
-				throw new UserRequestException($"You need permission to manage users to access this endpoint.");
-			if (!requestingUser.HigherThan(user))
-				throw new UserRequestException($"You are not high enough in the role hierarchy to perform this operation.");
+
+			// Do they have MANAGE_USERS?
+			if (!CommonResponseHandlerChecks.TryAuthorizeUser(requestingUser, [], out ResponseResultError? error3))
+				return new(error3);
+
+			// Are they higher in the Hierarchy?
+			if (!CommonResponseHandlerChecks.TryCompareHierarchy(requestingUser, targetUser, out ResponseResultError? error4))
+				return new(error4);
+
 		}
 
-		await user.SetPassword(request.NewPassword);
+		await targetUser.SetPassword(request.NewPassword);
 
-		return GenericResponseCreators.CreateUserInfoResponse(requestingUser, user);
+		return new(GenericResponseCreators.CreateUserInfoResponse(requestingUser, targetUser));
 
 	}
 

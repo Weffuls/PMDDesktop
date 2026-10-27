@@ -7,16 +7,16 @@ namespace PMDDesktop.Server.RequestHandlers.Users;
 public class ListUsersRequestHandler : JsonRequestHandler<ListUsersRequest, ListUsersResponse>
 {
 
-	protected override async Task<ListUsersResponse> CreateResponse(ListUsersRequest request, GameServer game, User? requestingUser)
+	protected override async Task<ResponseJsonResult<ListUsersResponse, ResponseResultError>> CreateResponse(ListUsersRequest request, GameServer game, User? requestingUser)
 	{
 
-		if (requestingUser is null)
-			throw new UserRequestException($"You need to be logged in to access this endpoint.");
+		if (!CommonResponseHandlerChecks.TryAuthorizeUser(requestingUser, [], out ResponseResultError? error1))
+			return new(error1);
 
-		return new()
+		return new(new ListUsersResponse()
 		{
 			Users = [.. game.State.Users.Select(user => GenericResponseCreators.CreateUserInfoResponse(requestingUser, user))]
-		};
+		});
 
 	}
 

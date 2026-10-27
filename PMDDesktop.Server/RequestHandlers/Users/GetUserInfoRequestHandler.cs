@@ -7,16 +7,16 @@ namespace PMDDesktop.Server.RequestHandlers.Users;
 public class GetUserInfoRequestHandler : JsonRequestHandler<GetUserInfoRequest, UserInfoResponse>
 {
 
-	protected override async Task<UserInfoResponse> CreateResponse(GetUserInfoRequest request, GameServer game, User? requestingUser)
+	protected override async Task<ResponseJsonResult<UserInfoResponse, ResponseResultError>> CreateResponse(GetUserInfoRequest request, GameServer game, User? requestingUser)
 	{
 
-		if (requestingUser is null)
-			throw new UserRequestException($"You need to be logged in to access this endpoint.");
+		if (!CommonResponseHandlerChecks.TryAuthorizeUser(requestingUser, [], out ResponseResultError? error1))
+			return new(error1);
 
-		if (!game.TryGetUser(request.GUID, out User? user))
-			throw new UserRequestException($"{request.GUID} does not match a user.");
+		if (!CommonResponseHandlerChecks.TryGetUser(game, request.GUID, out User? user, out ResponseResultError? error2))
+			return new(error2);
 
-		return GenericResponseCreators.CreateUserInfoResponse(requestingUser, user);
+		return new(GenericResponseCreators.CreateUserInfoResponse(requestingUser, user));
 
 	}
 
