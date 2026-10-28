@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using PMDDesktop.Requests;
+﻿using PMDDesktop.Requests;
+using PMDDesktop.Results;
 using PMDDesktop.Server.Game;
 using PMDDesktop.Server.Users;
 using PMDDesktop.Utils;
-using System.Buffers;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -33,8 +32,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 	/// </summary>
 	/// <param name="context">HttpContext of the request</param>
 	/// <returns></returns>
-	/// <exception cref="UserRequestException"></exception>
-	private async Task<JsonObject> GetJsonObject(HttpContext context)
+	private async Task<Result<TReq, ResponseResultError>> GetJsonObject(HttpContext context)
 	{
 
 		JsonObject json;
@@ -51,16 +49,22 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 		else
 		{
 
+			JsonNode? node;
+
 			try
 			{
-				json = (JsonObject?)await JsonNode.ParseAsync(context.Request.Body)
-					?? throw new Exception("Parsed JsonNode was not a JsonObject or otherwise null."); // TODO: Find a way to do this without throwing
+				node = await JsonNode.ParseAsync(context.Request.Body);
 			}
 			catch (JsonException e)
 			{
-				throw new Exception($"Error occurred while parsing JSON: {e.Message}", e); // TODO: Find a way to do this without throwing
+				return new(new ResponseResultRequestJsonParseError(e));
 			}
 			// Other exceptions should be unhandled. They'll be caught by HandleRequest as a 500 error.
+
+			if (node is not JsonObject parsedJson)
+				return new(new ResponseResultRequestJsonWrongTypeError(JsonValueKind.Object, node?.GetValueKind()));
+
+			json = parsedJson;
 
 		}
 
@@ -69,7 +73,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 		{
 
 			if (json.ContainsKey(member.Name))
-				throw new Exception($"'{member}' should be passed as a query parameter (url components after the ?) and not inside the JSON object."); // TODO: Find a way to do this without throwing
+				return new(new ResponseResultRequestQueryMisplacedError(member.Name));
 
 		}
 
@@ -82,13 +86,15 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 			string key = query.Key;
 
 			// Get the member we're looking at, and remove it from our query list.
-			MemberInfo member = acceptableQueries.Find((member) => member.Name == key)
-				?? throw new Exception($"Wasn't expecting a query with key '{key}'"); // TODO: Find a way to do this without throwing
+			MemberInfo? member = acceptableQueries.Find((member) => member.Name == key);
+			if (member is null)
+				return new(new ResponseResultRequestQueryUnexpectedError(key));
+
 			acceptableQueries.Remove(member);
 
 			if (query.Value.Count != 1) // We only allow one of each query.
 			{
-				throw new Exception($"Cannot handle {query.Value.Count} values for {key}"); // TODO: Find a way to do this without throwing
+				return new(new ResponseResultRequestQueryDuplicateError(key, query.Value.Count));
 			}
 
 			// Get that value, now that we know it's a singleton, and parse it into a node.
@@ -103,7 +109,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 			}
 			catch (JsonException e)
 			{
-				throw new Exception($"Error occurred while parsing query '{key}' as JSON: {e.Message}", e); // TODO: Find a way to do this without throwing
+				return new(new ResponseResultRequestJsonParseError(e, key));
 			}
 
 			json.Add(key, node);
@@ -114,38 +120,58 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 		foreach (MemberInfo nullQuery in acceptableQueries)
 			json.Add(nullQuery.Name, null);
 
-		return json;
+		// Finally, try to deserialize the object.
+		TReq? deserialized;
+		try
+		{
+			deserialized = json.Deserialize<TReq>(AppInfo.NETWORK_JSON_OPTIONS);
+		}
+		catch(JsonException e)
+		{
+			return new(new ResponseResultRequestJsonParseError(e));
+		}
+
+		if (deserialized is null)
+			return new(new ResponseResultRequestJsonWrongTypeError(JsonValueKind.Object, JsonValueKind.Null));
+
+		return new(deserialized);
+
+	}
+
+	public async Task<ResponseJsonResult<TRes, ResponseResultError>> DetermineResult(HttpContext context, GameServer game)
+	{
+
+		try
+		{
+
+			// This is responsible for all the logic that goes into creating a .NET object to use in the request handler.
+			Result<TReq, ResponseResultError> deserializedResult = await GetJsonObject(context);
+			if (!deserializedResult.TryResult(out TReq? deserialized, out ResponseResultError? error))
+				return new(error);
+
+			// This tries to return a User object if we could log them in using their token.
+			if (IRequestHandler.TryGetUserFromContext(game.State.Users, context, out User? user, out UserAccessToken? token))
+				if (token.NeedsRefresh())
+					await token.RefreshToken();
+
+			// This holds all the actual logic for responding to this specific request.
+			return await CreateResponse(deserialized, game, user);
+
+		}
+		catch (Exception e)
+		{
+
+			return new(new ResponseResultExceptionError(e));
+
+		}
 
 	}
 
 	public async Task HandleRequest(HttpContext context, GameServer game)
 	{
 
-		JsonObject json;
-
-		ResponseJsonResult<TRes, ResponseResultError> result;
-
-		try
-		{
-
-			json = await GetJsonObject(context);
-
-			TReq deserialized = json.Deserialize<TReq>(AppInfo.NETWORK_JSON_OPTIONS)
-					?? throw new Exception($"Deserialized data from {context} was null.");
-
-			if (IRequestHandler.TryGetUserFromContext(game.State.Users, context, out User? user, out UserAccessToken? token))
-				if (token.NeedsRefresh())
-					await token.RefreshToken();
-
-			result = await CreateResponse(deserialized, game, user);
-
-		}
-		catch (Exception e)
-		{
-
-			result = new(new ResponseResultExceptionError(e));
-
-		}
+		// Main chunk of the logic is inside DetermineResult.
+		ResponseJsonResult<TRes, ResponseResultError> result = await DetermineResult(context, game);
 
 		if (!result.TryResult(out TRes? success, out ResponseResultError? error))
 		{
