@@ -8,7 +8,7 @@ namespace PMDDesktop.Server.RequestHandlers.Roles;
 public class CreateRoleRequestHandler : JsonRequestHandler<CreateRoleRequest, RoleInfoResponse>
 {
 
-	protected override async Task<ResponseJsonResult<RoleInfoResponse, ResponseResultError>> CreateResponse(CreateRoleRequest request, GameServer game, User? requestingUser)
+	protected override async Task<ResponseResult<RoleInfoResponse, ResponseResultError>> CreateResponse(CreateRoleRequest request, GameServer game, User? requestingUser)
 	{
 
 		if (!CommonResponseHandlerChecks.TryAuthorizeUser(requestingUser, [UserPermission.MANAGE_ROLES], out ResponseResultError? error))

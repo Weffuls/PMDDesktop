@@ -7,7 +7,7 @@ namespace PMDDesktop.Server.RequestHandlers.Auth;
 public class WhoAmIRequestHandler : JsonRequestHandler<WhoAmIRequest, WhoAmIResponse>
 {
 
-	protected override async Task<ResponseJsonResult<WhoAmIResponse, ResponseResultError>> CreateResponse(WhoAmIRequest request, GameServer game, User? requestingUser)
+	protected override async Task<ResponseResult<WhoAmIResponse, ResponseResultError>> CreateResponse(WhoAmIRequest request, GameServer game, User? requestingUser)
 	{
 
 		if (!CommonResponseHandlerChecks.TryAuthorizeUser(requestingUser, [], out ResponseResultError? error))

@@ -8,7 +8,7 @@ namespace PMDDesktop.Server.RequestHandlers.Users;
 public class SetUserPasswordRequestHandler : JsonRequestHandler<SetUserPasswordRequest, UserInfoResponse>
 {
 
-	protected override async Task<ResponseJsonResult<UserInfoResponse, ResponseResultError>> CreateResponse(SetUserPasswordRequest request, GameServer game, User? requestingUser)
+	protected override async Task<ResponseResult<UserInfoResponse, ResponseResultError>> CreateResponse(SetUserPasswordRequest request, GameServer game, User? requestingUser)
 	{
 
 		// Check that they're logged in. We don't know what permissions they need yet.

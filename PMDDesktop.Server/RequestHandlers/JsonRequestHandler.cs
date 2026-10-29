@@ -1,12 +1,12 @@
-﻿using PMDDesktop.Requests;
+﻿using System.Reflection;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using PMDDesktop.Requests;
 using PMDDesktop.Results;
 using PMDDesktop.Server.Game;
 using PMDDesktop.Server.Users;
 using PMDDesktop.Utils;
-using System.Reflection;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace PMDDesktop.Server.RequestHandlers;
 
@@ -126,7 +126,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 		{
 			deserialized = json.Deserialize<TReq>(AppInfo.NETWORK_JSON_OPTIONS);
 		}
-		catch(JsonException e)
+		catch (JsonException e)
 		{
 			return new(new ResponseResultRequestJsonParseError(e));
 		}
@@ -138,7 +138,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 
 	}
 
-	public async Task<ResponseJsonResult<TRes, ResponseResultError>> DetermineResult(HttpContext context, GameServer game)
+	public async Task<ResponseResult<TRes, ResponseResultError>> DetermineResult(HttpContext context, GameServer game)
 	{
 
 		try
@@ -171,7 +171,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 	{
 
 		// Main chunk of the logic is inside DetermineResult.
-		ResponseJsonResult<TRes, ResponseResultError> result = await DetermineResult(context, game);
+		ResponseResult<TRes, ResponseResultError> result = await DetermineResult(context, game);
 
 		if (!result.TryResult(out TRes? success, out ResponseResultError? error))
 		{
@@ -191,6 +191,6 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 
 	}
 
-	protected abstract Task<ResponseJsonResult<TRes, ResponseResultError>> CreateResponse(TReq request, GameServer game, User? requestingUser);
+	protected abstract Task<ResponseResult<TRes, ResponseResultError>> CreateResponse(TReq request, GameServer game, User? requestingUser);
 
 }

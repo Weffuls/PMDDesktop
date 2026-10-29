@@ -7,7 +7,7 @@ namespace PMDDesktop.Server.RequestHandlers.Auth;
 public class LoginRequestHandler : JsonRequestHandler<LoginRequest, LoginResponse>
 {
 
-	protected override async Task<ResponseJsonResult<LoginResponse, ResponseResultError>> CreateResponse(LoginRequest request, GameServer game, User? requestingUser)
+	protected override async Task<ResponseResult<LoginResponse, ResponseResultError>> CreateResponse(LoginRequest request, GameServer game, User? requestingUser)
 	{
 
 		if (!game.State.Users.TryGetUserByLoginHandle(request.Handle, out User? user))
