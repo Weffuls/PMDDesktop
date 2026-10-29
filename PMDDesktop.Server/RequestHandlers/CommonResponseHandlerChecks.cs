@@ -50,7 +50,7 @@ internal static class CommonResponseHandlerChecks
 			return true;
 		}
 
-		error = new ResponseResultDataMissingError(guid.ToString(), typeof(User));
+		error = new ResponseResultIndexMissingError<User>(guid.ToString());
 		return false;
 
 	}
@@ -64,7 +64,7 @@ internal static class CommonResponseHandlerChecks
 			return true;
 		}
 
-		error = new ResponseResultDataMissingError(guid.ToString(), typeof(UserRole));
+		error = new ResponseResultIndexMissingError<UserRole>(guid.ToString());
 		return false;
 
 	}
@@ -78,7 +78,7 @@ internal static class CommonResponseHandlerChecks
 			return true;
 		}
 
-		error = new ResponseResultDataMissingError(dataName, typeof(UserPermission));
+		error = new ResponseResultIndexMissingError<UserPermission>(dataName);
 		return false;
 
 	}
@@ -92,7 +92,7 @@ internal static class CommonResponseHandlerChecks
 			return true;
 		}
 
-		error = new ResponseResultDataMissingError(guid.ToString(), typeof(TData));
+		error = new ResponseResultIndexMissingError<TData>(guid.ToString());
 		return false;
 
 	}
@@ -106,7 +106,7 @@ internal static class CommonResponseHandlerChecks
 			return true;
 		}
 
-		error = new ResponseResultDataMissingError(location, typeof(TAsset));
+		error = new ResponseResultIndexMissingError<TAsset>(location);
 		return false;
 
 	}
