@@ -62,7 +62,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 			// Other exceptions should be unhandled. They'll be caught by HandleRequest as a 500 error.
 
 			if (node is not JsonObject parsedJson)
-				return new(new ResponseResultRequestJsonWrongTypeError(JsonValueKind.Object, node?.GetValueKind()));
+				return new(new ResponseResultRequestJsonWrongValueKindError(JsonValueKind.Object, node?.GetValueKind()));
 
 			json = parsedJson;
 
@@ -132,7 +132,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 		}
 
 		if (deserialized is null)
-			return new(new ResponseResultRequestJsonWrongTypeError(JsonValueKind.Object, JsonValueKind.Null));
+			return new(new ResponseResultRequestJsonWrongValueKindError(JsonValueKind.Object, JsonValueKind.Null));
 
 		return new(deserialized);
 
@@ -176,7 +176,7 @@ public abstract class JsonRequestHandler<TReq, TRes> : IRequestHandler where TRe
 		if (!result.TryResult(out TRes? success, out ResponseResultError? error))
 		{
 			context.Response.ContentType = "text/plain";
-			context.Response.StatusCode = error.GetReturnCode();
+			context.Response.StatusCode = error.GetStatusCode();
 			byte[] messageBytes = Encoding.UTF8.GetBytes(error.GetErrorReason());
 			await context.Response.BodyWriter.WriteAsync(messageBytes);
 			return;

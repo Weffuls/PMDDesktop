@@ -1,8 +1,15 @@
 ﻿namespace PMDDesktop.Server.RequestHandlers;
 
+/// <summary>
+/// A <see cref="ResponseResultError"/> that specifies that the user is not authenticated or could not be authenticated. (Cannot log in.)
+/// </summary>
+/// <param name="providedTokenString">Optionally take in the provided token string to state that the specific token string didn't work.</param>
 public class ResponseResultAuthenticationError(string? providedTokenString) : ResponseResultError
 {
 
+	/// <summary>
+	/// The token string that was provided that failed to log in.
+	/// </summary>
 	public string? ProvidedTokenString { get; private init; } = providedTokenString;
 	public override string GetErrorReason()
 	{
@@ -13,6 +20,6 @@ public class ResponseResultAuthenticationError(string? providedTokenString) : Re
 
 	}
 
-	public override int GetReturnCode() => 401;
+	public override int GetStatusCode() => 401;
 
 }
