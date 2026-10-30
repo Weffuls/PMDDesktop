@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
-using PMDDesktop.Server.Users.Roles;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
+using PMDDesktop.Server.Users.Roles;
 
 namespace PMDDesktop.Server.Users;
 
@@ -680,6 +680,11 @@ public sealed class User : IUserHierarchyComparable
 
 		throw new InvalidOperationException($"Not sure how this happened, but we didn't find a role that {this} matched with. Not even the default role.");
 
+	}
+
+	public string GetClientFacingName()
+	{
+		return Name;
 	}
 
 	#endregion

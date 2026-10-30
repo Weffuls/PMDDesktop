@@ -116,7 +116,7 @@ internal static class CommonResponseHandlerChecks
 
 		if (!requestingUser.HigherThan(expectedLower))
 		{
-			error = new ResponseResultHierarchyError();
+			error = new ResponseResultHierarchyError(requestingUser, expectedLower);
 			return false;
 		}
 

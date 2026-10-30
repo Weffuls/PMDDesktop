@@ -274,4 +274,9 @@ public sealed class UserRole : IUserHierarchyComparable
 
 	public int GetHierarchyPosition() => GetCurrentOrderIndex();
 
+	public string GetClientFacingName()
+	{
+		return Name;
+	}
+
 }
