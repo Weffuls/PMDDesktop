@@ -26,10 +26,10 @@ internal interface IRequestHandler
 
 			Type requestType = handler.GetRequestType();
 
-			if (!ServerRequest<ServerResponse>.ATTRIBUTES.TryGetValue(requestType, out ServerRequestAttribute? attribute))
+			if (!ServerRequest<ServerJsonResponse>.ATTRIBUTES.TryGetValue(requestType, out ServerRequestAttribute? attribute))
 				throw new MissingAttributeException(requestType, typeof(ServerRequestAttribute));
 
-			EndpointMapper mapper = ServerRequest<ServerResponse>.IsAllQueryProperties(requestType)
+			EndpointMapper mapper = ServerRequest<ServerJsonResponse>.IsAllQueryProperties(requestType)
 				? server.WebApp.MapGet
 				: server.WebApp.MapPost;
 

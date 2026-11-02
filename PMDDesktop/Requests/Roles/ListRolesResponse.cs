@@ -1,6 +1,6 @@
 ﻿namespace PMDDesktop.Requests.Roles;
 
-public sealed class ListRolesResponse : ServerResponse
+public sealed class ListRolesResponse : ServerJsonResponse
 {
 
 	/// <summary>

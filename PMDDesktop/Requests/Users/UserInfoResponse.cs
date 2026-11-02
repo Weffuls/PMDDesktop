@@ -1,6 +1,6 @@
 ﻿namespace PMDDesktop.Requests.Users;
 
-public sealed class UserInfoResponse : ServerResponse
+public sealed class UserInfoResponse : ServerJsonResponse
 {
 
 	public required string DisplayName { get; set; }

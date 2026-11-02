@@ -1,6 +1,6 @@
 ﻿namespace PMDDesktop.Requests.Permissions;
 
-public sealed class ListPermissionsResponse : ServerResponse
+public sealed class ListPermissionsResponse : ServerJsonResponse
 {
 
 	/// <summary>

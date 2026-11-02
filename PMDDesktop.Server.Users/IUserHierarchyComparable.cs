@@ -15,4 +15,11 @@ public interface IUserHierarchyComparable
 	/// <returns>Number indicating the highest place in the hierarchy this user has.</returns>
 	int GetHierarchyPosition();
 
+	/// <summary>
+	/// <para>Returns a name that is reasonable to show to clients.</para>
+	/// <para>This is used in error messages relating to hierarchy comparisons.</para>
+	/// </summary>
+	/// <returns>A name to be displayed to clients.</returns>
+	string GetClientFacingName();
+
 }
