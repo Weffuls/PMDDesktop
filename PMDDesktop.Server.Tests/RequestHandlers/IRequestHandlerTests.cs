@@ -35,7 +35,7 @@ public class IRequestHandlerTests
 
 		List<Type> allRequests = [.. TypeUtils.GetInstanceableClassesAssignableTo(typeof(ServerRequest<>))];
 
-		Assert.All(allRequests, (req) => handledRequestTypes.Contains(req));
+		Assert.All(allRequests, (req) => Assert.Contains(req, handledRequestTypes));
 
 	}
 
