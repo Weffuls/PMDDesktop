@@ -10,6 +10,10 @@ public class DataIDTests
 	[InlineData("  -GReeTings-     ", "-greetings-")] // IDs should be trimmed.
 	[InlineData("AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789-", "aabbccddeeffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz0123456789-")] // All characters here should work.
 	[InlineData("awesome-sauce", "awesome-sauce")] // Nothing should change here.
+	[InlineData("W", "w")] // Make sure short strings are okay.
+	[InlineData("   O0", "o0")]
+	[InlineData("AbC  ", "abc")]
+	[InlineData("-67-", "-67-")]
 	public void ToAndBackConversions(string input, string expectedOutput)
 	{
 
@@ -32,6 +36,11 @@ public class DataIDTests
 		Assert.False(IdFromOutput != IdFromInput);
 		Assert.True(IdFromInput == IdFromOutput);
 		Assert.False(IdFromInput != IdFromOutput);
+
+		// Test that hash codes match.
+		Assert.Equal(IdFromInput.GetHashCode(), IdFromOutput.GetHashCode());
+		DataID exampleID = new("this-should-not-be-inline-data");
+		Assert.NotEqual(exampleID.GetHashCode(), IdFromInput.GetHashCode());
 
 		// If input!=output, it should not equal input.
 		if (input != expectedOutput)

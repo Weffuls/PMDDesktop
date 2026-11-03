@@ -82,7 +82,19 @@ public class DataID
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine(charData);
+
+		if (charData.Length < 4)
+			return BitConverter.ToInt32(
+				[
+					charData.ElementAtOrDefault(0),
+					charData.ElementAtOrDefault(1),
+					charData.ElementAtOrDefault(2),
+					charData.ElementAtOrDefault(3)
+				]
+			);
+
+		return BitConverter.ToInt32(charData);
+
 	}
 
 	public override bool Equals(object? obj)
