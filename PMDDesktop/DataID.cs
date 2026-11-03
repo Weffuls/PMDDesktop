@@ -1,8 +1,10 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace PMDDesktop;
 
+[JsonConverter(typeof(DataIDConverter))]
 public class DataID
 {
 
