@@ -67,12 +67,25 @@ public class DataID
 
 	}
 
-	public static bool operator ==(DataID left, DataID right)
+	public static bool operator ==(DataID? left, DataID? right)
 	{
+
+		// Null checks. If both are null then it's okay.
+		if (left is null)
+		{
+			if (right is null)
+				return true;
+			return false;
+		}
+		else if (right is null)
+		{
+			return false;
+		}
+
 		return Enumerable.SequenceEqual(left.charData, right.charData);
 	}
 
-	public static bool operator !=(DataID left, DataID right)
+	public static bool operator !=(DataID? left, DataID? right)
 	{
 		return !(left == right);
 	}
