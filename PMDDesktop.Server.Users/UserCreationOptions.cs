@@ -16,7 +16,7 @@ public sealed record class UserCreationOptions
 	/// <summary>
 	/// The initial value to set <see cref="User.LoginHandle"/>. Must be unique.
 	/// </summary>
-	public string? LoginHandle { get; set; }
+	public DataID? LoginHandle { get; set; }
 
 	public bool IsAdmin { get; set; } = false;
 

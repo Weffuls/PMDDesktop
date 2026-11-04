@@ -8,7 +8,7 @@ public class UserManagerTests
 	public static readonly UserCreationOptions DEFAULT_USER_OPTIONS = new()
 	{
 		DisplayName = "Test User",
-		LoginHandle = "test",
+		LoginHandle = new("test"),
 		PlainTextPassword = "Test123"
 	};
 

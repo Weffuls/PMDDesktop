@@ -19,11 +19,14 @@ internal class UserConverter : JsonConverter<User>
 
 		List<string> propertyList = [.. json.RootElement.EnumerateObject().Select(element => element.Name)];
 
+		string? readLoginHandle = QuickReadNullableString(json, propertyList, nameof(User.LoginHandle));
+		DataID? handle = readLoginHandle is not null ? new(readLoginHandle) : null;
+
 		User user = new()
 		{
 			Name = QuickReadString(json, propertyList, nameof(User.Name)),
 			HashedPassword = QuickReadNullableString(json, propertyList, nameof(User.HashedPassword)),
-			LoginHandle = QuickReadNullableString(json, propertyList, nameof(User.LoginHandle)),
+			LoginHandle = handle,
 			IsAdmin = QuickReadBoolean(json, propertyList, nameof(User.IsAdmin))
 		};
 
@@ -47,7 +50,7 @@ internal class UserConverter : JsonConverter<User>
 
 		writer.WriteString(nameof(User.Name), value.Name);
 		writer.WriteString(nameof(User.HashedPassword), value.HashedPassword);
-		writer.WriteString(nameof(User.LoginHandle), value.LoginHandle);
+		writer.WriteString(nameof(User.LoginHandle), value.LoginHandle?.ToString());
 		writer.WriteBoolean(nameof(User.IsAdmin), value.IsAdmin);
 
 		writer.WriteStartArray(TOKENS_PROPERTY_NAME);

@@ -6,7 +6,7 @@ public sealed class CreateUserRequest : ServerRequest<UserInfoResponse>
 
 	public required string NewName { get; set; }
 
-	public required string? NewLoginHandle { get; set; }
+	public required DataID? NewLoginHandle { get; set; }
 
 	public required string? NewPassword { get; set; }
 

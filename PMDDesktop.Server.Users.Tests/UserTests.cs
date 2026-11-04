@@ -8,7 +8,7 @@ public class UserTests
 	public static readonly UserCreationOptions DEFAULT_USER_OPTIONS = new()
 	{
 		DisplayName = "Test User",
-		LoginHandle = "test",
+		LoginHandle = new("test"),
 		PlainTextPassword = "Test123"
 	};
 
@@ -72,11 +72,11 @@ public class UserTests
 		User? user = await manager.TryCreateUser(DEFAULT_USER_OPTIONS);
 		Assert.NotNull(user);
 
-		string? loginHandle = DEFAULT_USER_OPTIONS.LoginHandle;
+		DataID? loginHandle = DEFAULT_USER_OPTIONS.LoginHandle;
 		Assert.NotNull(loginHandle);
 		Assert.True(manager.TryGetUserByLoginHandle(loginHandle, out _));
 
-		string newHandle = "new-handle";
+		DataID newHandle = new("new-handle");
 
 		Assert.True(await user.TrySetLoginHandle(newHandle));
 

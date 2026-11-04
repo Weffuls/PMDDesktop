@@ -1,7 +1,7 @@
-﻿using PMDDesktop.Server.Users.Roles;
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using PMDDesktop.Server.Users.Roles;
 
 namespace PMDDesktop.Server.Users;
 
@@ -12,7 +12,7 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 	{
 
 		DisplayName = "Default Admin User",
-		LoginHandle = "admin",
+		LoginHandle = new("admin"),
 		PlainTextPassword = "admin",
 		IsAdmin = true
 
@@ -54,7 +54,7 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 	/// <remarks>
 	/// <para>This dictionary's entries are not managed by the <see cref="UserManager"/>, but instead by the <see cref="User"/>s inside <see cref="guids"/>. <b>Do not let <see cref="UserManager"/> write to this dictionary.</b></para>
 	/// </remarks>
-	internal Dictionary<string, User> loginHandles = [];
+	internal Dictionary<DataID, User> loginHandles = [];
 
 	/// <summary>
 	/// <para>This is a dictionary with all the <see cref="UserAccessToken"/>s mapped to their <see cref="UserAccessToken.TokenString"/>.</para>
@@ -201,7 +201,7 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 	/// <param name="handle">The <see cref="User.LoginHandle"/> of the <see cref="User"/> you're looking for.</param>
 	/// <param name="user">The found <see cref="User"/>, if any was found. Will be null if the return was false.</param>
 	/// <returns>True if the <see cref="User"/> is found, and <paramref name="user"/> will not be null.</returns>
-	public bool TryGetUserByLoginHandle(string handle, [NotNullWhen(true)] out User? user)
+	public bool TryGetUserByLoginHandle(DataID handle, [NotNullWhen(true)] out User? user)
 	{
 
 		return loginHandles.TryGetValue(handle, out user);
