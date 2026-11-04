@@ -32,4 +32,37 @@ public class DataIDConverterTests
 
 	}
 
+	[Theory]
+	[InlineData("HELLO", true)]
+	[InlineData("AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789-", true)]
+	[InlineData("   O0", true)]
+	[InlineData("unawesome sauce", false)]
+	[InlineData("(cool)", false)]
+	[InlineData("#O0", false)]
+	public void JsonExceptionTests(string input, bool isValid)
+	{
+
+		string data = JsonSerializer.Serialize(input);
+
+		if (!isValid)
+		{
+
+			Assert.Throws<JsonException>(() =>
+			{
+
+				DataID? id = JsonSerializer.Deserialize<DataID>(data, AppInfo.JSON_OPTIONS);
+
+			});
+
+		}
+		else
+		{
+
+			DataID? id = JsonSerializer.Deserialize<DataID>(data, AppInfo.JSON_OPTIONS);
+			Assert.NotNull(id);
+
+		}
+
+	}
+
 }

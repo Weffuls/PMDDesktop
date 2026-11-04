@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -8,15 +9,43 @@ namespace PMDDesktop;
 public class DataID
 {
 
+	#region Error Messages
+
+	private static string GetInvalidCharacterErrorMessage(char inputChar) =>
+		$"{inputChar} cannot be stored in a {nameof(DataID)}.";
+
+	private static string GetBlankStringErrorMessage() =>
+		"You need to provide a non-null or non-whitespace string.";
+
+	#endregion
+
 	public static bool CanBeConverted(string inputString)
 	{
 
+		return CanBeConverted(inputString, out string? _);
+
+	}
+
+	public static bool CanBeConverted(string inputString, out string? failReason)
+	{
+
 		if (string.IsNullOrWhiteSpace(inputString))
+		{
+			failReason = GetBlankStringErrorMessage();
 			return false;
+		}
 
 		inputString = inputString.Trim().ToLowerInvariant();
 
-		return inputString.All(ValidChars.Contains);
+		foreach (char character in inputString)
+			if (!ValidChars.Contains(character))
+			{
+				failReason = GetInvalidCharacterErrorMessage(character);
+				return false;
+			}
+
+		failReason = null;
+		return true;
 
 	}
 
@@ -30,7 +59,7 @@ public class DataID
 	{
 
 		if (string.IsNullOrWhiteSpace(inputString))
-			throw new ArgumentException("You need to provide a non-null or non-whitespace string.", nameof(inputString));
+			throw new ArgumentException(GetBlankStringErrorMessage(), nameof(inputString));
 
 		inputString = inputString.Trim().ToLowerInvariant();
 
@@ -43,7 +72,7 @@ public class DataID
 			int location = ValidChars.IndexOf(inputChar);
 
 			if (location == -1)
-				throw new ArgumentException($"{inputChar} cannot be stored in a {nameof(DataID)}.", nameof(inputString));
+				throw new ArgumentException(GetInvalidCharacterErrorMessage(inputChar), nameof(inputString));
 
 			charData[charLoop] = (byte)location;
 
@@ -52,6 +81,8 @@ public class DataID
 		return;
 
 	}
+
+	#region Operators
 
 	public static implicit operator string(DataID data)
 	{
@@ -90,6 +121,10 @@ public class DataID
 		return !(left == right);
 	}
 
+	#endregion
+
+	#region Standard Object Overrides
+
 	public override string ToString()
 	{
 		return (string)this;
@@ -124,5 +159,7 @@ public class DataID
 		return base.Equals(obj);
 
 	}
+
+	#endregion
 
 }

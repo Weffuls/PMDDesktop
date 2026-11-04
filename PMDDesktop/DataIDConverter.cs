@@ -14,6 +14,9 @@ internal class DataIDConverter : JsonConverter<DataID>
 
 		string readString = reader.GetString() ?? throw new JsonException($"We read a null string while trying to deserialize {Type}.");
 
+		if (!DataID.CanBeConverted(readString, out string? reason))
+			throw new JsonException(reason);
+
 		return new DataID(readString);
 
 	}
