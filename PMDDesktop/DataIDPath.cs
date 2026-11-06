@@ -1,12 +1,14 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace PMDDesktop;
 
 /// <summary>
-/// <para>A struct for holding a path or location using DataIDs.</para>
+/// <para>A class for holding a path or location using DataIDs.</para>
 /// </summary>
 /// <param name="pathNodes">Array of DataIDs to use as the path.</param>
+[JsonConverter(typeof(DataIDPathConverter))]
 public class DataIDPath
 {
 	public static readonly char SPLIT_CHAR = '/';
