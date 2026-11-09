@@ -16,7 +16,7 @@ public sealed class RoleInfoResponse : ServerJsonResponse
 	/// <summary>
 	/// Dictionary of Permission "data names" (IDs) and whether they're enabled, disabled, or neither.
 	/// </summary>
-	public required Dictionary<string, bool?>? Permissions { get; set; }
+	public required Dictionary<DataID, bool?>? Permissions { get; set; }
 
 	/// <summary>
 	/// <para>The index in which this role is evaluated in the overall role order.</para>

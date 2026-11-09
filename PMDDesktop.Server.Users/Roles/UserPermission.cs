@@ -22,7 +22,7 @@ public sealed class UserPermission
 
 	}
 
-	public static bool TryGetPermissionByDataName(string dataName, [NotNullWhen(true)] out UserPermission? permission)
+	public static bool TryGetPermissionByDataName(DataID dataName, [NotNullWhen(true)] out UserPermission? permission)
 	{
 
 		foreach (UserPermission checking in ALL)
@@ -48,7 +48,7 @@ public sealed class UserPermission
 
 	public static readonly UserPermission MANAGE_USERS = new()
 	{
-		DataName = "manage-users",
+		DataName = new("manage-users"),
 		FriendlyName = "Manage Users",
 		FriendlyDescription = "Allow creation, modification, and deletion of user accounts.",
 		AlwaysForAdmin = true,
@@ -57,7 +57,7 @@ public sealed class UserPermission
 
 	public static readonly UserPermission MANAGE_ROLES = new()
 	{
-		DataName = "manage-roles",
+		DataName = new("manage-roles"),
 		FriendlyName = "Manage Roles",
 		FriendlyDescription = "Allow creation, modification, and removal of roles and their permissions.",
 		AlwaysForAdmin = true,
@@ -67,7 +67,7 @@ public sealed class UserPermission
 	/// <summary>
 	/// Name that is stored and compared to track permission in a <see cref="UserRole"/>.
 	/// </summary>
-	public required string DataName { get; init; }
+	public required DataID DataName { get; init; }
 
 	/// <summary>
 	/// User-facing name that is displayed to users when viewing permissions.

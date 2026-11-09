@@ -31,7 +31,7 @@ internal static class GenericResponseCreators
 
 		bool canSeePermissionInfo = fromPOV.HasPermission(UserPermission.MANAGE_USERS);
 
-		Dictionary<string, bool?>? permissions;
+		Dictionary<DataID, bool?>? permissions;
 
 		if (canSeePermissionInfo)
 		{

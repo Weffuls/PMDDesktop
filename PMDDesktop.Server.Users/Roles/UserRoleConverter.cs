@@ -107,7 +107,7 @@ public class UserRoleConverter : JsonConverter<UserRole>
 		foreach (JsonProperty property in jsonObj.EnumerateObject())
 		{
 
-			string dataName = property.Name;
+			DataID dataName = new(property.Name);
 
 			// We get this first, because if we can't find a permission even for a "null" permission, there's a chance we could be causing data loss in a different role.
 			UserPermission permission = UserPermission.ALL.First(perm => perm.DataName == dataName);

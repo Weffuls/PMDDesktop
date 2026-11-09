@@ -6,7 +6,7 @@ public sealed class PermissionInfoResponse : ServerJsonResponse
 	/// <summary>
 	/// This is the name used to identify this permission. Should be sent back exactly when talking about this permission with the server.
 	/// </summary>
-	public required string DataName { get; set; }
+	public required DataID DataName { get; set; }
 
 	/// <summary>
 	/// The name that's best shown to users.

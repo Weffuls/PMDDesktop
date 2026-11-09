@@ -93,7 +93,7 @@ internal static class CommonResponseHandlerChecks
 	/// <param name="permission">The <see cref="UserPermission"/>, if one was found. </param>
 	/// <param name="error">An <see cref="ResponseResultError"/>, if no <see cref="UserPermission"/> was found.</param>
 	/// <returns>True if <paramref name="permission"/> is not null; False if <paramref name="error"/> is not null.</returns>
-	internal static bool TryGetPermission(string dataName, [NotNullWhen(true)] out UserPermission? permission, [NotNullWhen(false)] out ResponseResultError? error)
+	internal static bool TryGetPermission(DataID dataName, [NotNullWhen(true)] out UserPermission? permission, [NotNullWhen(false)] out ResponseResultError? error)
 	{
 
 		if (UserPermission.TryGetPermissionByDataName(dataName, out permission))
