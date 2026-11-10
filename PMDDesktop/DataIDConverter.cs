@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace PMDDesktop;
@@ -12,12 +13,10 @@ internal class DataIDConverter : JsonConverter<DataID>
 		if (reader.TokenType != JsonTokenType.String)
 			throw new JsonException($"{Type} was expecting a string token to deserialize.");
 
-		string readString = reader.GetString() ?? throw new JsonException($"We read a null string while trying to deserialize {Type}.");
-
-		if (!DataID.CanBeConverted(readString, out string? reason))
+		if (!DataID.CanBeConverted(reader.ValueSpan, out string? reason))
 			throw new JsonException(reason);
 
-		return new DataID(readString);
+		return new DataID(reader.ValueSpan);
 
 	}
 

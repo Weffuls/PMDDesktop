@@ -8,7 +8,7 @@ public class UserConverterTests
 	public static readonly UserCreationOptions DEFAULT_USER_OPTIONS = new()
 	{
 		DisplayName = "Test User",
-		LoginHandle = new("test"),
+		LoginHandle = new("test"u8),
 		PlainTextPassword = "Test123"
 	};
 

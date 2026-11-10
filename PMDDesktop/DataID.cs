@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -11,36 +12,34 @@ public class DataID
 
 	#region Error Messages
 
-	private static string GetInvalidCharacterErrorMessage(char inputChar) =>
-		$"{inputChar} cannot be stored in a {nameof(DataID)}.";
+	private static string GetInvalidCharacterErrorMessage(byte inputByte) =>
+		$"{(char)inputByte} ({inputByte}) cannot be stored in a {nameof(DataID)}.";
 
-	private static string GetBlankStringErrorMessage() =>
-		"You need to provide a non-null or non-whitespace string.";
+	private static string GetBlankInputSpanErrorMessage() =>
+		"You need to provide a non-null input.";
 
 	#endregion
 
-	public static bool CanBeConverted(string inputString)
+	public static bool CanBeConverted(ReadOnlySpan<byte> inputSpan)
 	{
 
-		return CanBeConverted(inputString, out string? _);
+		return CanBeConverted(inputSpan, out string? _);
 
 	}
 
-	public static bool CanBeConverted(string inputString, out string? failReason)
+	public static bool CanBeConverted(ReadOnlySpan<byte> inputSpan, out string? failReason)
 	{
 
-		if (string.IsNullOrWhiteSpace(inputString))
+		if (inputSpan.Length == 0)
 		{
-			failReason = GetBlankStringErrorMessage();
+			failReason = GetBlankInputSpanErrorMessage();
 			return false;
 		}
 
-		inputString = inputString.Trim().ToLowerInvariant();
-
-		foreach (char character in inputString)
-			if (!ValidChars.Contains(character))
+		foreach (byte char8 in inputSpan)
+			if (!IsValidByte(char8))
 			{
-				failReason = GetInvalidCharacterErrorMessage(character);
+				failReason = GetInvalidCharacterErrorMessage(char8);
 				return false;
 			}
 
@@ -49,34 +48,41 @@ public class DataID
 
 	}
 
-	private static readonly ImmutableArray<char> ValidChars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-'];
+	public static bool IsValidByte(byte char8)
+	{
+
+		// this is: a-z
+		// first because it's most common imo
+		if (0x61 <= char8 && char8 <= 0x7A)
+			return true;
+
+		// this is: 0-9
+		if (0x30 <= char8 && char8 <= 0x39)
+			return true;
+
+		// this is: - (hypen)
+		if (0x2D == char8)
+			return true;
+
+		return false;
+
+	}
 
 	public int Length => charData.Length;
 
 	private readonly byte[] charData;
 
-	public DataID(string inputString)
+	public DataID(ReadOnlySpan<byte> inputSpan)
 	{
 
-		if (string.IsNullOrWhiteSpace(inputString))
-			throw new ArgumentException(GetBlankStringErrorMessage(), nameof(inputString));
+		if (inputSpan.Length == 0)
+			throw new ArgumentException(GetBlankInputSpanErrorMessage(), nameof(inputSpan));
 
-		inputString = inputString.Trim().ToLowerInvariant();
+		foreach (byte char8 in inputSpan)
+			if (!IsValidByte(char8))
+				throw new ArgumentException(GetInvalidCharacterErrorMessage(char8), nameof(inputSpan));
 
-		charData = new byte[inputString.Length];
-
-		for (int charLoop = 0; charLoop < charData.Length; ++charLoop)
-		{
-
-			char inputChar = inputString[charLoop];
-			int location = ValidChars.IndexOf(inputChar);
-
-			if (location == -1)
-				throw new ArgumentException(GetInvalidCharacterErrorMessage(inputChar), nameof(inputString));
-
-			charData[charLoop] = (byte)location;
-
-		}
+		charData = inputSpan.ToArray();
 
 		return;
 
@@ -84,17 +90,37 @@ public class DataID
 
 	#region Operators
 
-	public static implicit operator string(DataID data)
+	[return: NotNullIfNotNull(nameof(data))]
+	public static explicit operator string?(DataID? data)
 	{
 
-		StringBuilder builder = new(data.Length);
+		if (data is null)
+			return null;
 
-		foreach (byte loc in data.charData)
-		{
-			builder.Append(ValidChars[loc]);
-		}
+		return new(Encoding.UTF8.GetChars(data.charData));
 
-		return builder.ToString();
+	}
+
+	[return: NotNullIfNotNull(nameof(str))]
+	public static explicit operator DataID?(string? str)
+	{
+
+		if (str is null)
+			return null;
+
+		return new(Encoding.UTF8.GetBytes(str));
+
+	}
+
+	public static explicit operator DataID(ReadOnlySpan<byte> bytes)
+	{
+		return new(bytes);
+	}
+
+	public static implicit operator ReadOnlySpan<byte>(DataID data)
+	{
+
+		return new(data.charData);
 
 	}
 
@@ -114,6 +140,7 @@ public class DataID
 		}
 
 		return Enumerable.SequenceEqual(left.charData, right.charData);
+
 	}
 
 	public static bool operator !=(DataID? left, DataID? right)
@@ -152,6 +179,9 @@ public class DataID
 
 		if (obj is DataID data)
 			return this == data;
+
+		if (obj is byte[] bytes)
+			return Enumerable.SequenceEqual(charData, bytes);
 
 		if (obj is string str)
 			return (string)this == str;

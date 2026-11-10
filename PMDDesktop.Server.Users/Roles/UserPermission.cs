@@ -48,7 +48,7 @@ public sealed class UserPermission
 
 	public static readonly UserPermission MANAGE_USERS = new()
 	{
-		DataName = new("manage-users"),
+		DataName = new("manage-users"u8),
 		FriendlyName = "Manage Users",
 		FriendlyDescription = "Allow creation, modification, and deletion of user accounts.",
 		AlwaysForAdmin = true,
@@ -57,7 +57,7 @@ public sealed class UserPermission
 
 	public static readonly UserPermission MANAGE_ROLES = new()
 	{
-		DataName = new("manage-roles"),
+		DataName = new("manage-roles"u8),
 		FriendlyName = "Manage Roles",
 		FriendlyDescription = "Allow creation, modification, and removal of roles and their permissions.",
 		AlwaysForAdmin = true,

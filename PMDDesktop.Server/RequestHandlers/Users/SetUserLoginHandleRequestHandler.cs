@@ -33,7 +33,7 @@ public class SetUserLoginHandleRequestHandler : JsonRequestHandler<SetUserLoginH
 
 		// Check to make sure the new login handle is unique.
 		if (request.NewLoginHandle is not null && game.State.Users.TryGetUserByLoginHandle(request.NewLoginHandle, out _))
-			return new(new ResponseResultDataCollisionError(nameof(request.NewLoginHandle), request.NewLoginHandle));
+			return new(new ResponseResultDataCollisionError(nameof(request.NewLoginHandle), request.NewLoginHandle.ToString()));
 
 		if (!await targetUser.TrySetLoginHandle(request.NewLoginHandle))
 			throw new Exception($"Unable to set the login handle to '{request.NewLoginHandle}'. It may not be unique.");

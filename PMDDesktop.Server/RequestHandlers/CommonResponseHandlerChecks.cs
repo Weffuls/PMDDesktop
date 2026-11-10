@@ -102,7 +102,7 @@ internal static class CommonResponseHandlerChecks
 			return true;
 		}
 
-		error = new ResponseResultIndexMissingError<UserPermission>(dataName);
+		error = new ResponseResultIndexMissingError<UserPermission>(dataName.ToString());
 		return false;
 
 	}

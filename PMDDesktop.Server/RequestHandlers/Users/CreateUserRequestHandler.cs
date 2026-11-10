@@ -15,7 +15,7 @@ public class CreateUserRequestHandler : JsonRequestHandler<CreateUserRequest, Us
 			return new(error);
 
 		if (request.NewLoginHandle is not null && game.State.Users.TryGetUserByLoginHandle(request.NewLoginHandle, out _))
-			return new(new ResponseResultDataCollisionError(nameof(request.NewLoginHandle), request.NewLoginHandle));
+			return new(new ResponseResultDataCollisionError(nameof(request.NewLoginHandle), request.NewLoginHandle.ToString()));
 
 		UserCreationOptions options = new()
 		{

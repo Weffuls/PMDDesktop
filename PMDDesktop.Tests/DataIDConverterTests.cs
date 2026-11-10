@@ -7,18 +7,18 @@ public class DataIDConverterTests
 {
 
 	[Theory]
-	[InlineData("HELLO")]
-	[InlineData("  -GReeTings-     ")]
-	[InlineData("AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789-")]
+	[InlineData("hello")]
+	[InlineData("-greetings-")]
+	[InlineData("abcdefghijklmnopqrstuvwxyz0123456789-")]
 	[InlineData("awesome-sauce")]
-	[InlineData("W")]
-	[InlineData("   O0")]
-	[InlineData("AbC  ")]
+	[InlineData("w")]
+	[InlineData("o0")]
+	[InlineData("abc")]
 	[InlineData("-67-")]
 	public void ToAndBackJsonConversions(string input)
 	{
 
-		DataID original = new(input);
+		DataID original = new((DataID)input);
 
 		string jsonData = JsonSerializer.Serialize(original, AppInfo.JSON_OPTIONS);
 
@@ -33,12 +33,14 @@ public class DataIDConverterTests
 	}
 
 	[Theory]
-	[InlineData("HELLO", true)]
-	[InlineData("AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789-", true)]
-	[InlineData("   O0", true)]
+	[InlineData("hello", true)]
+	[InlineData("abcdefghijklmnopqrstuvwxyz0123456789-", true)]
+	[InlineData("AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789-", false)]
+	[InlineData("   O0", false)]
 	[InlineData("unawesome sauce", false)]
 	[InlineData("(cool)", false)]
 	[InlineData("#O0", false)]
+	[InlineData("awesome-sauce", true)]
 	public void JsonExceptionTests(string input, bool isValid)
 	{
 

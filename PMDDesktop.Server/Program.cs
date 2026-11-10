@@ -1,11 +1,11 @@
-﻿using PMDDesktop.Server.Assets.Builder;
+﻿using System.CommandLine;
+using PMDDesktop.Server.Assets.Builder;
 using PMDDesktop.Server.Game;
-using System.CommandLine;
 
 namespace PMDDesktop.Server;
 
 /// <summary>
-/// 
+///
 /// </summary>
 internal static class Program
 {

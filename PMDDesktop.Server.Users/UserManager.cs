@@ -12,7 +12,7 @@ public sealed class UserManager : IEnumerable<User>, IUserIndexable, IRoleIndexa
 	{
 
 		DisplayName = "Default Admin User",
-		LoginHandle = new("admin"),
+		LoginHandle = new("admin"u8),
 		PlainTextPassword = "admin",
 		IsAdmin = true
 

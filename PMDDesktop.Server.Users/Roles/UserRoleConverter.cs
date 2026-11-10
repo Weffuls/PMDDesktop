@@ -68,9 +68,9 @@ public class UserRoleConverter : JsonConverter<UserRole>
 		bool? result = value.GetPermission(permission);
 
 		if (result is bool boolResult)
-			writer.WriteBoolean(permission.DataName, boolResult);
+			writer.WriteBoolean((ReadOnlySpan<byte>)permission.DataName, boolResult);
 		else
-			writer.WriteNull(permission.DataName);
+			writer.WriteNull((ReadOnlySpan<byte>)permission.DataName);
 
 	}
 
@@ -107,17 +107,15 @@ public class UserRoleConverter : JsonConverter<UserRole>
 		foreach (JsonProperty property in jsonObj.EnumerateObject())
 		{
 
-			DataID dataName = new(property.Name);
-
 			// We get this first, because if we can't find a permission even for a "null" permission, there's a chance we could be causing data loss in a different role.
-			UserPermission permission = UserPermission.ALL.First(perm => perm.DataName == dataName);
+			UserPermission permission = UserPermission.ALL.First(perm => property.NameEquals(perm.DataName));
 
 			bool? value = property.Value.ValueKind switch
 			{
 				JsonValueKind.True => true,
 				JsonValueKind.False => false,
 				JsonValueKind.Null => null,
-				_ => throw new JsonException($"Unsupported value kind for {dataName}: {property.Value.ValueKind}")
+				_ => throw new JsonException($"Unsupported value kind for {property.Name}: {property.Value.ValueKind}")
 			};
 
 			if (value is bool boolValue)

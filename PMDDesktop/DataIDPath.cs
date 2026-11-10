@@ -11,7 +11,7 @@ namespace PMDDesktop;
 [JsonConverter(typeof(DataIDPathConverter))]
 public class DataIDPath
 {
-	public static readonly char SPLIT_CHAR = '/';
+	public static readonly byte SPLIT_CHAR = 0x2F;
 
 	public DataIDPath(params IEnumerable<DataID> pathNodes)
 	{
@@ -81,7 +81,7 @@ public class DataIDPath
 	/// </summary>
 	public override string ToString()
 	{
-		return string.Join(SPLIT_CHAR, PathNodes);
+		return string.Join((char)SPLIT_CHAR, PathNodes);
 	}
 
 	/// <summary>

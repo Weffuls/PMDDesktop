@@ -20,7 +20,7 @@ internal class UserConverter : JsonConverter<User>
 		List<string> propertyList = [.. json.RootElement.EnumerateObject().Select(element => element.Name)];
 
 		string? readLoginHandle = QuickReadNullableString(json, propertyList, nameof(User.LoginHandle));
-		DataID? handle = readLoginHandle is not null ? new(readLoginHandle) : null;
+		DataID? handle = readLoginHandle is not null ? new((DataID)readLoginHandle) : null;
 
 		User user = new()
 		{

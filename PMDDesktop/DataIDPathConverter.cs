@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Data;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace PMDDesktop;
@@ -12,19 +13,21 @@ internal class DataIDPathConverter : JsonConverter<DataIDPath>
 		if (reader.TokenType != JsonTokenType.String)
 			throw new JsonException($"{Type} was expecting a string token to deserialize.");
 
-		string readString = reader.GetString() ?? throw new JsonException($"We read a null string while trying to deserialize {Type}.");
+		MemoryExtensions.SpanSplitEnumerator<byte> parts = reader.ValueSpan.Split(DataIDPath.SPLIT_CHAR);
+		Queue<DataID> datas = [];
 
-		IEnumerable<DataID> nodes = readString.Split(DataIDPath.SPLIT_CHAR).Select(part =>
+		while (parts.MoveNext())
 		{
+			ReadOnlySpan<byte> bytes = reader.ValueSpan[parts.Current];
 
-			if (!DataID.CanBeConverted(part, out string? reason))
-				throw new JsonException(reason);
+			if (!DataID.CanBeConverted(bytes, out string? failReason))
+				throw new JsonException(failReason);
 
-			return new DataID(part);
+			datas.Enqueue(new(bytes));
 
-		});
+		}
 
-		return new DataIDPath(nodes);
+		return new DataIDPath(datas);
 
 	}
 
