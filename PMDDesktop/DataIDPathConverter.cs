@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -13,7 +14,14 @@ internal class DataIDPathConverter : JsonConverter<DataIDPath>
 		if (reader.TokenType != JsonTokenType.String)
 			throw new JsonException($"{Type} was expecting a string token to deserialize.");
 
-		return (DataIDPath)reader.ValueSpan;
+		try
+		{
+			return (DataIDPath)reader.ValueSpan;
+		}
+		catch (InvalidCastException e)
+		{
+			throw new JsonException($"Unable to cast {Encoding.UTF8.GetString(reader.ValueSpan)} to {nameof(DataIDPath)}.", e);
+		}
 
 	}
 

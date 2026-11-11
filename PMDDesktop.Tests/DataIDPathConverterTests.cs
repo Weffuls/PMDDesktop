@@ -49,6 +49,8 @@ public class DataIDPathConverterTests
 	[InlineData("\"cool/\"")]
 	[InlineData("\"/awesome/\"")]
 	[InlineData("\"\"")]
+	[InlineData("\"good/huh /good\"")]
+	[InlineData("\"good/good/ huh\"")]
 	public void ConversionErrors(string jsonData)
 	{
 
