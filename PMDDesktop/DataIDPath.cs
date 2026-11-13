@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
@@ -9,7 +10,7 @@ namespace PMDDesktop;
 /// </summary>
 /// <param name="pathNodes">Array of DataIDs to use as the path.</param>
 [JsonConverter(typeof(DataIDPathConverter))]
-public class DataIDPath
+public class DataIDPath : IEnumerable<DataID>
 {
 	public static readonly byte SPLIT_CHAR = 0x2F;
 
@@ -26,8 +27,6 @@ public class DataIDPath
 	public ImmutableArray<DataID> PathNodes { get; private init; }
 
 	public int Length { get => PathNodes.Sum(node => node.Length + 1) - 1; }
-
-	public DataID Tail { get => PathNodes.Last(); }
 
 	public override bool Equals([NotNullWhen(true)] object? obj)
 	{
@@ -62,6 +61,16 @@ public class DataIDPath
 		return !(left == right);
 	}
 
+	public static DataIDPath operator +(DataIDPath original, DataID append)
+	{
+		return new([.. original.PathNodes, append]);
+	}
+
+	public static DataIDPath operator +(DataIDPath original, IEnumerable<DataID> append)
+	{
+		return new([.. original.PathNodes, .. append]);
+	}
+
 	public override int GetHashCode()
 	{
 		return PathNodes.Length switch
@@ -84,6 +93,16 @@ public class DataIDPath
 	public override string ToString()
 	{
 		return (string)this;
+	}
+
+	public IEnumerator<DataID> GetEnumerator()
+	{
+		return ((IEnumerable<DataID>)PathNodes).GetEnumerator();
+	}
+
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return ((IEnumerable)PathNodes).GetEnumerator();
 	}
 
 	/// <summary>

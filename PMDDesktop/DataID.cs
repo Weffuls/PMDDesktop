@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.ComponentModel;
+﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -7,7 +6,7 @@ using System.Text.Json.Serialization;
 namespace PMDDesktop;
 
 [JsonConverter(typeof(DataIDConverter))]
-public class DataID
+public class DataID : IEnumerable<byte>
 {
 
 	#region Error Messages
@@ -177,10 +176,7 @@ public class DataID
 	public override bool Equals(object? obj)
 	{
 
-		if (obj is DataID data)
-			return this == data;
-
-		if (obj is byte[] bytes)
+		if (obj is IEnumerable<byte> bytes)
 			return Enumerable.SequenceEqual(charData, bytes);
 
 		if (obj is string str)
@@ -188,6 +184,16 @@ public class DataID
 
 		return base.Equals(obj);
 
+	}
+
+	public IEnumerator<byte> GetEnumerator()
+	{
+		return ((IEnumerable<byte>)charData).GetEnumerator();
+	}
+
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return charData.GetEnumerator();
 	}
 
 	#endregion
