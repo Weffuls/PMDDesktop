@@ -7,12 +7,12 @@ namespace PMDDesktop.Server.Assets.Builder.Species;
 /// </summary>
 internal class MetaPortraits : MetaVisual
 {
-	internal override AssetLocation Location => GetVisualAssetLocation("portraits");
+	internal override DataIDPath Path => GetVisualAssetLocation("portraits");
 
 	internal override async Task<Asset> CreateAsset()
 	{
 
-		SpeciesPortraits portraits = new(Location);
+		SpeciesPortraits portraits = new(Path);
 
 		await CreateVisualAssetCommon(portraits);
 

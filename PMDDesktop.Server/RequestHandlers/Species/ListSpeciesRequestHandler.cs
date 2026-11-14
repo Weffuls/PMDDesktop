@@ -12,7 +12,7 @@ public class ListSpeciesRequestHandler : JsonRequestHandler<ListSpeciesRequest, 
 
 		return new(new ListSpeciesResponse()
 		{
-			SpeciesIDs = [.. game.State.Assets.OfType<Assets.Data.Species>().Select((species) => (string)species.Location)]
+			SpeciesIDs = [.. game.State.Assets.OfType<Assets.Data.Species>().Select(species => species.Path)]
 		});
 
 	}

@@ -1,6 +1,6 @@
-﻿using PMDDesktop.GameData;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Text.Json.Serialization;
+using PMDDesktop.GameData;
 
 namespace PMDDesktop.Server.Assets.Data;
 
@@ -8,9 +8,11 @@ namespace PMDDesktop.Server.Assets.Data;
 public sealed class PokemonType : Asset, IPokemonType
 {
 
-	internal static AssetLocation DefaultTypeLocation(string typeName)
+	internal static DataID TYPES_ID = new("types"u8);
+
+	internal static DataIDPath DefaultTypeLocation(string typeName)
 	{
-		return new("types", typeName);
+		return new(TYPES_ID, (DataID)typeName);
 	}
 
 	public ImmutableArray<AssetReference<PokemonType>> Weaknesses { get; internal set; } = [];
@@ -32,9 +34,7 @@ public sealed class PokemonType : Asset, IPokemonType
 			reference.GetReference(Manager ?? throw new NullReferenceException($"Can't resolve references of Immunities of {this} because Manager is null.")
 		));
 
-	internal PokemonType(AssetLocation location) : base(location) { }
-	
 	[JsonConstructor]
-	private PokemonType() : base() { }
+	internal PokemonType(DataIDPath path) : base(path) { }
 
 }

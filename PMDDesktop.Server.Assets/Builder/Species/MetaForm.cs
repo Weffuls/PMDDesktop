@@ -1,5 +1,5 @@
-﻿using PMDDesktop.Server.Assets.Data;
-using System.Text.Json;
+﻿using System.Text.Json;
+using PMDDesktop.Server.Assets.Data;
 
 namespace PMDDesktop.Server.Assets.Builder.Species;
 
@@ -57,7 +57,7 @@ internal class MetaForm : MetaAsset, INameMatchable
 	internal List<string> OriginalNames { get; init; }
 
 	/// <summary>
-	/// The name of this <see cref="MetaForm"/>. Also used to determine the <see cref="Location"/>.
+	/// The name of this <see cref="MetaForm"/>. Also used to determine the <see cref="Path"/>.
 	/// </summary>
 	internal string Name { get; set; }
 
@@ -260,7 +260,7 @@ internal class MetaForm : MetaAsset, INameMatchable
 	/// <returns>An enumerable with all <see cref="MetaVisual"/>s pointing at this <see cref="MetaForm"/>.</returns>
 	public IEnumerable<MetaVisual> GetVisualsPointingAt() => Species.metaAssets.OfType<MetaVisual>().Where(visual => visual.ForForms.Contains(this));
 
-	internal override AssetLocation Location => new(Species.Location, "forms", Name);
+	internal override DataIDPath Path => new([.. Species.Path.PathNodes, new("forms"u8), (DataID)Name]);
 
 	internal override async Task<Asset> CreateAsset()
 	{
@@ -268,7 +268,7 @@ internal class MetaForm : MetaAsset, INameMatchable
 		// TODO: Verify if this is the best way to get the "main" form root.
 		JsonElement pokemonRoot = await PokeApiUtils.GetPokemonFromForm(FormRoots[0], Species.ApiZip);
 
-		return new SpeciesForm(Location)
+		return new SpeciesForm(Path)
 		{
 			Types = PokeApiUtils.CreateFormTypeReferences(pokemonRoot),
 			Stats = PokeApiUtils.CreatePokemonBattleStats(pokemonRoot)

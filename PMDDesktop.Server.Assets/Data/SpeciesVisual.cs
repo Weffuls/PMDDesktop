@@ -16,9 +16,7 @@ public abstract class SpeciesVisual : Asset
 	/// </summary>
 	public ImmutableArray<AssetReference<SpeciesForm>> ForForms { get; internal set; }
 
-	internal SpeciesVisual(AssetLocation location) : base(location) { }
-
 	[JsonConstructor]
-	protected internal SpeciesVisual() : base() { }
+	internal SpeciesVisual(DataIDPath path) : base(path) { }
 
 }

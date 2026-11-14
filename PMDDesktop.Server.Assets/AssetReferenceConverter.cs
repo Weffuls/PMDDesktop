@@ -9,20 +9,16 @@ internal class AssetReferenceConverter<T> : JsonConverter<AssetReference<T>> whe
 	{
 
 		if (reader.TokenType != JsonTokenType.String)
-			throw new JsonException($"{Type} was expecting a string token to deserialize.");
+			throw new JsonException($"{Type} was expecting a string token to deserialize. Instead got {reader.TokenType}");
 
-		string locationString = reader.GetString() ?? throw new JsonException($"We read a null string while trying to deserialize {Type}.");
-
-		AssetLocation location = new(locationString);
-
-		return new AssetReference<T>(location);
+		return new AssetReference<T>((DataIDPath)reader.ValueSpan);
 
 	}
 
 	public override void Write(Utf8JsonWriter writer, AssetReference<T> value, JsonSerializerOptions options)
 	{
 
-		writer.WriteStringValue(value.Location.ToString());
+		writer.WriteStringValue((string)value.Location);
 
 	}
 }

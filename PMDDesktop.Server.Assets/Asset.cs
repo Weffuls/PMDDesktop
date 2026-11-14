@@ -5,19 +5,14 @@ namespace PMDDesktop.Server.Assets;
 public abstract class Asset
 {
 
-	internal Asset(AssetLocation location)
-	{
-		Location = location;
-	}
-
 	[JsonConstructor]
-	protected internal Asset()
+	internal Asset(DataIDPath location)
 	{
-		
+		Path = location;
 	}
 
 	[JsonIgnore]
-	public AssetLocation Location { get; internal set; }
+	public DataIDPath Path { get; internal set; }
 
 	/// <summary>
 	/// The AssetManager this Asset belongs to. Can be null if not yet assigned to an AssetManager.
@@ -30,7 +25,7 @@ public abstract class Asset
 
 	public override string ToString()
 	{
-		return $"[Asset:{GetType().Name}:{Location}]";
+		return $"[Asset:{GetType().Name}:{Path}]";
 	}
 
 }

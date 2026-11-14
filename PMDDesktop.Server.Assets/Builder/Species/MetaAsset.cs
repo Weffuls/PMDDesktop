@@ -7,9 +7,9 @@ internal abstract class MetaAsset
 {
 
 	/// <summary>
-	/// The <see cref="AssetLocation"/> that <see cref="CreateAsset()"/> will save to. 
+	/// The <see cref="DataIDPath"/> that <see cref="CreateAsset()"/> will save to.
 	/// </summary>
-	internal abstract AssetLocation Location { get; }
+	internal abstract DataIDPath Path { get; }
 
 	/// <summary>
 	/// Create an <see cref="Asset"/> based on this <see cref="MetaAsset"/>.

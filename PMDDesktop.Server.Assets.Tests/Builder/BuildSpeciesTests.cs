@@ -22,7 +22,7 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 	private void GetVariants(string speciesName, out IEnumerable<SpeciesVariant> variants)
 	{
 
-		variants = fixture.assets.OfType<SpeciesVariant>().Where(variant => variant.Species.Location.Tail == speciesName);
+		variants = fixture.assets.OfType<SpeciesVariant>().Where(variant => (string)variant.Species.Location.Last() == speciesName);
 
 		Assert.Distinct(variants);
 
@@ -118,8 +118,8 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 
 		IEnumerable<SpeciesForm> forms = fixture.assets.OfType<SpeciesForm>();
 
-		Assert.All(forms, form => Assert.Contains(normalPortraits, portrait => portrait.ForForms.Any(forForm => forForm.Location == form.Location)));
-		Assert.All(forms, form => Assert.Contains(shinyPortraits, portrait => portrait.ForForms.Any(forForm => forForm.Location == form.Location)));
+		Assert.All(forms, form => Assert.Contains(normalPortraits, portrait => portrait.ForForms.Any(forForm => forForm.Location == form.Path)));
+		Assert.All(forms, form => Assert.Contains(shinyPortraits, portrait => portrait.ForForms.Any(forForm => forForm.Location == form.Path)));
 
 	}
 
@@ -132,8 +132,8 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 
 		IEnumerable<SpeciesForm> forms = fixture.assets.OfType<SpeciesForm>();
 
-		Assert.All(forms, form => Assert.Contains(normalSprites, portrait => portrait.ForForms.Any(forForm => forForm.Location == form.Location)));
-		Assert.All(forms, form => Assert.Contains(shinySprites, portrait => portrait.ForForms.Any(forForm => forForm.Location == form.Location)));
+		Assert.All(forms, form => Assert.Contains(normalSprites, portrait => portrait.ForForms.Any(forForm => forForm.Location == form.Path)));
+		Assert.All(forms, form => Assert.Contains(shinySprites, portrait => portrait.ForForms.Any(forForm => forForm.Location == form.Path)));
 
 	}
 
@@ -173,9 +173,9 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 	public void BulbasaurEvolutionLine()
 	{
 
-		Species bulbasaur = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0001-bulbasaur");
-		Species ivysaur = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0002-ivysaur");
-		Species venusaur = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0003-venusaur");
+		Species bulbasaur = fixture.assets.OfType<Species>().First(species => "0001-bulbasaur"u8.SequenceEqual(species.Path.Last()));
+		Species ivysaur = fixture.assets.OfType<Species>().First(species => "0002-ivysaur"u8.SequenceEqual(species.Path.Last()));
+		Species venusaur = fixture.assets.OfType<Species>().First(species => "0003-venusaur"u8.SequenceEqual(species.Path.Last()));
 
 		Assert.Null(bulbasaur.EvolvesFrom);
 
@@ -194,19 +194,19 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 	{
 
 		// Has gender differences, so these should be seperate.
-		SpeciesVariant maleVenusaur = fixture.assets.OfType<SpeciesVariant>().First(variant => variant.Location.Tail == "venusaur-male");
-		SpeciesVariant femaleVenusaur = fixture.assets.OfType<SpeciesVariant>().First(variant => variant.Location.Tail == "venusaur-female");
+		SpeciesVariant maleVenusaur = fixture.assets.OfType<SpeciesVariant>().First(variant => "venusaur-male"u8.SequenceEqual(variant.Path.Last()));
+		SpeciesVariant femaleVenusaur = fixture.assets.OfType<SpeciesVariant>().First(variant => "venusaur-female"u8.SequenceEqual(variant.Path.Last()));
 
 		// Default forms should be different.
 		Assert.NotEqual(maleVenusaur.DefaultForm.Location, femaleVenusaur.DefaultForm.Location);
 
 		// Both should reference venusaur-mega
-		SpeciesForm megaVenusaur = fixture.assets.OfType<SpeciesForm>().First(form => form.Location.Tail == "venusaur-mega");
+		SpeciesForm megaVenusaur = fixture.assets.OfType<SpeciesForm>().First(form => "venusaur-mega"u8.SequenceEqual(form.Path.Last()));
 		Assert.True(DoesVariantReferenceForm(maleVenusaur, megaVenusaur));
 		Assert.True(DoesVariantReferenceForm(femaleVenusaur, megaVenusaur));
 
 		// Both should reference venusaur-gmax
-		SpeciesForm gmaxVenusaur = fixture.assets.OfType<SpeciesForm>().First(form => form.Location.Tail == "venusaur-gmax");
+		SpeciesForm gmaxVenusaur = fixture.assets.OfType<SpeciesForm>().First(form => "venusaur-gmax"u8.SequenceEqual(form.Path.Last()));
 		Assert.True(DoesVariantReferenceForm(maleVenusaur, gmaxVenusaur));
 		Assert.True(DoesVariantReferenceForm(femaleVenusaur, gmaxVenusaur));
 
@@ -220,8 +220,8 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 	public void EspurrEvolutionLine()
 	{
 
-		Species espurr = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0677-espurr");
-		Species meowstic = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0678-meowstic");
+		Species espurr = fixture.assets.OfType<Species>().First(species => "0677-espurr"u8.SequenceEqual(species.Path.Last()));
+		Species meowstic = fixture.assets.OfType<Species>().First(species => "0678-meowstic"u8.SequenceEqual(species.Path.Last()));
 
 		Assert.Null(espurr.EvolvesFrom);
 
@@ -237,15 +237,15 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 
 		// Has gender differences, so these should be seperate.
 		// Unlike Venusaur, these gender differences are already baked into the API, so this is testing that they don't get split again.
-		SpeciesVariant maleMeowstic = fixture.assets.OfType<SpeciesVariant>().First(variant => variant.Location.Tail == "meowstic-male");
-		SpeciesVariant femaleMeowstic = fixture.assets.OfType<SpeciesVariant>().First(variant => variant.Location.Tail == "meowstic-female");
+		SpeciesVariant maleMeowstic = fixture.assets.OfType<SpeciesVariant>().First(variant => "meowstic-male"u8.SequenceEqual(variant.Path.Last()));
+		SpeciesVariant femaleMeowstic = fixture.assets.OfType<SpeciesVariant>().First(variant => "meowstic-female"u8.SequenceEqual(variant.Path.Last()));
 
 		// Default forms should be different.
 		Assert.NotEqual(maleMeowstic.DefaultForm.Location, femaleMeowstic.DefaultForm.Location);
 
 		// Both should reference meowstic-mega
 		// They are seperate in the API, but they should be merged in the final asset build, as they do not have unique properties.
-		SpeciesForm megaMeowstic = fixture.assets.OfType<SpeciesForm>().First(form => form.Location.Tail == "meowstic-mega");
+		SpeciesForm megaMeowstic = fixture.assets.OfType<SpeciesForm>().First(form => "meowstic-mega"u8.SequenceEqual(form.Path.Last()));
 		Assert.True(DoesVariantReferenceForm(maleMeowstic, megaMeowstic));
 		Assert.True(DoesVariantReferenceForm(femaleMeowstic, megaMeowstic));
 
@@ -263,8 +263,8 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 	public void FomantisEvolutionLine()
 	{
 
-		Species fomantis = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0753-fomantis");
-		Species lurantis = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0754-lurantis");
+		Species fomantis = fixture.assets.OfType<Species>().First(species => "0753-fomantis"u8.SequenceEqual(species.Path.Last()));
+		Species lurantis = fixture.assets.OfType<Species>().First(species => "0754-lurantis"u8.SequenceEqual(species.Path.Last()));
 
 		Assert.Null(fomantis.EvolvesFrom);
 
@@ -282,8 +282,8 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 
 		// Since lurantis-totem doesn't have unique stats or spritework, it shouldn't be included.
 
-		Assert.DoesNotContain(variants, variant => variant.Location.Tail.Contains("totem"));
-		Assert.DoesNotContain(forms, form => form.Location.Tail.Contains("totem"));
+		Assert.DoesNotContain(variants, variant => ((string)variant.Path.Last()).Contains("totem"));
+		Assert.DoesNotContain(forms, form => ((string)form.Path.Last()).Contains("totem"));
 
 		// There should only be 1 Lurantis form/variant
 		Assert.Single(variants);
@@ -305,9 +305,9 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 	public void ScatterbugEvolutionLine()
 	{
 
-		Species scatterbug = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0664-scatterbug");
-		Species spewpa = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0665-spewpa");
-		Species vivillon = fixture.assets.OfType<Species>().First(species => species.Location.Tail == "0666-vivillon");
+		Species scatterbug = fixture.assets.OfType<Species>().First(species => "0664-scatterbug"u8.SequenceEqual(species.Path.Last()));
+		Species spewpa = fixture.assets.OfType<Species>().First(species => "0665-spewpa"u8.SequenceEqual(species.Path.Last()));
+		Species vivillon = fixture.assets.OfType<Species>().First(species => "0666-vivillon"u8.SequenceEqual(species.Path.Last()));
 
 		Assert.Null(scatterbug.EvolvesFrom);
 
@@ -326,7 +326,7 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 	{
 
 		// Since each Scatterbug form is NOT unique (no unique artwork), they should be merged into one.
-		Assert.All(fixture.assets, asset => Assert.DoesNotContain(GetScatterbugAPINames(), name => name == asset.Location.Tail));
+		Assert.All(fixture.assets, asset => Assert.DoesNotContain(GetScatterbugAPINames(), name => name == (string)asset.Path.Last()));
 
 		// There should only be one variant & form.
 		GetVariantsAndForms("0664-scatterbug", out IEnumerable<SpeciesVariant> variants, out IEnumerable<SpeciesForm> forms);
@@ -334,8 +334,8 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 		Assert.Single(forms);
 
 		// That single variant & form's name should be simple.
-		Assert.Contains(fixture.assets.OfType<SpeciesForm>(), form => form.Location.Tail == "scatterbug");
-		Assert.Contains(fixture.assets.OfType<SpeciesVariant>(), form => form.Location.Tail == "scatterbug");
+		Assert.Contains(fixture.assets.OfType<SpeciesForm>(), form => "scatterbug"u8.SequenceEqual(form.Path.Last()));
+		Assert.Contains(fixture.assets.OfType<SpeciesVariant>(), variant => "scatterbug"u8.SequenceEqual(variant.Path.Last()));
 
 	}
 
@@ -345,7 +345,7 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 
 		// Since each Spewpa form is NOT unique (no unique artwork), they should be merged into one.
 
-		Assert.All(fixture.assets, asset => Assert.DoesNotContain(GetSpewpaAPINames(), name => name == asset.Location.Tail));
+		Assert.All(fixture.assets, asset => Assert.DoesNotContain(GetSpewpaAPINames(), name => name == (string)asset.Path.Last()));
 
 		// There should only be one variant & form.
 		GetVariantsAndForms("0665-spewpa", out IEnumerable<SpeciesVariant> variants, out IEnumerable<SpeciesForm> forms);
@@ -353,8 +353,8 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 		Assert.Single(forms);
 
 		// That single variant & form's name should be simple.
-		Assert.Contains(fixture.assets.OfType<SpeciesForm>(), form => form.Location.Tail == "spewpa");
-		Assert.Contains(fixture.assets.OfType<SpeciesVariant>(), form => form.Location.Tail == "spewpa");
+		Assert.Contains(fixture.assets.OfType<SpeciesForm>(), form => "spewpa"u8.SequenceEqual(form.Path.Last()));
+		Assert.Contains(fixture.assets.OfType<SpeciesVariant>(), form => "spewpa"u8.SequenceEqual(form.Path.Last()));
 
 	}
 
@@ -369,12 +369,12 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 		Assert.Equal(GetVivillonAPINames().Count(), forms.Count());
 
 		// Since each Vivillon form is unique (has unique artwork), they should be independently selectable.
-		Assert.All(GetVivillonAPINames(), name => Assert.Contains(forms, form => form.Location.Tail == name));
-		Assert.All(GetVivillonAPINames(), name => Assert.Contains(variants, variant => variant.Location.Tail == name));
+		Assert.All(GetVivillonAPINames(), name => Assert.Contains(forms, form => (string)form.Path.Last() == name));
+		Assert.All(GetVivillonAPINames(), name => Assert.Contains(variants, variant => (string)variant.Path.Last() == name));
 
 		// There should not be a standalone, variantless version.
-		Assert.DoesNotContain(fixture.assets.OfType<SpeciesForm>(), form => form.Location.Tail == "vivillon");
-		Assert.DoesNotContain(fixture.assets.OfType<SpeciesVariant>(), form => form.Location.Tail == "vivillon");
+		Assert.DoesNotContain(fixture.assets.OfType<SpeciesForm>(), form => "vivillon"u8.SequenceEqual(form.Path.Last()));
+		Assert.DoesNotContain(fixture.assets.OfType<SpeciesVariant>(), form => "vivillon"u8.SequenceEqual(form.Path.Last()));
 
 		// They should each reference a unique base form.
 		Assert.Distinct(variants.Select(variant => variant.DefaultForm.Location));
@@ -395,7 +395,7 @@ public class BuildSpeciesTests(BuildSpeciesFixture fixture) : IClassFixture<Buil
 		foreach (SpeciesForm form in forms)
 		{
 
-			IEnumerable<SpeciesVisual> visualsPointingTo = fixture.assets.OfType<SpeciesVisual>().Where(visual => visual.ForForms.Any(forForm => forForm.Location == form.Location));
+			IEnumerable<SpeciesVisual> visualsPointingTo = fixture.assets.OfType<SpeciesVisual>().Where(visual => visual.ForForms.Any(forForm => forForm.Location == form.Path));
 			IEnumerable<SpeciesPortraits> portraits = visualsPointingTo.OfType<SpeciesPortraits>();
 			IEnumerable<SpeciesSprites> sprites = visualsPointingTo.OfType<SpeciesSprites>();
 

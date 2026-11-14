@@ -7,9 +7,7 @@ public sealed class Species : Asset
 {
 
 	[JsonConstructor]
-	private Species() : this(new()) { }
-
-	internal Species(AssetLocation location) : base(location) { }
+	internal Species(DataIDPath path) : base(path) { }
 
 	public SpeciesEvolutionDetails? EvolvesFrom { get; internal set; }
 

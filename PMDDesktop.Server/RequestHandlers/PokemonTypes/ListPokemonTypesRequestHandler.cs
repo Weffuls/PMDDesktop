@@ -23,7 +23,7 @@ public class ListPokemonTypesRequestHandler : JsonRequestHandler<ListPokemonType
 
 		return new()
 		{
-			ID = type.Location,
+			ID = type.Path,
 			Immunities = [.. type.Immunities.Select((reference) => reference.Location.ToString())],
 			Weaknesses = [.. type.Weaknesses.Select((reference) => reference.Location.ToString())],
 			Resistances = [.. type.Resistances.Select((reference) => reference.Location.ToString())]

@@ -1,9 +1,9 @@
-﻿using PMDDesktop.Exceptions;
-using PMDDesktop.Utils;
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
+using PMDDesktop.Exceptions;
+using PMDDesktop.Utils;
 
 namespace PMDDesktop.Server.Assets;
 
@@ -17,11 +17,6 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 
 	}
 
-	private static readonly EnumerationOptions ENUMERATION_OPTIONS = new()
-	{
-		RecurseSubdirectories = true
-	};
-
 	/// <summary>
 	/// This lists all asset file names with their corresponding Types.
 	/// </summary>
@@ -33,7 +28,7 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 	/// <summary>
 	/// This lists all known assets. Assets can be accessed with Get<T>() and AssetReferences.
 	/// </summary>
-	private readonly Dictionary<AssetLocation, Asset> allAssets = [];
+	private readonly Dictionary<DataIDPath, Asset> allAssets = [];
 
 	public IEnumerable<KeyValuePair<string, Type>> EnumerateAssetTypes()
 	{
@@ -79,7 +74,7 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 				throw new InvalidOperationException($"{asset} already has Manager {asset.Manager} assigned to it.");
 		}
 
-		if (allAssets.TryGetValue(asset.Location, out Asset? blockingAsset))
+		if (allAssets.TryGetValue(asset.Path, out Asset? blockingAsset))
 		{
 
 			if (blockingAsset == asset)
@@ -89,7 +84,7 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 
 		}
 
-		allAssets.Add(asset.Location, asset);
+		allAssets.Add(asset.Path, asset);
 
 		asset.Manager = this;
 
@@ -108,12 +103,12 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 	private static async Task WriteAsset(Asset asset)
 	{
 
-		string dirPath = asset.Location.GetDirectory();
+		string dirPath = GetAssetDirectory(asset.Path);
 
 		if (!Directory.Exists(dirPath))
 			Directory.CreateDirectory(dirPath);
 
-		string filePath = asset.Location.GetFilePath(asset);
+		string filePath = GetAssetFilePath(asset);
 		Type type = asset.GetType();
 
 		using FileStream stream = File.Create(filePath);
@@ -126,7 +121,7 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 
 	}
 
-	public T GetAsset<T>(AssetLocation location) where T : Asset
+	public T GetAsset<T>(DataIDPath location) where T : Asset
 	{
 
 		if (TryGetAsset(location, out T? asset))
@@ -139,10 +134,10 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 
 	}
 
-	public bool TryGetAsset<T>(AssetLocation location, [NotNullWhen(true)] out T? asset) where T : Asset
+	public bool TryGetAsset<T>(DataIDPath path, [NotNullWhen(true)] out T? asset) where T : Asset
 	{
 
-		allAssets.TryGetValue(location, out Asset? gotAsset);
+		allAssets.TryGetValue(path, out Asset? gotAsset);
 
 		asset = gotAsset as T;
 
@@ -160,29 +155,104 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 	private async Task LoadAllAssets()
 	{
 
-		string assetDirectory = AssetLocation.GetAssetsDirectory();
+		Dictionary<string, DataID> IDs = [];
 
-		foreach (string filePath in Directory.EnumerateFiles(assetDirectory, "*.json", ENUMERATION_OPTIONS))
+		foreach (string filePath in Directory.EnumerateDirectories(GetAssetDirectory()))
 		{
 
-			string name = Path.GetFileNameWithoutExtension(filePath).ToLowerInvariant();
+			string directory = Path.GetFileName(filePath);
 
-			if (!assetFileTypes.TryGetValue(name, out Type? importType))
-				throw new Exception($"Couldn't find {name} as an asset type for {filePath}.");
+			// Skip "hidden" directories!!
+			if (directory.StartsWith('.'))
+				continue;
 
-			using FileStream readStream = File.OpenRead(filePath);
+			DataID node = (DataID)directory;
 
-			object deserialized = JsonSerializer.Deserialize(readStream, importType, AppInfo.JSON_OPTIONS)
-				?? throw new Exception($"Deserialized asset data from {filePath} was null.");
-
-			if (deserialized is not Asset asset)
-				throw new InvalidCastException($"{deserialized} couldn't be cast to Asset");
-
-			asset.Location = AssetLocation.LocationFromPath(filePath);
-
-			Add(asset);
+			await LoadAllAssetsRecursive(new(node), IDs);
 
 		}
+
+	}
+
+	private async Task LoadAssetAtIfExists(DataIDPath currentPath)
+	{
+
+		string[] files = [.. Directory.GetFiles(GetAssetDirectory(currentPath), "*.json").Where(path => !path.StartsWith('.'))];
+
+		if (files.Length == 0)
+			return;
+
+		if (files.Length != 1)
+			throw new Exception($"There can only be one .json file in {currentPath}");
+
+		string filePath = files[0];
+
+		string name = Path.GetFileNameWithoutExtension(filePath).ToLowerInvariant();
+
+		if (!assetFileTypes.TryGetValue(name, out Type? importType))
+			throw new Exception($"Couldn't find {name} as an asset type for {filePath}.");
+
+		using FileStream readStream = File.OpenRead(filePath);
+
+		object deserialized = JsonSerializer.Deserialize(readStream, importType, AppInfo.JSON_OPTIONS)
+			?? throw new Exception($"Deserialized asset data from {filePath} was null.");
+
+		if (deserialized is not Asset asset)
+			throw new InvalidCastException($"{deserialized} couldn't be cast to Asset");
+
+		asset.Path = currentPath;
+
+		Add(asset);
+
+	}
+
+	private async Task LoadAllAssetsRecursive(DataIDPath currentPath, Dictionary<string, DataID> IDs)
+	{
+
+		await LoadAssetAtIfExists(currentPath);
+
+		foreach (string filePath in Directory.EnumerateDirectories(GetAssetDirectory(currentPath)))
+		{
+
+			string directory = Path.GetFileName(filePath);
+
+			// Skip "hidden" directories!!
+			if (directory.StartsWith('.'))
+				continue;
+
+			DataID node = (DataID)directory;
+
+			await LoadAllAssetsRecursive(currentPath + node, IDs);
+
+		}
+
+	}
+
+	internal static string GetAssetDirectory()
+	{
+
+		return Path.Join(AppContext.BaseDirectory, "assets");
+
+	}
+
+	internal static string GetAssetDirectory(DataIDPath path)
+	{
+
+		return Path.Join([GetAssetDirectory(), (string)path]);
+
+	}
+
+	internal static string GetAssetFilePath(Asset asset)
+	{
+
+		Type type = asset.GetType();
+
+		AssetFileNameAttribute? fileNameAttribute = type.GetCustomAttribute<AssetFileNameAttribute>()
+			?? throw new MissingAttributeException(type, typeof(AssetFileNameAttribute));
+
+		string fileName = fileNameAttribute.FileName;
+
+		return Path.Join([GetAssetDirectory(asset.Path), fileName + ".json"]);
 
 	}
 

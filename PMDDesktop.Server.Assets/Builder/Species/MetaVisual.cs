@@ -1,6 +1,6 @@
-﻿using PMDDesktop.Server.Assets.Data;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Text.Json;
+using PMDDesktop.Server.Assets.Data;
 
 namespace PMDDesktop.Server.Assets.Builder.Species;
 
@@ -11,11 +11,11 @@ internal abstract class MetaVisual : MetaAsset, INameMatchable
 {
 
 	/// <summary>
-	/// Function to help determine <see cref="MetaAsset.Location"/> for <see cref="MetaVisual"/>s.
+	/// Function to help determine <see cref="MetaAsset.Path"/> for <see cref="MetaVisual"/>s.
 	/// </summary>
 	/// <param name="typeFolder">The name of the folder to distinguish this asset's type, for example "portraits" or "sprites".</param>
 	/// <returns></returns>
-	protected AssetLocation GetVisualAssetLocation(string typeFolder)
+	protected DataIDPath GetVisualAssetLocation(string typeFolder)
 	{
 
 		IEnumerable<string> names = groupNames
@@ -24,7 +24,7 @@ internal abstract class MetaVisual : MetaAsset, INameMatchable
 
 		string groupFolderName = string.Join('-', names);
 
-		return new(Species.Location, typeFolder, groupFolderName);
+		return new([.. Species.Path.PathNodes, (DataID)typeFolder, (DataID)groupFolderName]);
 
 	}
 
@@ -94,9 +94,9 @@ internal abstract class MetaVisual : MetaAsset, INameMatchable
 	protected async Task CreateVisualAssetCommon(SpeciesVisual visual)
 	{
 
-		visual.Location = Location;
+		visual.Path = Path;
 		visual.Shiny = isShiny;
-		visual.ForForms = ImmutableArray.Create([.. ForForms.Select(form => new AssetReference<SpeciesForm>(form.Location))]);
+		visual.ForForms = ImmutableArray.Create([.. ForForms.Select(form => new AssetReference<SpeciesForm>(form.Path))]);
 
 	}
 

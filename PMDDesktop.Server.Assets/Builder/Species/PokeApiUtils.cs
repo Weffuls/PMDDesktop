@@ -1,9 +1,9 @@
-﻿using PMDDesktop.GameData;
-using PMDDesktop.Server.Assets.Builder.ZipScavenger;
-using PMDDesktop.Server.Assets.Data;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.IO.Compression;
 using System.Text.Json;
+using PMDDesktop.GameData;
+using PMDDesktop.Server.Assets.Builder.ZipScavenger;
+using PMDDesktop.Server.Assets.Data;
 
 namespace PMDDesktop.Server.Assets.Builder.Species;
 
@@ -317,7 +317,7 @@ internal static class PokeApiUtils
 
 		return new()
 		{
-			FromSpecies = new(evolvesFromSpecies.Location),
+			FromSpecies = new(evolvesFromSpecies.Path),
 			MinimumLevel = minimumLevel
 		};
 

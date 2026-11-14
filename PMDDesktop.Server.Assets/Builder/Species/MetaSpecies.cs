@@ -1,5 +1,5 @@
-﻿using PMDDesktop.Server.Assets.Builder.ZipScavenger;
-using System.Text.Json;
+﻿using System.Text.Json;
+using PMDDesktop.Server.Assets.Builder.ZipScavenger;
 
 namespace PMDDesktop.Server.Assets.Builder.Species;
 
@@ -8,6 +8,8 @@ namespace PMDDesktop.Server.Assets.Builder.Species;
 /// </summary>
 internal class MetaSpecies : MetaAsset
 {
+
+	internal static DataID SPECIES_ID = new("species"u8);
 
 	/// <summary>
 	/// Create a new <see cref="MetaSpecies"/> based on a <paramref name="pokemonSpeciesRoot"/>.
@@ -47,7 +49,7 @@ internal class MetaSpecies : MetaAsset
 	internal JsonElement PokemonSpeciesRoot { get; init; }
 
 	/// <summary>
-	/// The name of the tail end of the <see cref="Location"/> that the <see cref="Data.Species"/> will be saved to.
+	/// The name of the tail end of the <see cref="Path"/> that the <see cref="Data.Species"/> will be saved to.
 	/// </summary>
 	internal string DataName => FormatDataName(SpeciesIndex, SoloName);
 
@@ -66,7 +68,7 @@ internal class MetaSpecies : MetaAsset
 	/// </summary>
 	internal string FormattedIndex => FormatIndex(SpeciesIndex);
 
-	internal override AssetLocation Location => new("species", DataName);
+	internal override DataIDPath Path => new(SPECIES_ID, (DataID)DataName);
 
 	/// <summary>
 	/// A list of all <see cref="MetaAsset"/>s connected to this <see cref="MetaSpecies"/>, <b>including itself</b>.
@@ -76,7 +78,7 @@ internal class MetaSpecies : MetaAsset
 	internal override async Task<Asset> CreateAsset()
 	{
 
-		return new Data.Species(Location)
+		return new Data.Species(Path)
 		{
 			EvolvesFrom = await PokeApiUtils.ResolveEvolutionDetails(this)
 		};

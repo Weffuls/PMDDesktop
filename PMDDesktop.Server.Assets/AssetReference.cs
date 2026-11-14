@@ -21,7 +21,7 @@ public sealed class AssetReference<T> where T : Asset
 	public AssetReference(T initalValue)
 	{
 
-		Location = initalValue.Location;
+		Location = initalValue.Path;
 
 	}
 
@@ -29,7 +29,7 @@ public sealed class AssetReference<T> where T : Asset
 	/// Creates an Asset Reference and sets its location explicitly.
 	/// </summary>
 	/// <param name="location">The location that this asset is at.</param>
-	internal AssetReference(AssetLocation location)
+	internal AssetReference(DataIDPath location)
 	{
 
 		Location = location;
@@ -37,7 +37,7 @@ public sealed class AssetReference<T> where T : Asset
 	}
 
 	[JsonInclude]
-	public AssetLocation Location { get; private set; }
+	public DataIDPath Location { get; private set; }
 
 	public T GetReference(IAssetIndexable assets)
 	{

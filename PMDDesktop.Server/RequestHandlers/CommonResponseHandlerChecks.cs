@@ -135,20 +135,20 @@ internal static class CommonResponseHandlerChecks
 	/// <para>Intended to be used in senarios where a response cannot continue if the <see cref="Asset"/> cannot be found.</para>
 	/// </summary>
 	/// <param name="indexable">A <see cref="IAssetIndexable"/> to get the <typeparamref name="TAsset"/> from.</param>
-	/// <param name="location">The <see cref="AssetLocation"/> of the <typeparamref name="TAsset"/> you're trying to find.</param>
+	/// <param name="path">The <see cref="AssetLocation"/> of the <typeparamref name="TAsset"/> you're trying to find.</param>
 	/// <param name="asset">The <typeparamref name="TAsset"/> if one was found. </param>
 	/// <param name="error">An <see cref="ResponseResultError"/>, if no <typeparamref name="TAsset"/> was found.</param>
 	/// <returns>True if <paramref name="data"/> is not null; False if <paramref name="error"/> is not null.</returns>
-	internal static bool TryGetAsset<TAsset>(IAssetIndexable indexable, AssetLocation location, [NotNullWhen(true)] out TAsset? asset, [NotNullWhen(false)] out ResponseResultError? error) where TAsset : Asset
+	internal static bool TryGetAsset<TAsset>(IAssetIndexable indexable, DataIDPath path, [NotNullWhen(true)] out TAsset? asset, [NotNullWhen(false)] out ResponseResultError? error) where TAsset : Asset
 	{
 
-		if (indexable.TryGetAsset(location, out asset))
+		if (indexable.TryGetAsset(path, out asset))
 		{
 			error = null;
 			return true;
 		}
 
-		error = new ResponseResultIndexMissingError<TAsset>(location);
+		error = new ResponseResultIndexMissingError<TAsset>((string)path);
 		return false;
 
 	}
