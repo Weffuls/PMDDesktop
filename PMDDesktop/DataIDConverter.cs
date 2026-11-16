@@ -23,7 +23,7 @@ internal class DataIDConverter : JsonConverter<DataID>
 	public override void Write(Utf8JsonWriter writer, DataID value, JsonSerializerOptions options)
 	{
 
-		writer.WriteStringValue(value.ToString());
+		writer.WriteStringValue(value);
 
 	}
 

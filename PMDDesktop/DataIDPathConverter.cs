@@ -28,7 +28,7 @@ internal class DataIDPathConverter : JsonConverter<DataIDPath>
 	public override void Write(Utf8JsonWriter writer, DataIDPath value, JsonSerializerOptions options)
 	{
 
-		writer.WriteStringValue((string)value);
+		writer.WriteStringValue(value);
 
 	}
 

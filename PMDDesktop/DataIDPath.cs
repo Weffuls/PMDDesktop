@@ -145,14 +145,14 @@ public class DataIDPath : IEnumerable<DataID>
 
 		int currentPosition = 0;
 
-		for (int currentNode = 0; currentNode <= path.PathNodes.Length; ++currentNode)
+		for (int currentNode = 0; currentNode < path.PathNodes.Length; ++currentNode)
 		{
 
 			ReadOnlySpan<byte> nodeBytes = path.PathNodes[currentNode];
 
 			nodeBytes.CopyTo(bytes.Slice(currentPosition, nodeBytes.Length));
 
-			if (currentNode != path.PathNodes.Length)
+			if (currentNode != path.PathNodes.Length - 1)
 				bytes[currentPosition + nodeBytes.Length] = SPLIT_CHAR;
 
 			currentPosition += nodeBytes.Length + 1;
