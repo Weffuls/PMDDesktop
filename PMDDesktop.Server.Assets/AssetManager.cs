@@ -166,7 +166,11 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 			if (directory.StartsWith('.'))
 				continue;
 
-			DataID node = (DataID)directory;
+			if (!IDs.TryGetValue(directory, out DataID? node))
+			{
+				node = (DataID)directory;
+				IDs.Add(directory, node);
+			}
 
 			await LoadAllAssetsRecursive(new(node), IDs);
 
@@ -220,7 +224,11 @@ public class AssetManager : IEnumerable<Asset>, IAssetIndexable
 			if (directory.StartsWith('.'))
 				continue;
 
-			DataID node = (DataID)directory;
+			if (!IDs.TryGetValue(directory, out DataID? node))
+			{
+				node = (DataID)directory;
+				IDs.Add(directory, node);
+			}
 
 			await LoadAllAssetsRecursive(currentPath + node, IDs);
 
