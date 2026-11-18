@@ -12,6 +12,10 @@ namespace PMDDesktop;
 [JsonConverter(typeof(DataIDPathConverter))]
 public class DataIDPath : IEnumerable<DataID>
 {
+
+	/// <summary>
+	/// The character (byte) that represents directories in paths. This is a "/".
+	/// </summary>
 	public static readonly byte SPLIT_CHAR = 0x2F;
 
 	public DataIDPath(params IEnumerable<DataID> pathNodes)
@@ -24,9 +28,21 @@ public class DataIDPath : IEnumerable<DataID>
 
 	}
 
+	/// <summary>
+	/// <para>The <see cref="DataID"/>s that make up this <see cref="DataIDPath"/>.</para>
+	/// <para>Presented in order from left-to-right.</para>
+	/// </summary>
 	public ImmutableArray<DataID> PathNodes { get; private init; }
 
-	public int Length { get => PathNodes.Sum(node => node.Length + 1) - 1; }
+	/// <summary>
+	/// The total number of bytes that make up all <see cref="DataID"/> in this path, plus the "/" between them.
+	/// </summary>
+	public int CharLength { get => PathNodes.Sum(node => node.Length + 1) - 1; }
+
+	/// <summary>
+	/// The count of <see cref="DataID"/>s in this <see cref="DataIDPath"/>; like <see cref="PathNodes.Length"/>.
+	/// </summary>
+	public int NodeCount { get => PathNodes.Length; }
 
 	public override bool Equals([NotNullWhen(true)] object? obj)
 	{
@@ -38,6 +54,13 @@ public class DataIDPath : IEnumerable<DataID>
 
 	}
 
+	/// <summary>
+	/// Check that two <see cref="DataIDPath"/>s have the same path or are both null.
+	/// </summary>
+	/// <param name="left">Left <see cref="DataIDPath"/> or null.</param>
+	/// <param name="right">Right <see cref="DataIDPath"/> or null.</param>
+	/// <returns>True if both <see cref="DataIDPath"/>s have the same path, or they are both null.</returns>
+	/// <remarks>Does not compare by reference, but by the value of each <see cref="DataID"/> in <see cref="PathNodes"/>.</remarks>
 	public static bool operator ==(DataIDPath? left, DataIDPath? right)
 	{
 
@@ -56,16 +79,37 @@ public class DataIDPath : IEnumerable<DataID>
 
 	}
 
+	/// <summary>
+	/// Check that two <see cref="DataIDPath"/>s have the different paths or not both null.
+	/// </summary>
+	/// <param name="left">Left <see cref="DataIDPath"/> or null.</param>
+	/// <param name="right">Right <see cref="DataIDPath"/> or null.</param>
+	/// <returns>True if the <see cref="DataIDPath"/>s are not both null and have different paths.</returns>
+	/// <remarks>Does not compare by reference, but by the value of each <see cref="DataID"/> in <see cref="PathNodes"/>.</remarks>
 	public static bool operator !=(DataIDPath? left, DataIDPath? right)
 	{
 		return !(left == right);
 	}
 
+	/// <summary>
+	/// Append a <see cref="DataID"/> onto a new <see cref="DataIDPath"/>.
+	/// </summary>
+	/// <param name="original">The original <see cref="DataIDPath"/> to append to.</param>
+	/// <param name="append">The <see cref="DataID"/> to append.</param>
+	/// <returns></returns>
+	/// <remarks>This only works with the appended data on the right side, because it appends the <see cref="DataID"/>s to the right-side.</remarks>
 	public static DataIDPath operator +(DataIDPath original, DataID append)
 	{
 		return new([.. original.PathNodes, append]);
 	}
 
+	/// <summary>
+	/// Append multiple <see cref="DataID"/>s onto a new <see cref="DataIDPath"/>.
+	/// </summary>
+	/// <param name="original">The original <see cref="DataIDPath"/> to append to.</param>
+	/// <param name="append">An enumerable of <see cref="DataID"/>s to append.</param>
+	/// <returns></returns>
+	/// <remarks>This only works with the appended data on the right side, because it appends the <see cref="DataID"/>s to the right-side.</remarks>
 	public static DataIDPath operator +(DataIDPath original, IEnumerable<DataID> append)
 	{
 		return new([.. original.PathNodes, .. append]);
@@ -117,6 +161,12 @@ public class DataIDPath : IEnumerable<DataID>
 
 	}
 
+	/// <summary>
+	/// <para>Convert <see cref="ReadOnlySpan{byte}"/> to a <see cref="DataIDPath"/>.</para>
+	/// <para>Will create new <see cref="DataID"/> objects based on splits by <see cref="SPLIT_CHAR"/> ('/').</para>
+	/// </summary>
+	/// <param name="bytes"></param>
+	/// <remarks>Note that this is very strict, and may throw an <see cref="InvalidCastException"/> if any part cannot be turned into a <see cref="DataID"/>.</remarks>
 	public static explicit operator DataIDPath(ReadOnlySpan<byte> bytes)
 	{
 
@@ -138,10 +188,14 @@ public class DataIDPath : IEnumerable<DataID>
 
 	}
 
+	/// <summary>
+	/// Turn a <see cref="DataIDPath"/> into a <see cref="ReadOnlySpan<byte>"/>, consisting of all the <see cref="PathNodes"/> in the object seperated by <see cref="SPLIT_CHAR"/> ('/').
+	/// </summary>
+	/// <param name="path">The path to convert.</param>
 	public static implicit operator ReadOnlySpan<byte>(DataIDPath path)
 	{
 
-		Span<byte> bytes = new byte[path.Length];
+		Span<byte> bytes = new byte[path.CharLength];
 
 		int currentPosition = 0;
 

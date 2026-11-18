@@ -5,20 +5,41 @@ using System.Text.Json.Serialization;
 
 namespace PMDDesktop;
 
+/// <summary>
+/// <para>Class for holding super normalized "string-like" IDs.</para>
+/// <para>All inputs are normalized and will throw if they do not conform to the standard.</para>
+/// <para>Additionally, all <see cref="DataID"/>s contain only characters that are safe to use in cross-platform file systems.</para>
+/// </summary>
 [JsonConverter(typeof(DataIDConverter))]
 public class DataID : IEnumerable<byte>
 {
 
 	#region Error Messages
 
+	/// <summary>
+	/// Reusable error message for invalid characters.
+	/// </summary>
+	/// <param name="inputByte">Byte that cannot be stored in a <see cref="DataID"/></param>
+	/// <returns>Returns an error message stating that <paramref name="inputByte"/> cannot be stored in a DataID.</returns>
 	private static string GetInvalidCharacterErrorMessage(byte inputByte) =>
 		$"{(char)inputByte} ({inputByte}) cannot be stored in a {nameof(DataID)}.";
 
+	/// <summary>
+	/// Reusable error message for empty inputs.
+	/// </summary>
+	/// <returns>Returns an error message stating that inputs cannot be empty.</returns>
 	private static string GetBlankInputSpanErrorMessage() =>
-		"You need to provide a non-null input.";
+		"You need to provide a non-empty input.";
 
-	#endregion
+	#endregion Error Messages
 
+	#region Validity Checks
+
+	/// <summary>
+	/// Checks if a <see cref="ReadOnlySpan<byte>"/> could be a valid <see cref="DataID"/>.
+	/// </summary>
+	/// <param name="inputSpan">The <see cref="ReadOnlySpan<byte>"/> that's being checked and would be converted into a DataID.</param>
+	/// <returns>True if it can be converted into a DataID.</returns>
 	public static bool CanBeConverted(ReadOnlySpan<byte> inputSpan)
 	{
 
@@ -26,6 +47,12 @@ public class DataID : IEnumerable<byte>
 
 	}
 
+	/// <summary>
+	/// Checks if a <see cref="ReadOnlySpan<byte>"/> could be a valid <see cref="DataID"/>, or outputs a message stating why it can't.
+	/// </summary>
+	/// <param name="inputSpan">The <see cref="ReadOnlySpan<byte>"/> that's being checked and would be converted into a DataID.</param>
+	/// <param name="failReason">When returning false, a message stating why the </param>
+	/// <returns>True if it can be converted into a DataID.</returns>
 	public static bool CanBeConverted(ReadOnlySpan<byte> inputSpan, out string? failReason)
 	{
 
@@ -47,6 +74,11 @@ public class DataID : IEnumerable<byte>
 
 	}
 
+	/// <summary>
+	/// Determines if a byte can be used as a character in a <see cref="DataID"/>.
+	/// </summary>
+	/// <param name="char8">A byte representing a UTF-8 char.</param>
+	/// <returns>True if it can be used.</returns>
 	public static bool IsValidByte(byte char8)
 	{
 
@@ -67,8 +99,16 @@ public class DataID : IEnumerable<byte>
 
 	}
 
+	#endregion Validity Checks
+
+	/// <summary>
+	/// Count of chars in the <see cref="DataID"/>.
+	/// </summary>
 	public int Length => charData.Length;
 
+	/// <summary>
+	/// The bytes that make up the <see cref="DataID"/>.
+	/// </summary>
 	private readonly byte[] charData;
 
 	public DataID(ReadOnlySpan<byte> inputSpan)
@@ -89,6 +129,10 @@ public class DataID : IEnumerable<byte>
 
 	#region Operators
 
+	/// <summary>
+	/// Create a string object using a DataID. Will be null if DataID input is null.
+	/// </summary>
+	/// <param name="data">Input data.</param>
 	[return: NotNullIfNotNull(nameof(data))]
 	public static explicit operator string?(DataID? data)
 	{
@@ -100,6 +144,10 @@ public class DataID : IEnumerable<byte>
 
 	}
 
+	/// <summary>
+	/// Create a DataID object using a string. Will be null if string input is null.
+	/// </summary>
+	/// <param name="str">Input data.</param>
 	[return: NotNullIfNotNull(nameof(str))]
 	public static explicit operator DataID?(string? str)
 	{
@@ -111,11 +159,19 @@ public class DataID : IEnumerable<byte>
 
 	}
 
+	/// <summary>
+	/// Create a <see cref="DataID"/> using a <see cref="ReadOnlySpan{byte}"/>. This essentially just calls the constructor.
+	/// </summary>
+	/// <param name="bytes">Input bytes to be stored in the DataID.</param>
 	public static explicit operator DataID(ReadOnlySpan<byte> bytes)
 	{
 		return new(bytes);
 	}
 
+	/// <summary>
+	/// Get the charData from this <see cref="DataID"/> as a <see cref="ReadOnlySpan{byte}"/>.
+	/// </summary>
+	/// <param name="data">Input DataID.</param>
 	public static implicit operator ReadOnlySpan<byte>(DataID data)
 	{
 
@@ -123,6 +179,13 @@ public class DataID : IEnumerable<byte>
 
 	}
 
+	/// <summary>
+	/// Test that two <see cref="DataID"/>s have the same <see cref="charData"/>, or that they're both null.
+	/// </summary>
+	/// <param name="left">Left <see cref="DataID"/> or null.</param>
+	/// <param name="right">Right <see cref="DataID"/> or null.</param>
+	/// <returns>True if they are both null or have the same <see cref="charData"/>.</returns>
+	/// <remarks>Both DataIDs are treated equallty in this operator.
 	public static bool operator ==(DataID? left, DataID? right)
 	{
 
@@ -142,12 +205,19 @@ public class DataID : IEnumerable<byte>
 
 	}
 
+	/// <summary>
+	/// Test that two <see cref="DataID"/>s have different <see cref="charData"/>, or that they're not both null.
+	/// </summary>
+	/// <param name="left">Left <see cref="DataID"/> or null.</param>
+	/// <param name="right">Right <see cref="DataID"/> or null.</param>
+	/// <returns>True if they're not both null and if they have different charData.</returns>
+	/// <remarks>Both DataIDs are treated equallty in this operator.
 	public static bool operator !=(DataID? left, DataID? right)
 	{
 		return !(left == right);
 	}
 
-	#endregion
+	#endregion Operators
 
 	#region Standard Object Overrides
 
@@ -196,6 +266,6 @@ public class DataID : IEnumerable<byte>
 		return charData.GetEnumerator();
 	}
 
-	#endregion
+	#endregion Standard Object Overrides
 
 }
