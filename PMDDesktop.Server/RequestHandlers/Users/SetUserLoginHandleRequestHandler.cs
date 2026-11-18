@@ -31,15 +31,9 @@ public class SetUserLoginHandleRequestHandler : JsonRequestHandler<SetUserLoginH
 
 		}
 
-		// TEMPORARY SOLUTION
-		// TODO: Replace this with a more elegant solution. I think we should make a new class or struct to hold these types of super normalized strings.
-		bool validHandle = request.NewLoginHandle is null || request.NewLoginHandle.All(letter => char.IsAsciiLetterLower(letter) || char.IsAsciiDigit(letter) || letter == '-');
-		if (!validHandle)
-			return new(new ResponseResultDataInvalidError(nameof(request.NewLoginHandle), request.NewLoginHandle));
-
 		// Check to make sure the new login handle is unique.
 		if (request.NewLoginHandle is not null && game.State.Users.TryGetUserByLoginHandle(request.NewLoginHandle, out _))
-			return new(new ResponseResultDataCollisionError(nameof(request.NewLoginHandle), request.NewLoginHandle));
+			return new(new ResponseResultDataCollisionError(nameof(request.NewLoginHandle), request.NewLoginHandle.ToString()));
 
 		if (!await targetUser.TrySetLoginHandle(request.NewLoginHandle))
 			throw new Exception($"Unable to set the login handle to '{request.NewLoginHandle}'. It may not be unique.");

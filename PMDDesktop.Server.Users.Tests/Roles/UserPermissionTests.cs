@@ -11,7 +11,7 @@ public class UserPermissionTests
 	public void UserPermissionAllIncludesPermissions(string dataName)
 	{
 
-		Assert.Contains(UserPermission.ALL, permission => permission.DataName == dataName);
+		Assert.Contains(UserPermission.ALL, permission => (string)permission.DataName == dataName);
 
 	}
 

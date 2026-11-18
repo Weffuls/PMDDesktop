@@ -3,6 +3,6 @@
 public class ListSpeciesResponse : ServerJsonResponse
 {
 
-	public required string[] SpeciesIDs { get; init; }
+	public required DataIDPath[] SpeciesIDs { get; init; }
 
 }

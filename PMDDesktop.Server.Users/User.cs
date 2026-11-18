@@ -52,7 +52,7 @@ public sealed class User : IUserHierarchyComparable
 	/// <para>Should be unique.</para>
 	/// </summary>
 	[JsonInclude]
-	public string? LoginHandle { get; internal set; }
+	public DataID? LoginHandle { get; internal set; }
 
 	/// <summary>
 	/// <para>Hashed password used to log in.</para>
@@ -140,7 +140,7 @@ public sealed class User : IUserHierarchyComparable
 	/// </summary>
 	/// <param name="newHandle">The string to change the new handle to.</param>
 	/// <returns>True if the handle was changed and saved.</returns>
-	public async Task<bool> TrySetLoginHandle(string? newHandle)
+	public async Task<bool> TrySetLoginHandle(DataID? newHandle)
 	{
 
 		// Handle is not the same.

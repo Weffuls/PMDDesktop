@@ -33,8 +33,10 @@ public static class AssetBuilder
 	public static void DeleteAssetsFolder()
 	{
 
-		if (Directory.Exists(AssetLocation.GetAssetsDirectory()))
-			Directory.Delete(AssetLocation.GetAssetsDirectory(), true);
+		string directory = AssetManager.GetAssetDirectory();
+
+		if (Directory.Exists(directory))
+			Directory.Delete(directory, true);
 
 	}
 

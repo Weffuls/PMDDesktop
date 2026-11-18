@@ -13,9 +13,7 @@ public sealed class SpeciesVariant : Asset
 	public required ImmutableArray<AssetReference<SpeciesForm>> OtherForms { get; init; }
 	public ImmutableArray<string> SpecialFlags { get; init; } = [];
 
-	internal SpeciesVariant(AssetLocation location) : base(location) { }
-
 	[JsonConstructor]
-	private SpeciesVariant() : base() { }
+	internal SpeciesVariant(DataIDPath path) : base(path) { }
 
 }

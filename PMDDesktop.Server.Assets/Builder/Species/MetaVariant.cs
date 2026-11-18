@@ -8,6 +8,8 @@ namespace PMDDesktop.Server.Assets.Builder.Species;
 internal class MetaVariant : MetaAsset
 {
 
+	internal static DataID VARIANTS_ID = new("variants"u8);
+
 	internal MetaVariant(MetaSpecies species, MetaForm baseForm, GenderAlignment genderAlignment)
 	{
 
@@ -45,21 +47,21 @@ internal class MetaVariant : MetaAsset
 	internal List<MetaForm> ExtraForms { get; set; }
 
 	/// <summary>
-	/// The name of this <see cref="MetaVariant"/>. Also used to determine the <see cref="Location"/>.
+	/// The name of this <see cref="MetaVariant"/>. Also used to determine the <see cref="Path"/>.
 	/// </summary>
 	internal string Name { get; set; }
 
-	internal override AssetLocation Location => new(Species.Location, "variants", Name);
+	internal override DataIDPath Path => new([.. Species.Path.PathNodes, VARIANTS_ID, (DataID)Name]);
 
 	internal override async Task<Asset> CreateAsset()
 	{
 
-		return new SpeciesVariant(Location)
+		return new SpeciesVariant(Path)
 		{
-			Species = new(Species.Location),
+			Species = new(Species.Path),
 			EvolutionTags = [],
-			DefaultForm = new(BaseForm.Location),
-			OtherForms = [.. ExtraForms.Select((form) => new AssetReference<SpeciesForm>(form.Location))]
+			DefaultForm = new(BaseForm.Path),
+			OtherForms = [.. ExtraForms.Select((form) => new AssetReference<SpeciesForm>(form.Path))]
 		};
 
 	}

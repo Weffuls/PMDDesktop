@@ -12,7 +12,7 @@ public sealed class SetRolePermissionRequest : ServerRequest<RoleInfoResponse>
 	/// <summary>
 	/// The "data name" of the permission you're trying to edit.
 	/// </summary>
-	public required string PermissionDataName { get; set; }
+	public required DataID PermissionDataName { get; set; }
 
 	/// <summary>
 	/// <para>The value you'd like to set the permission to.</para>

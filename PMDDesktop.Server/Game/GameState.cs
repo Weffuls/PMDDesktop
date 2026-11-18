@@ -1,8 +1,8 @@
-﻿using PMDDesktop.Server.Assets;
+﻿using System.Diagnostics.CodeAnalysis;
+using PMDDesktop.Server.Assets;
 using PMDDesktop.Server.Saving;
 using PMDDesktop.Server.Users;
 using PMDDesktop.Server.Users.Roles;
-using System.Diagnostics.CodeAnalysis;
 
 namespace PMDDesktop.Server.Game;
 
@@ -41,14 +41,14 @@ public class GameState : IAssetIndexable, ISaveDataIndexable, IUserIndexable, IR
 
 	}
 
-	public T GetAsset<T>(AssetLocation location) where T : Asset
+	public T GetAsset<T>(DataIDPath path) where T : Asset
 	{
-		return Assets.GetAsset<T>(location);
+		return Assets.GetAsset<T>(path);
 	}
 
-	public bool TryGetAsset<T>(AssetLocation location, [NotNullWhen(true)] out T? asset) where T : Asset
+	public bool TryGetAsset<T>(DataIDPath path, [NotNullWhen(true)] out T? asset) where T : Asset
 	{
-		return Assets.TryGetAsset<T>(location, out asset);
+		return Assets.TryGetAsset<T>(path, out asset);
 	}
 
 	public T? GetSave<T>(Guid GUID) where T : SaveData
